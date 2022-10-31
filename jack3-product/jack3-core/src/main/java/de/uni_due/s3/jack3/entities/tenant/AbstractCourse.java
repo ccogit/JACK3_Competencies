@@ -4,18 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.enterprise.inject.spi.CDI;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.ManyToMany;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Transient;
+import javax.persistence.*;
 
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.Type;
@@ -103,6 +92,9 @@ public abstract class AbstractCourse extends AbstractEntity implements Namable {
 	@ManyToMany(cascade = CascadeType.ALL)
 	protected Set<ResultFeedbackMapping> resultFeedbackMappings = new HashSet<>();
 
+	@ManyToOne
+	protected Subject subject;
+
 	@Enumerated(EnumType.STRING)
 	protected ECourseScoring scoringMode;
 
@@ -167,6 +159,10 @@ public abstract class AbstractCourse extends AbstractEntity implements Namable {
 	public abstract String getExternalDescription();
 
 	public abstract void setExternalDescription(String externalDescription);
+
+	public abstract Subject getSubject();
+
+	public abstract void setSubject(Subject subject);
 
 	protected void deepCopyCourseVars(Course other, int proxiedCourseRevisionId) {
 		if (this instanceof FrozenCourse) {

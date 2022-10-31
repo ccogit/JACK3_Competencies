@@ -283,6 +283,16 @@ public class Course extends AbstractCourse implements DeepCopyable<Course> {
 	}
 
 	@Override
+	public Subject getSubject() {
+		return subject;
+	}
+
+	@Override
+	public void setSubject(Subject subject) {
+		this.subject = subject;
+	}
+
+	@Override
 	public Course deepCopy() {
 		RevisionService revisionService = CDI.current().select(RevisionService.class).get();
 		Course copy = new Course(this, revisionService.getProxiedOrLastPersistedRevisionId(this));
