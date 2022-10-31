@@ -1,0 +1,80 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:c="http://java.sun.com/jstl/core"
+  template="/WEB-INF/templates/template.xhtml">
+
+  <ui:define name="metadata">
+    <f:metadata>
+      <f:viewParam
+        name="exerciseId"
+        value="#{quickIdView.exerciseId}" />
+      <f:viewAction action="#{quickIdView.initView()}" />
+    </f:metadata>
+  </ui:define>
+  
+  <ui:define name="content">
+    <h3>
+      <h:outputText value="#{msg['quickIdView.header']} #{quickIdView.exercise.name}"  />
+    </h3>
+    
+      <!-- Warn Message that there are no links found for the given id.
+              Simulates primefaces messages, because it cannot be generated in initView(). 
+              At the time initView() is called, the local is not set correctly, so localization failed.  -->
+        <h:panelGroup id="nolinkWarnMessage" class="ui-messages ui-widget" aria-live="polite" rendered="#{quickIdView.noLinkForExerciseExists()}">
+          <div class="ui-messages-warn ui-corner-all">
+            <span class="ui-messages-warn-icon"/>
+            <ul>
+              <li role="alert" aria-atomic="true">
+                 <h:outputText value="#{msg['quickIdView.noLinksinfo']}" escape="false"/>
+              </li>
+            </ul>
+          </div>
+        </h:panelGroup>
+    
+    <p:panel
+      id="panelLinkToExerciseTestpage"
+      header="#{msg['quickIdView.exerciseEdit']}"
+      rendered="#{quickIdView.linkToTestpage != null}" >
+      <ul>
+        <li>
+          <p:link href="#{quickIdView.linkToTestpage.url}" value="#{quickIdView.linkToTestpage.value}"/>
+        </li>
+      </ul>
+   </p:panel>
+    
+    <p:panel
+      id="panelLinksToCourseTestpage"
+      header="#{msg['quickIdView.courseEdit']}"
+      rendered="#{not empty quickIdView.possibleCourseLinks}">
+        <p:dataList value="#{quickIdView.possibleCourseLinks}" var="link" type="unordered" rendered="#{not empty quickIdView.possibleCourseLinks}">
+                 <p:link href="#{link.url}" value="#{link.value}"/>
+        </p:dataList>
+     </p:panel>
+    
+     <p:panel
+      id="panelLinksToCourseOfferPage"
+      header="#{msg['quickIdView.courseRecord']}"
+      rendered="#{not empty quickIdView.possibleCourseOfferLinks}">
+        <!-- Warn Message that user creates real course offer records and takes seats.
+              Simulates primefaces messages -->
+        <h:panelGroup id="courseOfferWarnMessage" class="ui-messages ui-widget" aria-live="polite" rendered="#{quickIdView.isShowCourseOfferWarnMessage()}" >
+          <div class="ui-messages-warn ui-corner-all">
+            <span class="ui-messages-warn-icon"/>
+            <ul>
+              <li role="alert" aria-atomic="true">
+                 <h:outputText value="#{msg['quickIdView.courseOfferInfo']}" escape="false"/>
+              </li>
+            </ul>
+          </div>
+        </h:panelGroup>
+        
+        <p:dataList value="#{quickIdView.possibleCourseOfferLinks}" var="link" type="unordered" rendered="#{not empty quickIdView.possibleCourseOfferLinks}">
+                <p:link href="#{link.url}" value="#{link.value}"/>
+        </p:dataList>
+     </p:panel>
+  </ui:define>
+  </ui:composition>

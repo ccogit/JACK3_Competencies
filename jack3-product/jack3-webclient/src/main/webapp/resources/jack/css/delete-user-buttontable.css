@@ -1,0 +1,19 @@
+.grid-table-submissions {
+	font-size: 80%;
+	display: grid;
+	grid-template-columns: repeat(8, minmax(0, 1fr));
+	overflow-y: auto;
+	max-height: 200px;
+}
+.grid-table-courseoffers {
+	font-size: 80%;
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	overflow-y: auto;
+	max-height: 200px;
+}
+.grid-table-courseoffers .ui-button-text {
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
+}

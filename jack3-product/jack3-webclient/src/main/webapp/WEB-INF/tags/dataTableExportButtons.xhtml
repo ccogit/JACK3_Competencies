@@ -1,0 +1,31 @@
+<!--
+Generates 2 Buttons with Download Icon and Text, for dataTable export.
+-->
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:p="http://primefaces.org/ui">
+  <p:commandButton
+    value="#{msg['global.downloadAsCsv']}"
+    icon="fa fa-download"
+    ajax="false">
+    <p:dataExporter
+      type="csv"
+      target="#{target}"
+      fileName="#{fileName}"
+      encoding="UTF-8" />
+  </p:commandButton>
+  <p:commandButton
+    value="#{msg['global.downloadAsXslx']}"
+    icon="fa fa-download"
+    ajax="false">
+    <p:dataExporter
+      type="xlsx"
+      target="#{target}"
+      fileName="#{fileName}"
+      encoding="UTF-8" />
+  </p:commandButton>
+
+</ui:composition>

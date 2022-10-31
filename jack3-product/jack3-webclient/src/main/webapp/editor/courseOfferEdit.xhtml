@@ -1,0 +1,1574 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:c="http://java.sun.com/jsp/jstl/core"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:pe="http://primefaces.org/ui/extensions"
+  xmlns:j="http://jack.s3.uni-due.de/ui-elements"
+  template="/WEB-INF/templates/template.xhtml">
+  <ui:define name="metadata">
+    <f:metadata id="metadata">
+      <f:viewParam
+        name="courseOffer"
+        value="#{courseOfferEditView.courseOfferId}" />
+      <f:viewAction action="#{courseOfferEditView.loadCourseOffer}" />
+      <f:event type="preRenderView" listener="#{courseOfferEditView.updateBreadCrumb()}"/>
+    </f:metadata>
+
+    <script>
+					function processChange() {
+						// We want to enable the save button only when something has changed, to avoid saving redundant 
+						// revisions
+						PF('saveCourseOfferButton').enable();
+						preventUnload(true);
+					}
+
+					function preventUnload(state) {
+						message = "#{msg['global.preventUnloadMessage']}"
+						window.onbeforeunload = state ? function() {
+							return message;
+						} : null;
+					}
+
+					function checkUserInputForActivationOfSaveButton() {
+						var keyCode = event.keyCode;
+						// if Enter is pressed no save action
+						if (keyCode == 13) {
+							event.preventDefault();
+							return false;
+						}
+
+						//printable chars have lenght of 1, Backspace or Delete should also be handled like them
+						if (event.key.length == 1 || keyCode == 8
+								|| keyCode == 46) {
+							processChange();
+						}
+						return true;
+					}
+					function copyTextToClipboard(id) {
+						var pwdField = document.getElementById(id)
+						pwdField.select()
+						document.execCommand("copy")
+					}
+				</script>
+  </ui:define>
+
+  <ui:define
+    id="courseOfferContent"
+    name="content">
+
+    <h:outputStylesheet
+      library="jack"
+      name="css/coloredInfobox.css" />
+    <h:outputStylesheet
+      library="jack"
+      name="css/borderlessTable.css" />
+
+    <h:form id="courseOfferEdit">
+      <p:breadCrumb
+        id="breadCrumb"
+        model="#{userSession.model}" />
+
+      <p:toolbar id="tb" styleClass="sticky-toolbar">
+        <f:facet
+          id="facetLeft"
+          name="left">
+          <p:commandButton
+            id="saveCourseOffer"
+            widgetVar="saveCourseOfferButton"
+            update="@form globalGrowl"
+            action="#{courseOfferEditView.saveCourseOffer()}"
+            onstart="preventUnload(false);"
+            value="#{msg['global.save']}"
+            icon="far fa-save fa-sm"
+            disabled="#{courseOfferEditView.readOnly}">
+          </p:commandButton>
+          <!-- This script unfortunatly needs (even with jquery().ready) to be after the saveCourseButton- 
+                          definition, or Primefaces PF won't find it in the widget-array. We also can't just set 
+                          disabled="true" in the p:commandButton-definition, because then the button won't work anymore. -->
+          <script>
+											jQuery(document)
+													.ready(
+															function() {
+																PF(
+																		'saveCourseOfferButton')
+																		.disable();
+															});
+										</script>
+        </f:facet>
+        <f:facet
+          id="facetRight"
+          name="right">
+          <p:commandButton
+            id="discardChanges"
+            action="#{courseOfferEditView.reloadCourseByRedirect()}"
+            onstart="preventUnload(false)"
+            value="#{msg['global.discard']}"
+            icon="fas fa-trash-alt fa-sm"
+            disabled="#{courseOfferEditView.readOnly}">
+          </p:commandButton>
+        </f:facet>
+      </p:toolbar>
+
+      <!-- Basic settings -->
+      <p:panel
+        id="tabBasic"
+        header="#{msg['courseOfferEdit.editCourseOffer']}">
+        <p:panelGrid
+          id="basicConfiguration"
+          columns="2"
+          cellpadding="5"
+          styleClass="ui-panelgrid-blank">
+          <h:outputLabel
+            for="courseOfferName"
+            value="#{msg['global.name']}:" />
+          <p:inplace
+            id="courseOfferName"
+            editor="true"
+            widgetVar="courseOfferNameInput"
+            disabled="#{courseOfferEditView.readOnly}"
+            class="inplaceIcon">
+            <p:ajax
+              event="save"
+              oncomplete="processChange()"
+              update="@this"
+              onstart="document.getElementById('courseOfferEdit:courseOfferNameInputProgress').style.display = 'inline-block'"
+              onsuccess="document.getElementById('courseOfferEdit:courseOfferNameInputProgress').style.display = 'none'" />
+            <p:inputText
+              id="courseOfferNameInput"
+              value="#{courseOfferEditView.courseOffer.name}"
+              validator="#{courseOfferEditView.validateCourseOfferName}"
+              onkeydown="onkeydownCourseOfferName()">
+              <f:attribute
+                name="oldValue"
+                value="#{courseOfferEditView.courseOffer.name}" />
+            </p:inputText>
+            <h:outputText
+              id="courseOfferNameInputProgress"
+              styleClass="fas fa-circle-notch fa-spin"
+              style="margin-left:5px;display:none;" />
+            <p:message for="courseOfferNameInput" />
+            <script>
+													function onkeydownCourseOfferName() {
+														if (event.keyCode === 27) {
+															PF(
+																	'courseOfferNameInput')
+																	.cancel();
+															return false;
+														} else if (event.keyCode === 13) {
+															event
+																	.preventDefault();
+															PF(
+																	'courseOfferNameInput')
+																	.save();
+															return false;
+														}
+													}
+												</script>
+          </p:inplace>
+
+          <!-- CourseOffer ID -->
+          <h:outputLabel for="courseOfferId" value="#{msg['global.id']}:" />
+          <h:outputText id="courseOfferId" value="#{courseOfferEditView.courseOffer.id}" />
+          
+          <!-- Language selection -->
+          <h:outputLabel for="language" value="#{msg['courseOfferEdit.language']}" />
+          <p:selectOneMenu id="language"
+            disabled="#{courseOfferEditView.readOnly}"
+            value="#{courseOfferEditView.courseOffer.language}" editable="false"
+            onchange="processChange()">
+            <f:selectItems value="#{userSession.countriesInMap}" />
+          </p:selectOneMenu>
+
+          <!-- Course selection -->
+          <h:outputLabel
+            for="courses"
+            value="#{msg['global.course']}:" />
+          <h:panelGroup id="courseSelectionWrapper" layout="block">
+            <p:selectOneMenu
+              id="courses"
+              widgetVar="courses"
+              value="#{courseOfferEditView.referencedCourse}"
+              converter="courseConverter"
+              filter="true"
+              filterMatchMode="startsWith"
+              onchange="processChange();"
+              disabled="#{courseOfferEditView.readOnly}">
+              <!-- This updates settings, because they habe to be inaccessible when no course is selected -->
+              <p:ajax
+                listener="#{courseOfferEditView.onCourseChange}"
+                update=":courseOfferEdit:revisions :courseOfferEdit:switchToCourse tabSubmissionSettings tabFeedbackDuringCourse tabSubmissionReview tabAccessSettings tabEnrollmentSettings courseSelectionWrapper" />
+              <f:selectItem
+                id="selectNoCourse"
+                itemLabel="#{msg['courseOfferEdit.noCourseSelection']}"
+                itemValue="#{null}" />
+              <f:selectItems
+                id="selectedCourse"
+                value="#{courseOfferEditView.allCourses}"
+                var="course"
+                itemLabel="#{courseOfferEditView.getCourseName(course)}"
+                itemValue="#{course}" />
+            </p:selectOneMenu>
+            <j:helperTooltip
+              tooltip="#{msg['courseOfferEdit.hints.noCourseHint']}"
+              id="noCourseSelectedHint"
+              rendered="#{empty courseOfferEditView.referencedCourse}" />
+          </h:panelGroup>
+          <!-- empty panel group to align properly in the grid -->
+          <h:panelGroup rendered="#{not empty courseOfferEditView.referencedCourse and not courseOfferEditView.rightsForCourse and not courseOfferEditView.readOnly}" />
+          <h:panelGroup rendered="#{not empty courseOfferEditView.referencedCourse and not courseOfferEditView.rightsForCourse and not courseOfferEditView.readOnly}">
+            <h:outputText
+              style="font-size:80%"
+              value="#{msg['courseOfferEdit.hintUserDoesNotOwnReferencedCourse']}" />
+          </h:panelGroup>
+
+
+          <h:outputLabel
+            for="revisions"
+            value="#{msg['courseOffer.frozenCourse']}:" />
+          <h:panelGroup>
+            <p:selectOneMenu
+              id="revisions"
+              onchange="processChange()"
+              value="#{courseOfferEditView.referencedFrozenCourse}"
+              converter="frozenCourseConverter"
+              disabled="#{courseOfferEditView.readOnly}">
+              <p:ajax update=":courseOfferEdit:switchToCourse" />
+              <f:selectItem
+                itemValue="#{null}"
+                itemLabel="#{msg['global.noneFem']}" />
+              <f:selectItems
+                id="referencedFrozenCourse"
+                value="#{courseOfferEditView.frozenRevisionsForCurrentCourse}"
+                var="revision"
+                itemLabel="#{courseOfferEditView.getRevisionIndexForRevisionId(revision.proxiedCourseRevisionId)}: #{revision.frozenTitle} (#{revision.name})"
+                itemValue="#{revision}" />
+            </p:selectOneMenu>
+            <p:linkButton
+              id="switchToCourse"
+              outcome="#{viewId.courseEditor}"
+              rendered="#{not empty courseOfferEditView.referencedCourse and courseOfferEditView.rightsForCourse}"
+              value="#{msg['courseOfferEdit.switchToCourse']}"
+              icon="fas fa-sign-in-alt  fa-sm"
+              style="margin-left:10px;">
+              <f:param
+                name="course"
+                value="#{courseOfferEditView.referencedCourse.id}" />
+            </p:linkButton>
+          </h:panelGroup>
+        </p:panelGrid>
+      </p:panel>
+
+      <!-- Descriptions -->
+      <p:panel
+        id="tabInternalDescription"
+        header="#{msg['courseOffer.internalDescription']}"
+        toggleable="true"
+        collapsed="true">
+        <p:inputTextarea
+          id="internalDescription"
+          rows="5"
+          cols="80"
+          style="width: 100%"
+          value="#{courseOfferEditView.courseOffer.internalDescription}"
+          onkeydown="processChange()"
+          disabled="#{courseOfferEditView.readOnly}" />
+      </p:panel>
+
+      <p:panel
+        id="tabPublicDescription"
+        header="#{msg['courseOffer.publicDescription']}"
+        toggleable="true"
+        collapsed="true">
+        <pe:ckEditor
+          id="publicDescription"
+          value="#{courseOfferEditView.courseOffer.publicDescription}"
+          widgetVar="publicDescriptionWidget"
+          width="100%"
+          height="250px"
+          language="#{msg['ckEditor.language']}"
+          advancedContentFilter="false"
+          toolbar="[['Bold','Italic','Underline','-','NumberedList','BulletedList','JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock','-','Table','Link','Unlink','HorizontalRule','-','TextColor','BGColor','RemoveFormat']]"
+          customConfig="#{resource['js/ckEditorConfig.js']}"
+          disabled="#{courseOfferEditView.readOnly}">
+          <p:ajax
+            event="dirty"
+            oncomplete="processChange()" />
+        </pe:ckEditor>
+      </p:panel>
+      
+      <!-- E-Mail settings -->      
+      <p:panel
+        id="eMailSettings"
+        header="#{msg['courseOfferEdit.eMailSettingsHeader']}"
+        toggleable="true"
+        collapsed="true">
+        
+      <!-- Info Bar if explicit enrollment is not activated -->
+      <h:panelGroup id="emailInfoBar">
+        <h:panelGroup
+          layout="block"
+          styleClass="colored-infobox small-info infobox-pfpanel grey"
+          rendered = "#{(courseOfferEditView.courseOffer.enrollmentEmail or courseOfferEditView.courseOffer.waitingListEmail) and not courseOfferEditView.courseOffer.explicitEnrollment}">
+          <h:outputText
+            value="#{msg['courseOfferEdit.eMailStatus']}"/>
+          </h:panelGroup>
+        </h:panelGroup>
+        
+        <p:panelGrid
+          id="eMailSettingsGrid"
+          columns="2"
+          styleClass="ui-panelgrid-blank">  
+          
+          <!-- Sending e-mails if user enrolls -->
+          <h:panelGroup id="sendingMailForEnrollmentWrapper">
+            <p:selectBooleanCheckbox
+              id="sendingMailForEnrollment"
+              value="#{courseOfferEditView.courseOffer.enrollmentEmail}"
+              disabled="#{courseOfferEditView.readOnly}">
+              <p:ajax
+                oncomplete="processChange()"
+                update ="enrollmentEmailText emailInfoBar showEnrollmentEmail" />
+            </p:selectBooleanCheckbox>
+          </h:panelGroup>
+          <h:panelGroup id="sendingMailForEnrollmentLabelWrapper">
+            <h:outputLabel
+              for="sendingMailForEnrollment"
+              value="#{msg['courseOfferEdit.eMailByEnrollment']}" />
+            <j:helperTooltip
+              id="sendingMailForEnrollmentHint"
+              tooltip="#{msg['courseOfferEdit.eMailByEnrollmentHint']}" />
+          </h:panelGroup>
+          <h:panelGroup />
+            <pe:ckEditor
+    			id="enrollmentEmailText"
+    			value="#{courseOfferEditView.courseOffer.enrollmentEmailText}"
+    			language="#{msg['ckEditor.language']}"
+    			advancedContentFilter="false"
+    			toolbar="[['Bold','Italic','Underline','-','NumberedList','BulletedList','JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock','-','Table','Link','Unlink','HorizontalRule','-','TextColor','BGColor','RemoveFormat']]"
+    			customConfig="#{resource['js/ckEditorConfig.js']}"
+    			disabled="#{courseOfferEditView.readOnly or !courseOfferEditView.courseOffer.enrollmentEmail}">            
+                  <p:ajax event="dirty" oncomplete="processChange()" />
+    		</pe:ckEditor>        
+        
+            <h:panelGroup />
+            <p:commandButton
+              id="showEnrollmentEmail"
+              icon="fas fa-search"
+              value="#{msg['courseOfferEdit.eMailPreview']}"
+              disabled="#{!courseOfferEditView.courseOffer.enrollmentEmail}"
+              oncomplete="PF('showEmailPreview').show();"
+              action="#{courseOfferEditView.preparePreviewEnrollmentMail()}"
+              update="showEmailPreview"/>
+          </p:panelGrid>
+                    
+          <!-- Sending e-mails if user enters the waiting list -->
+          <p:panelGrid
+            id="eMailSettingsGrid2"
+            columns="2"
+            styleClass="ui-panelgrid-blank"> 
+            <p:selectBooleanCheckbox
+              id="sendingMailForWaitingList"
+              value="#{courseOfferEditView.courseOffer.waitingListEmail}"
+              disabled="#{courseOfferEditView.readOnly}">
+              <p:ajax
+                oncomplete="processChange()"
+                update="waitingListEmailText emailInfoBar showWaitingListEmail"/>
+            </p:selectBooleanCheckbox>
+            <h:panelGroup id="sendingMailForWaitingListLabelWrapper">
+              <h:outputLabel
+                for="sendingMailForWaitingList"
+                value="#{msg['courseOfferEdit.eMailByWaitingList']}" />
+              <j:helperTooltip
+                id="sendingMailForWaitingListHint"
+                tooltip="#{msg['courseOfferEdit.eMailForWaitingListHint']}" />
+              </h:panelGroup>
+            <h:panelGroup />
+            <pe:ckEditor
+    			id="waitingListEmailText"
+    			value="#{courseOfferEditView.courseOffer.waitingListEmailText}"
+    			language="#{msg['ckEditor.language']}"
+    			advancedContentFilter="false"
+    			toolbar="[['Bold','Italic','Underline','-','NumberedList','BulletedList','JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock','-','Table','Link','Unlink','HorizontalRule','-','TextColor','BGColor','RemoveFormat']]"
+    			customConfig="#{resource['js/ckEditorConfig.js']}"
+    			disabled="#{courseOfferEditView.readOnly or !courseOfferEditView.courseOffer.waitingListEmail}">            
+                  <p:ajax event="dirty" oncomplete="processChange()" />
+    		</pe:ckEditor>
+            <h:panelGroup />
+            <p:commandButton
+              id="showWaitingListEmail"
+              icon="fas fa-search"
+              value="#{msg['courseOfferEdit.eMailPreview']}"
+              disabled="#{!courseOfferEditView.courseOffer.enrollmentEmail}"
+              oncomplete="PF('showEmailPreview').show();"
+              action="#{courseOfferEditView.preparepreviewWaitinglistMail()}"
+              update="showEmailPreview"/>
+          </p:panelGrid>
+      </p:panel>
+      
+      <!-- E-Mail preview Dialog -->
+        <p:dialog
+            id="showEmailPreview"
+            widgetVar="showEmailPreview"
+            closable="true"
+            closeOnEscape="true"
+            header="#{courseOfferEditView.mailSubject}"
+            modal="true"
+            draggable="false"
+            resizable="false"
+            width="800"
+            height="250">
+              <iframe
+                style="height: 100%; width: 100%;"
+                srcdoc="#{courseOfferEditView.mailContext}"/>
+        </p:dialog>
+
+      <!-- Access Settings -->
+      <!-- Settings for accessing this course (visibility start time, visibility end time, etc.) -->
+      <p:panel
+        id="tabAccessSettings"
+        header="#{msg['courseOfferEdit.accessRestrictionsSettings']}"
+        toggleable="true">
+        
+        <!-- Visibility indicator -->
+        <h:panelGroup
+          id="visibleInfoBar"
+          layout="block"
+          styleClass="colored-infobox small-info infobox-pfpanel #{courseOfferEditView.visibilityStatus.visible ? 'green' : 'grey'}">
+          <h:outputText
+            styleClass="far #{courseOfferEditView.visibilityStatus.visible ? 'fa-eye' : 'fa-eye-slash'}" />
+          <h:outputText
+            value="#{msg['courseOfferEdit.visibilityStatus.visible']}"
+            rendered="#{courseOfferEditView.visibilityStatus.visible}" />
+          <h:outputText
+            value="#{msg['courseOfferEdit.visibilityStatus.notVisible']}"
+            rendered="#{not courseOfferEditView.visibilityStatus.visible}" />
+          <h:panelGroup
+            rendered="#{not courseOfferEditView.visibilityStatus.visible and not empty courseOfferEditView.visibilityStatus.willBeVisible}">
+            <br />
+            <h:outputText value="#{msg['courseOfferEdit.visibilityStatus.willBeVisible1']}" />
+            <h:outputText
+              value="#{courseOfferEditView.visibilityStatus.willBeVisible}"
+              converter="relativeTimestampConverter"
+              escape="false" />
+            <h:outputText value="#{msg['courseOfferEdit.visibilityStatus.willBeVisible2']}" />
+          </h:panelGroup>
+          <br />
+          <h:outputText
+            value="#{msg['courseOfferEdit.visibilityStatus.changes']}"
+            style="font-size: smaller;" />
+        </h:panelGroup>
+        
+        <!-- Visibility toggle -->
+        <p:selectOneRadio
+          id="accessTimeVisibilityToggle"
+          value="#{courseOfferEditView.courseOffer.canBeVisible}"
+          layout="pageDirection"
+          disabled="#{courseOfferEditView.readOnly}">
+          <f:selectItem
+            itemLabel="#{msg['courseOfferEdit.visibleToggle.notVisible']}"
+            itemValue="false" />
+          <f:selectItem
+            itemLabel="#{msg['courseOfferEdit.visibleToggle.visible']}"
+            itemValue="true" />
+          <p:ajax
+            update="accessTimePeriodPanelWrapper"
+            oncomplete="processChange()"
+            process="accessTimeVisibilityToggle" />
+        </p:selectOneRadio>
+        
+        <!-- Time settings -->
+        <h:panelGroup
+          layout="block"
+          id="accessTimePeriodPanelWrapper">
+          <p:panelGrid
+            columns="4"
+            styleClass="ui-panelgrid-blank"
+            rendered="#{courseOfferEditView.courseOffer.canBeVisible}">
+            <p:selectBooleanCheckbox
+              id="hasVisibilityStartTime"
+              value="#{courseOfferEditView.visibilityStartTime}"
+              disabled="#{courseOfferEditView.readOnly}">
+              <p:ajax
+                update="courseOfferVisibilityStartTime"
+                listener="#{courseOfferEditView.handleVisibilityStartTime}"
+                oncomplete="processChange()" />
+            </p:selectBooleanCheckbox>
+            <h:outputLabel
+              for="courseOfferVisibilityStartTime"
+              value="#{msg['courseOfferEdit.courseOfferVisibilityStarts']}:" />
+            <p:calendar
+              id="courseOfferVisibilityStartTime"
+              mask="true"
+              navigator="true"
+              required="true"
+              requiredMessage="#{msg['courseOfferEdit.timeConfigurationDateMissing']}"
+              value="#{courseOfferEditView.courseOffer.visibilityStartTime}"
+              pattern="dd.MM.yyyy HH:mm"
+              disabled="#{!courseOfferEditView.visibilityStartTime or courseOfferEditView.readOnly}"
+              mindate="#{courseOfferEditView.minVisibilityStartTime}"
+              maxdate="#{courseOfferEditView.maxVisibilityStartTime}"
+              onchange="processChange()">
+              <p:ajax
+                event="dateSelect"
+                listener="#{courseOfferEditView.updateAllOtherCalendars}"
+                update="@next" />
+              <p:ajax
+                event="blur"
+                listener="#{courseOfferEditView.updateAllOtherCalendars}"
+                update="@next" />
+            </p:calendar>
+            <p:message for="courseOfferVisibilityStartTime" />
+            <p:selectBooleanCheckbox
+              id="hasVisibilityEndTime"
+              value="#{courseOfferEditView.visibilityEndTime}"
+              disabled="#{courseOfferEditView.readOnly}">
+              <p:ajax
+                update="courseOfferVisibilityEndTime"
+                listener="#{courseOfferEditView.handleVisibilityEndTime}"
+                oncomplete="processChange()" />
+            </p:selectBooleanCheckbox>
+
+            <h:outputLabel
+              for="courseOfferVisibilityEndTime"
+              value="#{msg['courseOfferEdit.courseOfferVisibilityEnds']}:" />
+            <p:calendar
+              id="courseOfferVisibilityEndTime"
+              mask="true"
+              navigator="true"
+              required="true"
+              requiredMessage="#{msg['courseOfferEdit.timeConfigurationDateMissing']}"
+              value="#{courseOfferEditView.courseOffer.visibilityEndTime}"
+              pattern="dd.MM.yyyy HH:mm"
+              disabled="#{!courseOfferEditView.visibilityEndTime or courseOfferEditView.readOnly}"
+              mindate="#{courseOfferEditView.minVisibilityEndTime}"
+              onchange="processChange()">
+              <p:ajax
+                event="dateSelect"
+                listener="#{courseOfferEditView.updateAllOtherCalendars}"
+                update="@next" />
+              <p:ajax
+                event="blur"
+                listener="#{courseOfferEditView.updateAllOtherCalendars}"
+                update="@next" />
+            </p:calendar>
+            <p:message for="courseOfferVisibilityEndTime" />
+
+            <h:panelGroup />
+            <h:outputLabel
+              for="publicLink"
+              value="#{msg['courseOfferEdit.linkToMainMenu']}:" />
+            <h:panelGroup>
+              <div class="ui-inputgroup">
+                <p:inputText
+                  id="publicLink"
+                  styleClass="small-monospace"
+                  readonly="true"
+                  value="#{courseOfferEditView.hyperlinkToMainMenu}"
+                  size="60" />
+                <h:panelGroup
+                  id="copyPublicLinkInfo"
+                  class="ui-inputgroup-addon"
+                  style="border: 1px solid #1f89ce;color: #fff;background: #2399e5;">
+                  <h:outputText styleClass="fas fa-question" />
+                  <p:tooltip
+                    for="copyPublicLinkInfo"
+                    style="max-width:600px;"
+                    position="top"
+                    value="#{msg['courseOfferEdit.linkToMainMenu.infobox']}" />
+                </h:panelGroup>
+                <h:panelGroup
+                  id="copyPublicLinkWarn"
+                  class="ui-inputgroup-addon"
+                  style="border: solid #1f89ce;border-width: 1px 0px;color: #fff;background: #ff9900;">
+                  <h:outputText styleClass="fas fa-exclamation-triangle" />
+                  <p:tooltip
+                    for="copyPublicLinkWarn"
+                    style="max-width:600px;"
+                    position="top"
+                    value="#{msg['courseOfferEdit.linkToMainMenu.warnbox']}"
+                    escape="false" />
+                </h:panelGroup>
+                <p:commandButton
+                  id="copyPublicLink"
+                  type="button"
+                  icon="fas fa-copy"
+                  onclick="copyTextToClipboard('courseOfferEdit:publicLink')" />
+                <p:tooltip
+                  for="copyPublicLink"
+                  value="#{msg['global.copyToClipboard']}"
+                  position="top" />
+              </div>
+            </h:panelGroup>
+            <p:selectBooleanCheckbox
+              id="autostart"
+              value="#{courseOfferEditView.autostart}"
+              itemLabel="#{msg['courseOfferEdit.linkToMainMenu.autostart']}">
+              <p:ajax
+                event="change"
+                update="publicLink"
+                listener="#{courseOfferEditView.updateHyperlinkToMainMenu}" />
+            </p:selectBooleanCheckbox>
+
+          </p:panelGrid>
+        </h:panelGroup>
+        
+        <!-- Access mode -->
+        <p:panelGrid
+          columns="2"
+          id="accessSettingsGrid"
+          styleClass="ui-panelgrid-blank">
+          <h:outputLabel
+            for="accessModeList"
+            value="#{msg['global.modus']}:" />
+          <h:panelGroup>
+
+            <p:selectBooleanButton
+              value="#{courseOfferEditView.courseOffer.toggleAllowlist}"
+              onLabel="#{msg['courseOfferEdit.toggleUserFilter.allowlist']}"
+              offLabel="#{msg['courseOfferEdit.toggleUserFilter.blocklist']}"
+              onchange="processChange()"
+              disabled="#{courseOfferEditView.readOnly}">
+              <p:ajax
+                listener="#{courseOfferEditView.loadAccessMode()}"
+                update="filterListOverlay" />
+            </p:selectBooleanButton>
+            <p:spacer width="5" />
+
+            <p:commandButton
+              id="showFilterList"
+              value="#{msg[courseOfferEditView.readOnly ? 'courseOfferEdit.showAccessModeButtonText' : 'courseOfferEdit.editAccessModeButtonText']}" />
+            <p:overlayPanel
+              id="filterListOverlay"
+              for="showFilterList"
+              my="center"
+              at="center"
+              style="width:700px;"
+              showCloseIcon="true">
+              <ui:include page="/WEB-INF/includes/courseOfferEdit/userFilter.xhtml" />
+            </p:overlayPanel>
+            <j:helperTooltip
+              id="accessSettingsChangesHint"
+              tooltip="#{msg['courseOfferEdit.toggleUserFilter.noSubsequentChanges']}" />
+
+          </h:panelGroup>
+        </p:panelGrid>
+
+      </p:panel>
+      
+      <p:panel id="tabLtiSettings"
+        header="LTI"
+        toggleable="true">
+        <c:if test="#{not courseOfferEditView.ltiEnabled}">
+          <h:outputText value="#{msg['courseOfferEdit.ltiGloballyDisabled']}"/>
+        </c:if>
+        <c:if test="#{courseOfferEditView.ltiEnabled}">
+          <p:selectBooleanCheckbox
+            id="ltiEnabled"
+            value="#{courseOfferEditView.courseOffer.ltiEnabled}"
+            itemLabel="#{msg['courseOfferEdit.ltiEnabled']}"
+            onchange="processChange()"/>
+          <p:panelGrid
+            id="ltiSettings"
+            columns="2"
+            styleClass="ui-panelgrid-blank">
+            <h:outputText value="#{msg['courseOfferEdit.ltiUrl']}:"/>
+            <h:panelGroup>
+              <div class="ui-inputgroup">
+                <p:inputText
+                  id="ltiUrl"
+                  readonly="true"
+                  value="#{courseOfferEditView.ltiUrl}"
+                  size="30" />
+                <p:commandButton
+                  id="copyLtiUrl"
+                  type="button"
+                  icon="fas fa-copy"
+                  onclick="copyTextToClipboard('courseOfferEdit:ltiUrl')" />
+              </div>
+            </h:panelGroup>
+            <h:outputText value="#{msg['courseOfferEdit.ltiConsumerKey']}:"/>
+            <h:panelGroup>
+              <div class="ui-inputgroup">
+                <p:inputText
+                  id="consumerKey"
+                  readonly="true"
+                  value="#{courseOfferEditView.courseOffer.ltiConsumerKey}"
+                  size="30" />
+                <p:commandButton
+                  id="copyConsumerKey"
+                  type="button"
+                  icon="fas fa-copy"
+                  onclick="copyTextToClipboard('courseOfferEdit:consumerKey')" />
+              </div>
+            </h:panelGroup>
+            <h:outputText value="#{msg['courseOfferEdit.ltiConsumerSecret']}:"/>
+            <h:panelGroup>
+              <div class="ui-inputgroup">
+                <p:inputText
+                  id="consumerSecret"
+                  readonly="true"
+                  value="#{courseOfferEditView.courseOffer.ltiConsumerSecret}"
+                  size="30" />
+                <p:commandButton
+                  id="copyConsumerSecret"
+                  type="button"
+                  icon="fas fa-copy"
+                  onclick="copyTextToClipboard('courseOfferEdit:consumerSecret')" />
+              </div>
+            </h:panelGroup>
+          </p:panelGrid>
+        </c:if>
+      </p:panel>
+      
+
+      <!-- Enrollment Settings -->
+      <!-- Settings for enrolling in this course (sign on start time, sign on end time, maximum participants, etc.) -->
+      <p:panel
+        id="tabEnrollmentSettings"
+        header="#{msg['courseOfferEdit.enrollmentSettingsHeader']}"
+        toggleable="true">
+        <p:selectBooleanCheckbox
+          id="hasExplicitEnrollment"
+          value="#{courseOfferEditView.courseOffer.explicitEnrollment}"
+          validator="#{courseOfferEditView.validateDependentEnrollmentSettings}"
+          disabled="#{courseOfferEditView.referencedCourse == null or courseOfferEditView.readOnly}"
+          itemLabel="#{msg['courseOfferEdit.hasExplicitEnrollment']}">
+          <p:ajax
+            update="dependentEnrollmentSettingsWrapper manualEnrollmentWrapper emailInfoBar"
+            oncomplete="processChange()" />
+        </p:selectBooleanCheckbox>
+
+        <h:panelGroup
+          id="dependentEnrollmentSettingsWrapper"
+          layout="block">
+          <p:panel
+            id="dependendEnrollmentSettings"
+            rendered="#{courseOfferEditView.courseOffer.explicitEnrollment}">
+            <h:panelGroup
+              layout="block"
+              style="position: relative; float:right;">
+              <j:helperTooltip
+                id="dependentEnrollmentHelper"
+                tooltip="#{msg['courseOfferEdit.dependentEnrollmentHelperTooltip']}"
+                position="left" />
+            </h:panelGroup>
+            <p:panelGrid
+              columns="4"
+              cellpadding="5"
+              styleClass="ui-panelgrid-blank">
+              <p:selectBooleanCheckbox
+                id="hasEnrollmentStart"
+                value="#{courseOfferEditView.enrollmentStart}"
+                disabled="#{courseOfferEditView.readOnly or not courseOfferEditView.courseOffer.explicitEnrollment}">
+                <p:ajax
+                  update="courseOfferEnrollmentStart"
+                  listener="#{courseOfferEditView.handleEnrollmentStart}"
+                  oncomplete="processChange()" />
+              </p:selectBooleanCheckbox>
+              <h:outputLabel
+                for="courseOfferEnrollmentStart"
+                value="#{msg['courseOfferEdit.courseOfferEnrollmentStarts']}:" />
+
+              <p:calendar
+                id="courseOfferEnrollmentStart"
+                mask="true"
+                navigator="true"
+                required="true"
+                requiredMessage="#{msg['courseOfferEdit.timeConfigurationDateMissing']}"
+                value="#{courseOfferEditView.courseOffer.enrollmentStart}"
+                pattern="dd.MM.yyyy HH:mm"
+                disabled="#{!courseOfferEditView.enrollmentStart or courseOfferEditView.readOnly}"
+                maxdate="#{courseOfferEditView.maxEnrollmentStart}"
+                onchange="processChange()">
+                <p:ajax
+                  event="dateSelect"
+                  listener="#{courseOfferEditView.updateAllOtherCalendars}"
+                  update="@next" />
+                <p:ajax
+                  event="blur"
+                  listener="#{courseOfferEditView.updateAllOtherCalendars}"
+                  update="@next" />
+              </p:calendar>
+              <p:message for="courseOfferEnrollmentStart" />
+
+              <p:selectBooleanCheckbox
+                id="hasEnrollmentDeadline"
+                value="#{courseOfferEditView.enrollmentDeadline}"
+                disabled="#{courseOfferEditView.readOnly  or not courseOfferEditView.courseOffer.explicitEnrollment}">
+                <p:ajax
+                  update="courseOfferEnrollmentDeadline"
+                  listener="#{courseOfferEditView.handleEnrollmentDeadline}"
+                  oncomplete="processChange()" />
+              </p:selectBooleanCheckbox>
+              <h:outputLabel
+                for="courseOfferEnrollmentDeadline"
+                value="#{msg['courseOfferEdit.courseOfferEnrollmentEnds']}:" />
+              <p:calendar
+                id="courseOfferEnrollmentDeadline"
+                mask="true"
+                navigator="true"
+                required="true"
+                requiredMessage="#{msg['courseOfferEdit.timeConfigurationDateMissing']}"
+                value="#{courseOfferEditView.courseOffer.enrollmentDeadline}"
+                mindate="#{courseOfferEditView.minEnrollmentDeadline}"
+                pattern="dd.MM.yyyy HH:mm"
+                disabled="#{!courseOfferEditView.enrollmentDeadline or courseOfferEditView.readOnly}"
+                onchange="processChange()">
+                <p:ajax
+                  event="dateSelect"
+                  listener="#{courseOfferEditView.updateAllOtherCalendars}"
+                  update="@next" />
+                <p:ajax
+                  event="blur"
+                  listener="#{courseOfferEditView.updateAllOtherCalendars}"
+                  update="@next" />
+              </p:calendar>
+              <p:message for="courseOfferEnrollmentDeadline" />
+
+              <p:selectBooleanCheckbox
+                id="hasDisenrollmentDeadline"
+                value="#{courseOfferEditView.disenrollmentDeadline}"
+                disabled="#{courseOfferEditView.readOnly  or not courseOfferEditView.courseOffer.explicitEnrollment}">
+                <p:ajax
+                  update="courseOfferDisenrollmentDeadline"
+                  listener="#{courseOfferEditView.handleDisenrollmentDeadline}"
+                  oncomplete="processChange()" />
+              </p:selectBooleanCheckbox>
+              <h:outputLabel
+                for="courseOfferDisenrollmentDeadline"
+                value="#{msg['courseOfferEdit.courseOfferDisenrollmentDeadline']}:" />
+              <p:calendar
+                id="courseOfferDisenrollmentDeadline"
+                mask="true"
+                navigator="true"
+                required="true"
+                requiredMessage="#{msg['courseOfferEdit.timeConfigurationDateMissing']}"
+                value="#{courseOfferEditView.courseOffer.disenrollmentDeadline}"
+                pattern="dd.MM.yyyy HH:mm"
+                disabled="#{!courseOfferEditView.disenrollmentDeadline or courseOfferEditView.readOnly}"
+                mindate="#{courseOfferEditView.minDisenrollmentDeadline}"
+                onchange="processChange()">
+                <p:ajax
+                  event="dateSelect"
+                  listener="#{courseOfferEditView.updateAllOtherCalendars}"
+                  update="@next" />
+                <p:ajax
+                  event="blur"
+                  listener="#{courseOfferEditView.updateAllOtherCalendars}"
+                  update="@next" />
+              </p:calendar>
+              <p:message for="courseOfferDisenrollmentDeadline" />
+
+              <!-- Linked cpurses -->
+              <p:selectBooleanCheckbox
+                id="hasLinkedCoursesCheckbox"
+                value="#{courseOfferEditView.hasLinkedCoursesChecked}"
+                onchange="processChange()"
+                disabled="true" />
+              <h:panelGroup>
+                <h:outputLabel
+                  for="hasLinkedCoursesCheckbox"
+                  value="#{msg['courseOfferEdit.linkedCourses']}" />
+                <j:helperTooltip
+                  tooltip="#{msg['courseOfferEdit.linkedCourses.tooltip']} #{courseOfferEditView.hasInheritedLinkedCourses ? msg['courseOfferEdit.linkedCourses.disabledParent'] : ''}"
+                  id="linkedCoursesHelper" />
+              </h:panelGroup>
+              <p:commandButton
+                id="changeLinkedCourses"
+                value="#{msg['courseOfferEdit.linkedCourses.switchButton']}"
+                action="#{courseOfferEditView.switchLinkedCourses}"
+                disabled="#{courseOfferEditView.readOnly or courseOfferEditView.hasInheritedLinkedCourses}"
+                update="hasLinkedCoursesCheckbox changeLinkedCourses linkedCoursesHelper globalGrowl">
+                <p:confirm
+                  message="#{courseOfferEditView.hasLinkedCoursesChecked ? msg['courseOfferEdit.linkedCourses.switchButtonConfirmUnlink'] : msg['courseOfferEdit.linkedCourses.switchButtonConfirmLink']}"
+                  escape="false" />
+              </p:commandButton>
+              <h:panelGroup layout="block" />
+
+              <!-- Global password -->
+              <h:panelGroup layout="block" />
+              <h:panelGroup layout="block">
+                <h:outputLabel
+                  value="#{msg['courseOfferEdit.globalPassword']}"
+                  for="globalPasswordInput" />
+                <j:helperTooltip
+                  id="globalPasswordHint"
+                  tooltip="#{msg['courseOfferEdit.globalPasswordHint']}" />
+              </h:panelGroup>
+              <h:panelGroup
+                layout="block"
+                styleClass="ui-inputgroup">
+                <p:inputText
+                  id="globalPasswordInput"
+                  value="#{courseOfferEditView.courseOffer.globalPassword}"
+                  onkeydown="checkUserInputForActivationOfSaveButton()"
+                  readonly="#{courseOfferEditView.readOnly}"
+                  styleClass="monospace" />
+                <p:commandButton
+                  id="globalPasswordCopyButton"
+                  icon="fas fa-copy"
+                  type="button"
+                  onclick="copyTextToClipboard('courseOfferEdit:globalPasswordInput')" />
+                <p:tooltip
+                  for="globalPasswordCopyButton"
+                  value="#{msg['global.copyToClipboard']}"
+                  position="top" />
+                <p:commandButton
+                  id="globalPasswordClearButton"
+                  icon="fa fa-times"
+                  disabled="#{courseOfferEditView.readOnly}"
+                  action="#{courseOfferEditView.clearGlobalPassword}"
+                  update="globalPasswordInput"
+                  oncomplete="processChange()" />
+                <p:tooltip
+                  for="globalPasswordClearButton"
+                  value="#{msg['courseOfferEdit.globalPasswordClearButton']}"
+                  position="top" />
+              </h:panelGroup>
+              <h:panelGroup layout="block" />
+
+              <!-- max participants -->
+              <p:selectBooleanCheckbox
+                id="maxAllowedParticipantsCheckbox"
+                value="#{courseOfferEditView.participantsLimit}"
+                disabled="#{courseOfferEditView.readOnly}">
+                <p:ajax
+                  update="maxAllowedParticipantsWrapper hasWaitlistEnabledCheckbox warningForEnrollmentActionAfterSaving"
+                  oncomplete="processChange()"
+                  listener="#{courseOfferEditView.updateEnrollmentActionWarning}" />
+              </p:selectBooleanCheckbox>
+              <h:outputLabel value="#{msg['courseOfferEdit.maxAllowedParticipants']}" />
+              <h:panelGroup
+                id="maxAllowedParticipantsWrapper"
+                layout="block">
+                <p:spinner
+                  id="maxAllowedParticipants"
+                  min="1"
+                  size="3"
+                  value="#{courseOfferEditView.courseOffer.maxAllowedParticipants}"
+                  required="true"
+                  onchange="processChange()"
+                  onkeydown="checkUserInputForActivationOfSaveButton()"
+                  disabled="#{courseOfferEditView.readOnly  or not courseOfferEditView.courseOffer.explicitEnrollment}"
+                  rendered="#{courseOfferEditView.participantsLimit}">
+                  <p:ajax
+                    update="warningForEnrollmentActionAfterSaving"
+                    listener="#{courseOfferEditView.updateEnrollmentActionWarning}" />
+                </p:spinner>
+              </h:panelGroup>
+              <h:panelGroup layout="block" />
+
+              <!-- enable waiting list -->
+              <p:selectBooleanCheckbox
+                id="hasWaitlistEnabledCheckbox"
+                value="#{courseOfferEditView.courseOffer.enableWaitingList}"
+                onchange="processChange()"
+                disabled="#{courseOfferEditView.readOnly or not courseOfferEditView.participantsLimit}">
+                <p:ajax
+                  update="warningForEnrollmentActionAfterSaving"
+                  listener="#{courseOfferEditView.updateEnrollmentActionWarning}" />
+              </p:selectBooleanCheckbox>
+              <h:outputLabel
+                for="hasWaitlistEnabledCheckbox"
+                value="#{msg['courseOfferEdit.hasWaitlistEnabled']}" />
+              <h:panelGroup layout="block" />
+              <h:panelGroup layout="block" />
+            </p:panelGrid>
+
+            <h:panelGroup
+              id="warningForEnrollmentActionAfterSaving"
+              layout="block">
+              <p:panel rendered="#{not courseOfferEditView.enrollmentActionWarnings.isEmpty()}">
+                <p:dataTable
+                  id="warningForEnrollmentActionAfterSavingTable"
+                  value="#{courseOfferEditView.enrollmentActionWarnings}"
+                  var="item"
+                  rowStyleClass="#{item.warning ? 'warn-text' : ''}"
+                  styleClass="without-header borderless nobackground">
+                  <p:column style="width: 16px;">
+                    <h:outputText styleClass="fa fa-#{item.warning ? 'exclamation-triangle' : 'info-circle'}" />
+                  </p:column>
+                  <p:column style="width: 75px;">
+                    <h:outputText value="[#{msg[item.warning ? 'global.warn' : 'global.info']}]" />
+                  </p:column>
+                  <p:column>
+                    <h:outputText value="#{item.text}" />
+                    <j:helperTooltip
+                      id="tooltip"
+                      tooltip="#{item.hint}"
+                      rendered="#{not empty item.hint}" />
+                  </p:column>
+                </p:dataTable>
+              </p:panel>
+            </h:panelGroup>
+
+          </p:panel>
+        </h:panelGroup>
+
+        <!-- Manual enrollment -->
+        <h:panelGroup
+          id="manualEnrollmentWrapper"
+          layout="block">
+          <p:panel
+            id="manuallyRegisterUserPanel"
+            rendered="#{courseOfferEditView.courseOffer.explicitEnrollment}">
+            <h:panelGroup
+              layout="block"
+              style="position: relative; float:right;">
+              <j:helperTooltip
+                id="manuallyRegisterUserHint"
+                tooltip="#{msg['courseOfferEdit.manualEnrollment.statisticsHint']}"
+                position="left" />
+            </h:panelGroup>
+            <p:panelGrid
+              columns="2"
+              styleClass="ui-panelgrid-blank">
+              <h:outputLabel
+                for="registerUserAutocomplete"
+                value="#{msg['statistics.actionDialog.enrollTitle']}:" />
+              <h:panelGroup layout="block">
+                <p:autoComplete
+                  id="registerUserAutocomplete"
+                  value="#{courseOfferEditView.userToRegister}"
+                  completeMethod="#{courseOfferEditView.userToRegisterAutoComplete}"
+                  forceSelection="true"
+                  emptyMessage="#{msg['courseOfferEdit.noAutocompleteMatch']}"
+                  delay="350"
+                  cache="true"
+                  disabled="#{!courseOfferEditView.userHasExtendedRead}"
+                  placeholder="#{msg['global.username']}">
+                  <p:ajax
+                    event="itemSelect"
+                    listener="#{courseOfferEditView.autoCompleteSelectHandler}"
+                    update="manuallyRegisterUserPanel" />
+                </p:autoComplete>
+                <p:spacer width="10px" />
+                <j:enrollmentStatusIndicator
+                  id="userStatusIndicator"
+                  status="#{courseOfferEditView.userToRegisterStatus}"
+                  altTextDisenrolled="#{msg['enum.EEnrollmentStatus.DISENROLLED_OR_NOT_ENROLLED']}" />
+              </h:panelGroup>
+              <h:outputLabel
+                for="registerUserExplanationTextarea"
+                value="#{msg['confirmDialog.optionalReason']}:" />
+              <p:inputText
+                id="registerUserExplanationTextarea"
+                value="#{courseOfferEditView.manualEnrollExplanation}"
+                disabled="#{!courseOfferEditView.userHasExtendedRead}"
+                size="60" />
+            </p:panelGrid>
+            <h:panelGroup id="registerUserWrapper">
+              <p:commandButton
+                id="registerUserCB"
+                disabled="#{not courseOfferEditView.userHasExtendedRead or empty courseOfferEditView.userToRegisterStatus or courseOfferEditView.userToRegisterStatus == 'ENROLLED'}"
+                value="#{msg['statistics.actions.enrollManually']}"
+                action="#{courseOfferEditView.enrollUserManually}"
+                update="manuallyRegisterUserPanel statistics globalGrowl" />
+            </h:panelGroup>
+            <p:tooltip
+              for="registerUserWrapper"
+              value="#{msg['courseOfferEdit.manualEnrollment.disabledNoRights']}"
+              rendered="#{not courseOfferEditView.userHasExtendedRead}" />
+            <p:tooltip
+              for="registerUserWrapper"
+              value="#{msg['courseOfferEdit.manualEnrollment.disabledAlreadyEnrolled']}"
+              rendered="#{not empty courseOfferEditView.userToRegisterStatus and courseOfferEditView.userToRegisterStatus == 'ENROLLED'}" />
+          </p:panel>
+        </h:panelGroup>
+
+      </p:panel>
+
+      <!-- Submission Settings -->
+      <!-- Settings for submitting this course (restart, hints, pauses, etc.) -->
+      <p:panel
+        id="tabSubmissionSettings"
+        widgetVar="tabSubmissionSettings"
+        header="#{msg['courseOfferEdit.submissionRestrictionsSettingsHeader']}"
+        toggleable="true"
+        visible="#{courseOfferEditView.referencedCourse != null}">
+        <p:panelGrid
+          id="studentRights"
+          columns="2"
+          styleClass="ui-panelgrid-blank">
+
+          <!-- Allow stage erasing -->
+          <p:selectBooleanCheckbox
+            id="allowStageRestart"
+            value="#{courseOfferEditView.courseOffer.allowStageRestart}"
+            onchange="processChange()"
+            disabled="#{courseOfferEditView.readOnly}" />
+          <h:panelGroup>
+            <h:outputLabel
+              for="allowStageRestart"
+              value="#{msg['courseOfferEdit.allowStageRestart']}" />
+            <j:helperTooltip
+              id="allowStageRestartHint"
+              tooltip="#{msg['courseOfferEdit.allowStageRestartHint']}" />
+          </h:panelGroup>
+
+          <!-- Activate hints for stages -->
+          <p:selectBooleanCheckbox
+            id="selectedAllowHints"
+            value="#{courseOfferEditView.courseOffer.allowHints}"
+            onchange="processChange()"
+            disabled="#{courseOfferEditView.readOnly}" />
+          <h:panelGroup>
+            <h:outputLabel
+              for="selectedAllowHints"
+              value="#{msg['courseOfferEdit.allowHints']}" />
+            <j:helperTooltip
+              id="selectedAllowHintsTooltip"
+              tooltip="#{msg['courseOfferEdit.hints.allowHintsHint']}" />
+          </h:panelGroup>
+
+          <!-- Allow course pausing -->
+          <p:selectBooleanCheckbox
+            id="selectedAllowPauses"
+            value="#{courseOfferEditView.courseOffer.allowPauses}"
+            onchange="processChange()"
+            disabled="#{courseOfferEditView.readOnly}" />
+          <h:panelGroup>
+            <h:outputLabel
+              for="selectedAllowPauses"
+              value="#{msg['courseOfferEdit.allowPauses']}" />
+            <j:helperTooltip
+              id="selectedAllowPausesTooltip"
+              tooltip="#{msg['courseOfferEdit.hints.allowPausesHint']}" />
+          </h:panelGroup>
+
+          <!-- Allow student comments -->
+          <p:selectBooleanCheckbox
+            id="selectedAllowStudentComments"
+            value="#{courseOfferEditView.courseOffer.allowStudentComments}"
+            onchange="processChange()"
+            disabled="#{courseOfferEditView.readOnly}" />
+          <h:panelGroup>
+            <h:outputLabel
+              for="selectedAllowStudentComments"
+              value="#{msg['courseOfferEdit.allowStudentComments']}" />
+            <j:helperTooltip
+              id="selectedAllowStudentCommentsTooltip"
+              tooltip="#{msg['courseOfferEdit.hints.allowStudentCommentsHint']}" />
+          </h:panelGroup>
+
+          <!-- Allow exercise restart -->
+          <p:selectBooleanCheckbox
+            id="solvingExerciseAgain"
+            value="#{courseOfferEditView.courseOffer.allowExerciseRestart}"
+            disabled="#{courseOfferEditView.readOnly}">
+            <p:ajax
+              update="limitExerciseRepetitionsWrapper minMaxRepetitionsWrapper"
+              oncomplete="processChange()" />
+          </p:selectBooleanCheckbox>
+          <h:panelGroup id="solvingExerciseAgainLabelWrapper">
+            <h:outputLabel
+              for="solvingExerciseAgain"
+              value="#{msg['courseOfferEdit.allowExerciseRestart']}" />
+            <j:helperTooltip
+              id="solvingExerciseAgainHint"
+              tooltip="#{msg['courseOfferEdit.allowExerciseRestartHint']}" />
+          </h:panelGroup>
+
+          <!-- Limited repetitions per exercise -->
+          <h:panelGroup id="limitExerciseRepetitionsWrapper">
+            <p:selectBooleanCheckbox
+              id="limitExerciseRepetitions"
+              value="#{courseOfferEditView.exerciseRepetitionLimit}"
+              disabled="#{courseOfferEditView.readOnly}"
+              rendered="#{courseOfferEditView.courseOffer.allowExerciseRestart}">
+              <p:ajax
+                update="minMaxRepetitionsWrapper"
+                oncomplete="processChange()" />
+            </p:selectBooleanCheckbox>
+          </h:panelGroup>
+          <h:panelGroup id="minMaxRepetitionsWrapper">
+            <h:outputLabel
+              for="minMaxRepetitions"
+              value="#{msg['courseOfferEdit.limitExerciseRepetitions']}"
+              rendered="#{courseOfferEditView.courseOffer.allowExerciseRestart}"
+              style="vertical-align: middle; margin-right: 10px;" />
+            <p:spinner
+              id="minMaxRepetitions"
+              value="#{courseOfferEditView.maxRepetitionsPerExercise}"
+              min="1"
+              max="100"
+              size="10"
+              prefix="#{msg['global.max']} "
+              required="true"
+              onchange="processChange()"
+              onkeydown="checkUserInputForActivationOfSaveButton()"
+              rendered="#{courseOfferEditView.courseOffer.allowExerciseRestart and courseOfferEditView.exerciseRepetitionLimit}"
+              disabled="#{courseOfferEditView.readOnly}" />
+          </h:panelGroup>
+        </p:panelGrid>
+
+        <p:separator />
+
+        <p:panelGrid
+          columns="2"
+          styleClass="ui-panelgrid-blank">
+          <p:selectBooleanCheckbox
+            id="selectedExplicitSubmissionRequired"
+            value="#{courseOfferEditView.courseOffer.explicitSubmission}"
+            onchange="processChange()"
+            disabled="#{courseOfferEditView.readOnly}"
+            validator="#{courseOfferEditView.validateDependentSubmissionSettings}">
+            <p:ajax
+              update="dependentSubmissionSettingsWrapper"
+              oncomplete="processChange()" />
+          </p:selectBooleanCheckbox>
+          <h:outputText value="#{msg['courseOfferEdit.explicitSubmissionStartRequiredCheckboxText']}" />
+        </p:panelGrid>
+
+        <h:panelGroup
+          id="dependentSubmissionSettingsWrapper"
+          layout="block">
+
+          <p:panel
+            id="dependentSettings"
+            rendered="#{courseOfferEditView.courseOffer.explicitSubmission}">
+            <h:panelGroup
+              layout="block"
+              style="position: relative; float:right;">
+              <j:helperTooltip
+                id="dependentSubmissionSettingsHelper"
+                tooltip="#{msg['courseOfferEdit.dependentSubmissionSettingsHelperTooltip']}"
+                position="left" />
+            </h:panelGroup>
+            <p:panelGrid
+              columns="4"
+              styleClass="ui-panelgrid-blank"
+              style="margin-bottom:5px">
+              <p:selectBooleanCheckbox
+                id="hasSubmissionStart"
+                value="#{courseOfferEditView.submissionStart}"
+                disabled="#{courseOfferEditView.readOnly or not courseOfferEditView.courseOffer.explicitSubmission}">
+                <p:ajax
+                  update="courseOfferSubmissionStart"
+                  listener="#{courseOfferEditView.handleSubmissionStart}"
+                  oncomplete="processChange()" />
+              </p:selectBooleanCheckbox>
+              <h:outputLabel
+                for="courseOfferSubmissionStart"
+                value="#{msg['courseOfferEdit.courseOfferSubmissionStarts']}:" />
+              <p:calendar
+                id="courseOfferSubmissionStart"
+                mask="true"
+                navigator="true"
+                required="true"
+                requiredMessage="#{msg['courseOfferEdit.timeConfigurationDateMissing']}"
+                value="#{courseOfferEditView.courseOffer.submissionStart}"
+                pattern="dd.MM.yyyy HH:mm"
+                disabled="#{!courseOfferEditView.submissionStart or courseOfferEditView.readOnly}"
+                mindate="#{courseOfferEditView.minSubmissionStart}"
+                maxdate="#{courseOfferEditView.maxSubmissionStart}"
+                onchange="processChange()">
+                <p:ajax
+                  event="dateSelect"
+                  listener="#{courseOfferEditView.updateAllOtherCalendars}"
+                  update="@next" />
+                <p:ajax
+                  event="blur"
+                  listener="#{courseOfferEditView.updateAllOtherCalendars}"
+                  update="@next" />
+              </p:calendar>
+              <p:message for="courseOfferSubmissionStart" />
+              <p:selectBooleanCheckbox
+                id="hasSubmissionDeadline"
+                value="#{courseOfferEditView.submissionDeadline}"
+                disabled="#{courseOfferEditView.readOnly or not courseOfferEditView.courseOffer.explicitSubmission}">
+                <p:ajax
+                  update="courseOfferSubmissionDeadline"
+                  listener="#{courseOfferEditView.handleSubmissionDeadline}"
+                  oncomplete="processChange()" />
+              </p:selectBooleanCheckbox>
+              <h:outputLabel
+                for="courseOfferSubmissionDeadline"
+                value="#{msg['courseOfferEdit.courseOfferSubmissionDeadline']}:" />
+              <p:calendar
+                id="courseOfferSubmissionDeadline"
+                mask="true"
+                navigator="true"
+                required="true"
+                requiredMessage="#{msg['courseOfferEdit.timeConfigurationDateMissing']}"
+                value="#{courseOfferEditView.courseOffer.submissionDeadline}"
+                mindate="#{courseOfferEditView.minSubmissionDeadline}"
+                maxdate="#{courseOfferEditView.maxSubmissionDeadline}"
+                pattern="dd.MM.yyyy HH:mm"
+                disabled="#{!courseOfferEditView.submissionDeadline or courseOfferEditView.readOnly}"
+                onchange="processChange()">
+                <p:ajax
+                  event="dateSelect"
+                  listener="#{courseOfferEditView.updateAllOtherCalendars}"
+                  update="@next" />
+                <p:ajax
+                  event="blur"
+                  listener="#{courseOfferEditView.updateAllOtherCalendars}"
+                  update="@next" />
+              </p:calendar>
+              <p:message for="courseOfferSubmissionDeadline" />
+            </p:panelGrid>
+
+            <p:panelGrid
+              columns="2"
+              styleClass="ui-panelgrid-blank"
+              style="margin-bottom: 5px">
+
+              <!-- only one participation -->
+              <p:selectBooleanCheckbox
+                id="selectedOnlyAllowSingularParticipation"
+                value="#{courseOfferEditView.courseOffer.onlyOneParticipation}"
+                onchange="processChange()"
+                disabled="#{courseOfferEditView.readOnly}" />
+              <h:panelGroup>
+                <h:outputLabel value="#{msg['courseOfferEdit.onlyAllowSingularParticipation']}" />
+                <j:helperTooltip
+                  id="selectedOnlyAllowSingularParticipationHint"
+                  tooltip="#{msg['courseOfferEdit.onlyAllowSingularParticipationHint']}" />
+              </h:panelGroup>
+
+              <!-- time limit -->
+              <p:selectBooleanCheckbox
+                id="timelimitCheck"
+                value="#{courseOfferEditView.hasTimeLimit}"
+                disabled="#{courseOfferEditView.readOnly or not courseOfferEditView.courseOffer.explicitSubmission}">
+                <p:ajax
+                  update="timelimitSpinnerWrapper"
+                  oncomplete="processChange()" />
+              </p:selectBooleanCheckbox>
+              <h:panelGroup
+                id="timelimitSpinnerWrapper"
+                layout="block">
+                <h:outputLabel
+                  value="#{msg['global.timelimit']}"
+                  style="vertical-align: middle; margin-right: 10px;" />
+                <p:spinner
+                  id="timelimitSpinner"
+                  size="10"
+                  required="true"
+                  min="1"
+                  max="1440"
+                  suffix=" #{msg['global.minutes']}"
+                  value="#{courseOfferEditView.courseOffer.timeLimit}"
+                  converter="durationToMinutesConverter"
+                  onchange="processChange()"
+                  onkeydown="checkUserInputForActivationOfSaveButton()"
+                  disabled="#{courseOfferEditView.readOnly or not courseOfferEditView.courseOffer.explicitSubmission}"
+                  rendered="#{courseOfferEditView.hasTimeLimit}" />
+              </h:panelGroup>
+              
+              <!-- Personal passwords -->
+              <p:selectBooleanCheckbox
+                id="hasPersonalPassword"
+                value="#{courseOfferEditView.courseOffer.enablePersonalPasswords}"
+                disabled="#{courseOfferEditView.readOnly or not courseOfferEditView.courseOffer.explicitSubmission}">
+                <p:ajax
+                  update="personalPasswordsOverlay"
+                  oncomplete="processChange()" />
+              </p:selectBooleanCheckbox>
+              <h:panelGroup id="personalPasswordsSettings">
+                <h:outputLabel
+                  value="#{msg['courseOfferEdit.requiresPersonalPassword']}"
+                  style="margin-right: 10px;" />
+                <p:commandButton
+                  id="showPersonalPasswordsOverlay"
+                  value="#{msg[courseOfferEditView.readOnly ? 'courseOfferEdit.showPersonalPasswordsButtonText' : 'courseOfferEdit.editPersonalPasswordsButtonText']}" />
+                <p:overlayPanel
+                  id="personalPasswordsOverlay"
+                  for="showPersonalPasswordsOverlay"
+                  my="center"
+                  at="center"
+                  style="width:700px"
+                  showCloseIcon="true">
+                  <ui:include page="/WEB-INF/includes/courseOfferEdit/personalPasswords.xhtml" />
+                </p:overlayPanel>
+              </h:panelGroup>
+              
+            </p:panelGrid>
+          </p:panel>
+        </h:panelGroup>
+      </p:panel>
+
+      <!-- Settings for feedback during course -->
+      <p:panel
+        id="tabFeedbackDuringCourse"
+        widgetVar="tabFeedbackDuringCourse"
+        header="#{msg['courseOfferEdit.feedbackDuringCourse']}"
+        toggleable="true"
+        visible="#{courseOfferEditView.referencedCourse != null}">
+        <p:panelGrid
+          id="pgFeedbackDuringCourse"
+          columns="2"
+          cellpadding="5"
+          styleClass="ui-panelgrid-blank">
+          <p:selectBooleanCheckbox
+            id="showDifficulty"
+            value="#{courseOfferEditView.courseOffer.showDifficulty}"
+            onchange="processChange()"
+            disabled="#{courseOfferEditView.readOnly}" />
+          <h:outputLabel value="#{msg['courseOfferEdit.showDifficulty']}" />
+
+          <p:selectBooleanCheckbox
+            id="showResultImmediately"
+            value="#{courseOfferEditView.courseOffer.showResultImmediately}"
+            onchange="processChange()"
+            disabled="#{courseOfferEditView.readOnly}" />
+          <h:outputLabel value="#{msg['courseOfferEdit.showResult']}" />
+
+          <p:selectBooleanCheckbox
+            id="showFeedbackImmediately"
+            value="#{courseOfferEditView.courseOffer.showFeedbackImmediately}"
+            onchange="processChange()"
+            disabled="#{courseOfferEditView.readOnly}" />
+          <h:outputLabel value="#{msg['courseOfferEdit.showFeedback']}" />
+        </p:panelGrid>
+      </p:panel>
+      
+      <!-- Settings for review -->
+      <p:panel
+        id="tabSubmissionReview"
+        widgetVar="tabSubmissionReview"
+        header="#{msg['courseOfferEdit.submissionReview']}"
+        toggleable="true"
+        visible="#{courseOfferEditView.referencedCourse != null}">
+        <p:panelGrid
+          styleClass="ui-panelgrid-blank"
+          columns="1">
+          <h:panelGroup>
+            <h:outputLabel
+              for="courseResultDisplay"
+              value="#{msg['courseOfferEdit.showCourseResult']}: " />
+            <p:selectOneMenu
+              id="courseResultDisplay"
+              value="#{courseOfferEditView.courseOffer.courseResultDisplay}"
+              onchange="processChange()"
+              disabled="#{courseOfferEditView.readOnly}">
+              <p:ajax update="@parent" />
+              <f:selectItems
+                id="courseOfferEditSelectedCourseResultDisplay"
+                value="#{courseOfferEditView.courseResultDisplayTypes}"
+                var="courseResultDisplay"
+                itemLabel="#{msg['enum.EResultDisplay.' += courseResultDisplay]}" />
+            </p:selectOneMenu>
+          </h:panelGroup>
+
+          <h:panelGroup>
+            <h:outputLabel
+              for="review"
+              value="#{msg['courseOfferEdit.showResultDetails']}: " />
+            <p:selectOneMenu
+              id="review"
+              value="#{courseOfferEditView.courseOffer.reviewMode}"
+              onchange="processChange()"
+              disabled="#{courseOfferEditView.readOnly}">
+              <p:ajax update="pgSubmissionReviewConfigurations" />
+              <f:selectItems
+                id="courseOfferEditSelectedReviewType"
+                value="#{courseOfferEditView.reviewTypes}"
+                var="reviewMode"
+                itemDisabled="#{courseOfferEditView.isReviewModeDisabled(reviewMode)}"
+                itemLabel="#{msg['enum.ECourseOfferReviewMode.' += reviewMode]}" />
+            </p:selectOneMenu>
+          </h:panelGroup>
+        </p:panelGrid>
+        <p:panelGrid
+          id="pgSubmissionReviewConfigurations"
+          columns="2"
+          cellpadding="5"
+          styleClass="ui-panelgrid-blank">
+          <p:selectBooleanCheckbox
+            id="showExerciseAndSubmissionInCourseResults"
+            value="#{courseOfferEditView.courseOffer.showExerciseAndSubmissionInCourseResults}"
+            disabled="#{courseOfferEditView.courseOffer.reviewMode.name() == 'NEVER' or courseOfferEditView.readOnly}"
+            onchange="processChange()">
+            <p:ajax update="pgSubmissionReviewConfigurations" />
+          </p:selectBooleanCheckbox>
+          <h:outputLabel value="#{msg['courseOfferEdit.showExerciseAndSubmission']}" />
+
+          <p:selectBooleanCheckbox
+            id="showResultInCourseResults"
+            value="#{courseOfferEditView.courseOffer.showResultInCourseResults}"
+            disabled="#{courseOfferEditView.courseOffer.reviewMode.name() == 'NEVER'or courseOfferEditView.readOnly}"
+            onchange="processChange()">
+            <p:ajax update="pgSubmissionReviewConfigurations" />
+          </p:selectBooleanCheckbox>
+          <h:outputLabel value="#{msg['courseOfferEdit.showResult']}" />
+
+          <p:selectBooleanCheckbox
+            id="showFeedbackInCourseResults"
+            value="#{courseOfferEditView.courseOffer.showFeedbackInCourseResults}"
+            disabled="#{courseOfferEditView.courseOffer.reviewMode.name() == 'NEVER' or not courseOfferEditView.courseOffer.showExerciseAndSubmissionInCourseResults or courseOfferEditView.readOnly}"
+            onchange="processChange()">
+            <p:ajax update="pgSubmissionReviewConfigurations" />
+          </p:selectBooleanCheckbox>
+          <h:outputLabel value="#{msg['courseOfferEdit.showFeedback']}" />
+        </p:panelGrid>
+      </p:panel>
+      
+      <!-- Statistics -->
+      <p:panel
+        id="statistics"
+        header="#{msg['statistics']}"
+        toggleable="true">
+
+        <h:outputText
+          styleClass="fas fa-circle-notch fa-spin fa-lg"
+          style="margin: 10px auto;"
+          rendered="#{!courseOfferParticipantsView.lazyDataLoaded}" />
+
+        <h:panelGrid
+          id="statisticsTable"
+          columns="2"
+          rendered="#{courseOfferParticipantsView.lazyDataLoaded}">
+          <ui:include src="/WEB-INF/includes/courseOffer/statisticsTable.xhtml" />
+          <p:linkButton
+            id="toMoreCourseOfferStatistics"
+            outcome="#{viewId.courseOfferParticipants}"
+            value="#{msg['courseOfferParticipants']}"
+            icon="fas fa-chart-bar fa-sm">
+            <f:param
+              name="courseOffer"
+              value="#{courseOfferEditView.courseOffer.id}" />
+          </p:linkButton>
+        </h:panelGrid>
+      </p:panel>
+
+      <p:remoteCommand
+        global="false"
+        actionListener="#{courseOfferParticipantsView.loadOnlyKeyFigures(courseOfferEditView.courseOffer)}"
+        name="loadLazyData"
+        id="lld"
+        autoRun="true"
+        update="statistics"
+        process="@this" />
+
+      <!-- Generic confirm dialog with Yes and No button -->
+      <p:confirmDialog
+        id="globalConfirmDialog"
+        widgetVar="globalConfirmDialog"
+        closable="true"
+        resizable="false"
+        header="#{msg['global.confirm']}"
+        closeOnEscape="true"
+        global="true"
+        width="600px">
+        <p:commandButton
+          id="globalConfirmYes"
+          value="#{msg['global.yes']}"
+          type="button"
+          styleClass="ui-confirmdialog-yes"
+          icon="fas fa-check" />
+        <p:commandButton
+          id="globalConfirmNo"
+          value="#{msg['global.no']}"
+          type="button"
+          styleClass="ui-confirmdialog-no button-white"
+          icon="fas fa-times" />
+      </p:confirmDialog>
+
+    </h:form>
+  </ui:define>
+</ui:composition>

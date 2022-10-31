@@ -1,0 +1,199 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:p="http://primefaces.org/ui">
+
+  <p:panelGrid style="width:100%;border:0px;">
+    <p:row style="border-width:0px; display:flex;">
+
+      <!-- Available Exercises, shown in a tree -->
+      <p:column
+        id="fixedAllocation_availableExercises"
+        style="width:calc(50% - 5px); vertical-align:top; padding:0px;">
+        <h4 class="shadow-header">#{msg['courseEditExerciseTree.availableExercises']}</h4>
+        <ui:include src="/WEB-INF/includes/courseEdit/tree.xhtml">
+          <ui:param
+            name="id"
+            value="fixedAllocation_tree" />
+          <ui:param
+            name="updateComponents"
+            value="@parent:fixedAllocation_selectedExercisesTable" />
+        </ui:include>
+      </p:column>
+
+      <p:column style="width:10px; border:0px; padding:0;" />
+
+      <!-- Selected Exercises, shown in a Datatable -->
+      <p:column
+        id="fixedAllocation_selectedExercises"
+        style="width:calc(50% - 5px); vertical-align:top; padding:0px;">
+        <h4 class="shadow-header">#{msg['courseEditExerciseTree.selectedExercises']}</h4>
+
+        <p:remoteCommand
+          name="fixedAllocation_refreshPointSum"
+          update="fixedAllocation_selectedExercisesTable:pointSum" />
+        <p:dataTable
+          id="fixedAllocation_selectedExercisesTable"
+          var="courseEntry"
+          paginator="true"
+          rows="10"
+          rowsPerPageTemplate="10,50,500"
+          paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+          paginatorAlwaysVisible="false"
+          value="#{courseEditView.fixedAllocationView.getSortedCourseEntriesMaybeForReorder()}"
+          rowKey="#{courseEntry.id}"
+          draggableRows="#{courseEditView.newestRevision and courseEditView.course.exerciseOrder=='MANUAL'}"
+          rowStyleClass="#{courseEditView.isCourseEntryMissing(courseEntry) ? 'background-orange' : ''}"
+          style="margin:-1px;">
+          <p:ajax
+            event="rowReorder"
+            listener="#{courseEditView.fixedAllocationView.onExerciseReorder}"
+            oncomplete="processChange()"
+            update="fixedAllocation_selectedExercisesTable" />
+
+          <p:column
+            headerText="#{msg['global.exercise']}"
+            filterBy="#{courseEntry.exercise.name}"
+            filterMatchMode="contains">
+            <h:panelGroup id="exerciseName">
+              <h:outputText value="#{courseEntry.exercise.name}" />
+              <h:outputText
+                styleClass="fas fa-trash fa-sm"
+                rendered="#{courseEditView.isCourseEntryMissing(courseEntry)}"
+                title="#{msg['courseEditProvider.symbols.meanwhileDeleted']}"
+                style="margin-left: 5px;" />
+              <h:outputText
+                styleClass="far fa-star fa-sm"
+                rendered="#{empty courseEntry.frozenExercise and not empty courseEditView.fixedAllocationView.getFrozenExercisesFor(courseEntry.exercise)}"
+                title="#{msg['courseEditProvider.symbols.frozenAvailable']}"
+                style="margin-left: 5px;" />
+              <h:outputText
+                styleClass="fas fa-star fa-sm"
+                rendered="#{not empty courseEntry.frozenExercise}"
+                title="#{msg['courseEditProvider.symbols.frozenSelected']}"
+                style="margin-left: 5px;" />
+              <h:outputText
+                styleClass="fas fa-times-circle fa-sm"
+                rendered="#{courseEditView.newestRevision and not courseEditView.readOnly and courseEditView.fixedAllocationView.isMissingRightForExercise(courseEntry.exercise)}"
+                title="#{msg['courseEditProvider.noRights.exercise']}"
+                style="margin-left: 5px; color: red;" />
+              <br />
+              <h:outputText
+                value="#{courseEditView.getUserSpecificPathForFixedAllocation(courseEntry)}"
+                style="font-size:x-small;color:grey" />
+            </h:panelGroup>
+          </p:column>
+
+          <p:column
+            headerText="#{msg['global.points']}"
+            width="55">
+            <p:spinner
+              id="inputPoints"
+              disabled="#{!courseEditView.newestRevision or courseEditView.readOnly}"
+              value="#{courseEntry.points}"
+              min="0"
+              max="100"
+              size="1"
+              required="true"
+              onchange="processChange()"
+              onkeydown="checkUserInputForActivationOfSaveButton()">
+              <p:ajax
+                event="change"
+                oncomplete="fixedAllocation_refreshPointSum()" />
+            </p:spinner>
+          </p:column>
+
+          <p:column
+            width="80"
+            headerText="#{msg['global.actions']}">
+            <p:commandButton
+              id="cbEditFrozenRevision"
+              icon="fas fa-cog fa-sm"
+              type="button"
+              title="#{msg['courseEditProvider.fixedAllocation.changeVersion']}">
+              <p:overlayPanel
+                id="editFrozenRevisionPanel"
+                for="cbEditFrozenRevision"
+                hideEffect="fade"
+                showEffect="fade"
+                my="right top">
+                <p:panelGrid
+                  columns="2"
+                  style="width:auto"
+                  styleClass="ui-panelgrid-blank">
+                  <h:outputText value="#{msg['exerciseEdit.frozenVersion']}:" />
+                  <p:selectOneMenu
+                    id="frozenRevisionForExercise"
+                    disabled="#{!courseEditView.newestRevision or courseEditView.readOnly}"
+                    converter="frozenExerciseConverter"
+                    value="#{courseEntry.frozenExercise}"
+                    onchange="processChange()">
+                    <f:selectItem
+                      itemValue="#{null}"
+                      itemLabel="#{msg['global.noneFem']}" />
+                    <f:selectItems
+                      value="#{courseEditView.fixedAllocationView.getFrozenExercisesFor(courseEntry.exercise)}"
+                      var="revision"
+                      itemLabel="#{courseEditView.fixedAllocationView.getRevisionIndexForExerciseRevisionId(revision)}: #{revision.frozenTitle} (#{revision.name})"
+                      itemValue="#{revision}" />
+                    <p:ajax update="exerciseName" />
+                  </p:selectOneMenu>
+                </p:panelGrid>
+              </p:overlayPanel>
+            </p:commandButton>
+            <p:commandButton
+              id="cbDeleteSelectedExercise"
+              icon="fas fa-minus fa-sm"
+              oncomplete="processChange()"
+              title="#{msg['courseEdit.removeFromExerciseList']}"
+              disabled="#{!courseEditView.newestRevision or courseEditView.readOnly}"
+              actionListener="#{courseEditView.fixedAllocationView.removeCourseEntry(courseEntry)}"
+              update="courseEditMainForm:fixedAllocation_selectedExercisesTable courseEditMainForm:fixedAllocation_tree">
+              <p:confirm
+                disabled="#{not courseEditView.fixedAllocationView.isMissingRightForExercise(courseEntry.exercise)}"
+                message="#{msg['courseEditProvider.noRights.exercise']} #{msg['courseEditProvider.noRights.confirmRemove']}" />
+            </p:commandButton>
+          </p:column>
+
+          <!-- Summary -->
+          <f:facet name="footer">
+            <h:panelGroup
+              id="summary"
+              rendered="#{courseEditView.fixedAllocationView.exerciseCount > 0}"
+              layout="block">
+              <h:outputText value="#{msg['global.summary']}" />
+              <p:panelGrid
+                id="summaryTable"
+                columns="2"
+                style="font-weight:normal; font-size:small; text-align:left; width:auto; margin:auto;"
+                styleClass="ui-panelgrid-blank">
+                <p:outputLabel
+                  id="labelNumberOfExercises"
+                  value="#{msg['courseEditProvider.numberOfExercises']}:" />
+                <h:outputText
+                  value="#{courseEditView.fixedAllocationView.exerciseCount}"
+                  id="numOfCourseExercises" />
+                <p:outputLabel
+                  id="labelAverageDifficulty"
+                  value="#{msg['courseEditProvider.avgDifficulty']}:" />
+                <h:outputText
+                  value="#{courseEditView.fixedAllocationView.averageDifficulty}"
+                  id="averageDifficulty" />
+                <p:outputLabel
+                  id="labelPointSum"
+                  value="#{msg['courseEditProvider.pointSum']}:" />
+                <h:outputText
+                  value="#{courseEditView.fixedAllocationView.pointSum}"
+                  id="pointSum" />
+              </p:panelGrid>
+            </h:panelGroup>
+          </f:facet>
+        </p:dataTable>
+      </p:column>
+    </p:row>
+
+  </p:panelGrid>
+
+</ui:composition>

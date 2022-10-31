@@ -1,0 +1,51 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:c="http://java.sun.com/jsp/jstl/core"
+  xmlns:p="http://primefaces.org/ui">
+
+  <h:form id="renameFolderDialogForm">
+    <p:dialog
+      widgetVar="renameFolderDialog"
+      closable="true"
+      closeOnEscape="true"
+      header="#{msg['startContentTabView.renameFolderDialog']}"
+      modal="true"
+      draggable="false"
+      resizable="false"
+      styleClass="dialog-like-confirmdialog">
+      <p:outputLabel
+        for="folderRenameText"
+        value="#{msg['startContentTabView.renameFolderDialog.newName']} "
+        style="vertical-align:baseline;" />
+      <p:inputText
+        id="folderRenameText"
+        value="#{folderRenameDialogView.newFolderName}"
+        placeholder="#{folderRenameDialogView.oldFolderName}"
+        size="40"
+        validator="requiredValidator" />
+      <p:message
+        id="validationError"
+        for="folderRenameText" />
+      <f:facet name="footer">
+        <!-- Info: reload the side after renaming the folder, otherwise the tree is not sorted -->
+        <p:commandButton
+          id="renameFolderDialogOk"
+          value="#{msg['global.ok']}"
+          oncomplete="if (args &amp;&amp; !args.validationFailed) { PF('renameFolderDialog').hide(); window.location.reload(); }"
+          update="validationError"
+          action="#{folderRenameDialogView.renameFolder()}"
+          icon="fas fa-check" />
+        <p:commandButton
+          id="renameFolderDialogCancel"
+          value="#{msg['global.cancel']}"
+          onclick="PF('renameFolderDialog').hide();"
+          type="button"
+          styleClass="button-white"
+          icon="fas fa-times" />
+      </f:facet>
+    </p:dialog>
+  </h:form>
+</ui:composition>

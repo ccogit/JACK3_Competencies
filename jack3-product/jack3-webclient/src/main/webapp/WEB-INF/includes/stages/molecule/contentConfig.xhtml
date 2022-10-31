@@ -1,0 +1,15 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+  <h:outputScript
+    library="js"
+    name="ckEditorEditStage.js" />
+    
+  
+  <ui:param name="updateComponents" value="answers @form:tabs#{stageBean.stage.orderIndex}:feedback:feedbacks @form:tabs#{stageBean.stage.orderIndex}:feedback:feedbackTable @form:tabs#{stageBean.stage.orderIndex}:feedback:stageTransitions @form:tabs#{stageBean.stage.orderIndex}:feedback:targetTable" />
+
+ <ui:include page="../taskDescriptionEditor.xhtml" />
+
+</ui:composition>

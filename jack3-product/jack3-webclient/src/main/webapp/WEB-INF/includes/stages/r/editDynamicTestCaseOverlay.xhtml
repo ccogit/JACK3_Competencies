@@ -1,0 +1,95 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:j="http://jack.s3.uni-due.de/ui-elements">
+
+	<!-- editDynamicTestCaseOverlay -->
+	<p:overlayPanel
+		widgetVar="editDynamicTestCaseOverlay#{stageBean.stage.orderIndex}"
+		id="editDynamicTestCaseOverlayPanel">
+		<p:panel header="#{msg['rStage.testCaseOverlay.edittestcase']}"
+			id="editDynamicTestCasePanel">
+
+			<p:panelGrid columns="2">
+				<h:outputText value="#{msg['global.name']}" />
+				<p:inputText
+					rendered="#{stageBean.currentDynamicTestcaseToUpdate != null}"
+					value="#{stageBean.currentDynamicTestcaseToUpdate.name}"
+					style="width:97%" />
+
+				<p:outputLabel value="#{msg['rStage.testCaseOverlay.postcode']}" />
+				<p:inputTextarea autoResize="true"
+					rendered="#{stageBean.currentDynamicTestcaseToUpdate != null}"
+					value="#{stageBean.currentDynamicTestcaseToUpdate.postCode}"
+					onchange="processChange()" rows="5" cols="70" />
+					
+				<h:panelGroup>
+					<p:outputLabel
+						value="#{msg['rStage.testCaseOverlay.postprocessingFunction']}" />
+					<j:helperTooltip id="editPostprocessingFunctionHelp"
+						tooltip="#{msg['rStage.testCaseOverlay.postprocessingFunctionHelp']}" />
+				</h:panelGroup>
+				
+				<p:inputText
+					rendered="#{stageBean.currentDynamicTestcaseToUpdate != null}"
+					value="#{stageBean.currentDynamicTestcaseToUpdate.postprocessingFunction}"
+					style="width:97%" onchange="processChange()" />
+
+				<h:outputText
+					value="#{msg['rStage.testCaseOverlay.expectedOutput']}" />
+				<p:inputText
+					rendered="#{stageBean.currentDynamicTestcaseToUpdate != null}"
+					value="#{stageBean.currentDynamicTestcaseToUpdate.expectedOutput}"
+					rows="5" cols="70" style="width:97%" onchange="processChange()" />
+
+				<h:outputText value="#{msg['rStage.testCaseOverlay.tolerance']}" />
+				<p:inputText
+					rendered="#{stageBean.currentDynamicTestcaseToUpdate != null}"
+					value="#{stageBean.currentDynamicTestcaseToUpdate.tolerance}"
+					style="width:97%" onchange="processChange()" />
+
+	            <h:outputText value="#{msg['rStage.staticRuleMode']}" />
+				<h:selectOneMenu
+					rendered="#{stageBean.currentDynamicTestcaseToUpdate != null}"
+					value="#{stageBean.currentDynamicTestcaseToUpdate.ruleMode}">
+					<f:selectItems value="#{stageBean.ruleModes}" var="mode"
+						itemLabel="#{mode}" itemValue="#{mode}" />
+				</h:selectOneMenu>
+
+				<h:outputText value="#{msg['rStage.pointsMode']}" />
+				<h:selectOneMenu
+					rendered="#{stageBean.currentDynamicTestcaseToUpdate != null}"
+					value="#{stageBean.currentDynamicTestcaseToUpdate.pointsMode}">
+					<f:selectItems value="#{stageBean.pointModes}" var="mode"
+						itemLabel="#{mode}" itemValue="#{mode}" onchange="processChange()" />
+				</h:selectOneMenu>
+
+				<h:outputText value="#{msg['global.points']}" />
+				<p:inputText
+					rendered="#{stageBean.currentDynamicTestcaseToUpdate != null}"
+					value="#{stageBean.currentDynamicTestcaseToUpdate.points}"
+					style="width:97%" onchange="processChange()" />
+
+				<h:outputText
+					value="#{msg['rStage.testCaseOverlay.feedbackIfFailed']}" />
+
+				<p:inputTextarea autoResize="true" rows="5" cols="70"
+					value="#{stageBean.currentDynamicTestcaseToUpdate.feedbackIfFailed}"
+					rendered="#{stageBean.currentDynamicTestcaseToUpdate != null}"
+					onchange="processChange()" />
+			</p:panelGrid>
+		</p:panel>
+
+		<p:commandButton
+			action="#{stageBean.updateDynamicTestcase(stageBean.currentDynamicTestcaseToUpdate)}"
+			value="#{msg['rStage.testCaseOverlay.updateTestcase']}"
+			oncomplete="processChange();PF('editDynamicTestCaseOverlay#{stageBean.stage.orderIndex}').hide();"
+			update="testCaseGroupsPanel" />
+
+		<p:commandButton value="#{msg['rStage.closeDontSave']}"
+			oncomplete="PF('editDynamicTestCaseOverlay#{stageBean.stage.orderIndex}').hide()" />
+	</p:overlayPanel>
+
+</ui:composition>

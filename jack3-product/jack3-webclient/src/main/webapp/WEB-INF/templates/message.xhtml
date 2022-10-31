@@ -1,0 +1,63 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  template="template.xhtml">
+
+  <ui:define name="content">
+
+    <h1>
+      <!-- The message's title icon -->
+      <ui:insert 
+        name="message-title-icon">
+        <h:graphicImage
+          width="32"
+          height="32"
+          library="jack"
+          name="images/header/h1/message.png"/>
+      </ui:insert>
+      
+      <!-- The message's title text -->
+      <ui:insert 
+        name="message-title-text"/>
+    </h1>
+
+    <h:panelGrid
+      id="pgMessage"
+      columns="2"
+      cellpadding="8">
+    
+      <!-- Icon area. If undefined a default info icon is shown. -->
+      <ui:insert name="message-icon">
+        <h:graphicImage
+          width="128"
+          height="128"
+          library="jack"
+          name="/images/symbols/info.png"/>
+      </ui:insert>    
+    
+      <h:panelGroup>
+      
+        <!-- The actual text of the message -->
+        <p>
+          <ui:insert name="message-text"/>
+        </p>
+
+        <!-- A link leading to the previous page. -->
+        <ui:insert name="message-link-back">
+          <a href="javascript:history.back()" id="jsBack">Zur vorherigen Seite</a>
+          <br/>
+        </ui:insert>
+
+        <!-- Room for additional links -->
+        <ui:insert name="message-link-custom"/>
+      
+      </h:panelGroup>
+    
+    </h:panelGrid>
+  
+  </ui:define>
+
+</ui:composition>
+

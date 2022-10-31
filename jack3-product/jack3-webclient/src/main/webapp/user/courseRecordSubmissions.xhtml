@@ -1,0 +1,310 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:j="http://jack.s3.uni-due.de/ui-elements"
+	template="/WEB-INF/templates/template.xhtml">
+
+	<ui:define name="metadata">
+		<f:metadata>
+			<f:viewParam name="courseRecord"
+				value="#{courseRecordSubmissionsView.courseRecordId}" />
+			<f:viewParam name="course"
+				value="#{courseRecordSubmissionsView.courseId}" />
+			<f:viewParam name="courseOffer"
+				value="#{courseRecordSubmissionsView.courseOfferId}" />
+			<f:viewAction
+				action="#{courseRecordSubmissionsView.loadCourseRecord()}" />
+            <f:event
+                type="preRenderView" listener="#{courseRecordSubmissionsView.updateBreadCrumb()}"/>
+		</f:metadata>
+	</ui:define>
+
+	<ui:define name="content">
+		<h:form id="courseRecordSubmissionsMainForm">
+			<p:breadCrumb model="#{userSession.model}"
+              id="breadCrumbCourseRecordSubmissions"/>
+
+			<h3>#{msg['courseRecordSubmissions.generalInformation']}</h3>
+			<p:panelGrid id="pgCourseRecordSubmissionsGeneral" columns="2"
+				styleClass="ui-panelgrid-blank">
+				<h:outputLabel for="student"
+					value="#{msg['global.username']}:" />
+				<h:panelGroup>
+					<j:publicUserName
+						id="student"
+						publicUserName="#{courseRecordSubmissionsView.getPublicUserName(courseRecordSubmissionsView.courseRecord.user)}" />
+				</h:panelGroup>
+				<h:outputLabel for="courseOffer"
+					rendered="#{courseRecordSubmissionsView.courseRecord.courseOffer.present 
+								and courseRecordSubmissionsView.hasRightsToSeeExtendedStatistics()}"
+					value="#{msg['courseRecordSubmissions.courseOffer']}:" />
+                <p:breadCrumb
+                    id="courseOffer"
+                    rendered="#{courseRecordSubmissionsView.courseRecord.courseOffer.present 
+                                and courseRecordSubmissionsView.hasRightsToSeeExtendedStatistics()}"
+                    styleClass="ui-breadcrumb small"
+                    homeDisplay="text"
+                    model="#{courseRecordSubmissionsView.getPathOfCourseOffer()}" />
+                <h:outputLabel for="course"
+					rendered="#{not empty courseRecordSubmissionsView.courseRecord.course 
+								and (courseRecordSubmissionsView.hasRightsToSeeExtendedStatistics())}"
+					value="#{msg['courseRecordSubmissions.course']}:" />
+                <h:panelGroup rendered="#{not empty courseRecordSubmissionsView.courseRecord.course and (courseRecordSubmissionsView.hasRightsToSeeExtendedStatistics())}">
+                  <h:panelGrid columns="2">
+                    <p:breadCrumb
+                              id="course"
+                              styleClass="ui-breadcrumb small"
+                              homeDisplay="text"
+                              style="padding-left:0px; padding-right:0px;"
+                              model="#{courseRecordSubmissionsView.getPathOfCourse()}" />
+                    <h:outputText styleClass="fas fa-star fa-sm" rendered="#{courseRecordSubmissionsView.courseRecord.course.frozen}" title="#{msg['exerciseEdit.frozenVersion']}" style="margin-left:5px; display:inline-block;" />
+                  </h:panelGrid>
+                </h:panelGroup>
+				<h:outputLabel for="submissionType"
+					value="#{msg['submissionDetails.type']}:"
+					rendered="#{courseRecordSubmissionsView.hasRightsToSeeExtendedStatistics()}" />
+				<h:outputText id="submissionType"
+					value="#{courseRecordSubmissionsView.courseRecordType}"
+					rendered="#{courseRecordSubmissionsView.hasRightsToSeeExtendedStatistics()}" />
+				<h:outputLabel for="result"
+					rendered="#{not courseRecordSubmissionsView.courseRecord.courseOffer.present 
+								or courseRecordSubmissionsView.courseRecord.courseOffer.get().showResultInCourseResults}"
+					value="#{msg['courseRecordSubmissions.score']}:" />
+				<h:outputText id="result"
+					rendered="#{not courseRecordSubmissionsView.courseRecord.courseOffer.present 
+								or courseRecordSubmissionsView.courseRecord.courseOffer.get().showResultInCourseResults}"
+					value="#{courseRecordSubmissionsView.courseRecord.resultPoints} %" />
+				<h:outputLabel for="startTime"
+					value="#{msg['courseRecordSubmissions.begun']}:" />
+				<j:outputTimestamp id="startTime"
+					value="#{courseRecordSubmissionsView.courseRecord.startTime}"
+					converter="longTimestampConverter" />
+				<h:outputLabel for="lastVisit"
+					value="#{msg['courseRecordSubmissions.lastVisited']}:" />
+				<j:outputTimestamp id="lastVisit"
+					value="#{courseRecordSubmissionsView.courseRecord.lastVisit}"
+					converter="longTimestampConverter" showNever="true" />
+                <h:outputLabel for="finishTime"
+                    value="#{msg['courseRecordSubmissions.finished']}:" />
+                <j:outputTimestamp id="finishTime"
+                    value="#{courseRecordSubmissionsView.courseRecord.closedTimestamp}"
+                    converter="longTimestampConverter" showNever="true" />
+                <h:outputLabel for="closedBy"
+                    value="#{msg['submissionDetails.closedBy']}:" />
+                <h:outputText id="closedBy"
+                    value="#{courseRecordSubmissionsView.courseRecordCloser}"/>
+				<h:panelGroup id="courseRecordDeletion">
+					<p:commandButton id="deleteCourseRecord"
+						value="#{msg['courseRecordSubmissions.deleteWholeSubmission']}"
+						action="#{courseRecordSubmissionsView.deleteCourseRecord()}"
+						disabled="#{!courseRecordSubmissionsView.isAllowedToDeleteCourseRecord()}"
+						rendered="#{courseRecordSubmissionsView.hasRightsToSeeExtendedStatistics()}" />
+					<p:tooltip for="courseRecordDeletion"
+						value="#{msg['global.deletionInfoStudentSubmission']}"
+						escape="false"
+						rendered="#{!courseRecordSubmissionsView.isAllowedToDeleteCourseRecord() and courseRecordSubmissionsView.userHasGradeRightsOnCourseRecord()}" />
+                    <p:tooltip for="courseRecordDeletion"
+                        value="#{msg['global.deletionInfoNoRights']}"
+                        escape="false"
+                        rendered="#{!courseRecordSubmissionsView.userHasGradeRightsOnCourseRecord()}" />
+          		</h:panelGroup>
+			</p:panelGrid>
+
+      <h3>#{msg['statistics.submissions']}</h3>
+      <p:dataTable
+        id="availableSubmissions"
+        var="submission"
+        value="#{courseRecordSubmissionsView.submissionList}"
+        rowIndexVar="submissionTableRow"
+        tableStyle="table-layout:auto;">
+
+        <p:column
+          id="headerTextExercise"
+          headerText="#{msg['global.exercise']}">
+          <h:outputText value="#{submission.exercise.name}" />
+          <c:if test="#{courseRecordSubmissionsView.showLecturerInfos()}">
+            <span id="revisionSmall">(#{msg['courseRecordSubmissions.revisionShort']} <h:outputText
+                value="#{courseRecordSubmissionsView.getRevisionNumber(submission)}" />) <h:outputText
+                value="[#{msg['courseRecordSubmissions.unreadComments']}]"
+                rendered="#{submission.hasUnreadComments()}" /> <h:outputText
+                value="[#{msg['courseRecordSubmissions.comments']}]"
+                rendered="#{submission.hasComments() and not submission.hasUnreadComments()}" />
+            </span>
+            <h:outputText
+              style="font-size: 80%; color: gray;"
+              value=" [#{msg['exerciseSubmissions.pendingChecks']}]"
+              rendered="#{submission.hasPendingStageChecks()}" />
+            <h:outputText
+              style="font-size: 80%; color: gray;"
+              value=" [#{msg['exerciseSubmissions.notCompleted']}]"
+              rendered="#{not submission.isCompleted()}" />
+            <h:outputText
+              style="font-size: 80%; color: gray;"
+              value=" [#{msg['exerciseSubmissions.internalError']}]"
+              rendered="#{submission.hasInternalErrors()}" />
+            <h:outputText
+              style="font-size: 80%; color: gray;"
+              value=" [#{msg['exerciseSubmissions.reviewedManually']}]"
+              rendered="#{submission.isReviewed()}" />
+          </c:if>
+        </p:column>
+
+        <p:column
+          id="headerTextExerciseSubmissionTimestamp"
+          headerText="#{msg['exerciseSubmissions.timestamp']}">
+          <h:outputText
+            value="#{submission.creationTimestamp}"
+            converter="shortTimestampConverter" />
+        </p:column>
+
+        <p:column
+          id="headerTextScore"
+          headerText="#{msg['global.result']}"
+          rendered="#{courseRecordSubmissionsView.showResultPoints()}">
+          <h:outputText value="#{submission.resultPoints} %" />
+        </p:column>
+
+        <p:column
+          id="headerTextRelevant"
+          headerText="#{msg['courseRecordSubmissions.scored']}"
+          rendered="#{courseRecordSubmissionsView.showResultPoints()}">
+          <h:outputText value="&#10003;" rendered="#{(courseRecordSubmissionsView.isLatestSubmissionForExercise(submission) and courseRecordSubmissionsView.scoringMode=='LAST') or (courseRecordSubmissionsView.isBestSubmissionForExercise(submission) and courseRecordSubmissionsView.scoringMode=='BEST')}"/>
+        </p:column>
+
+        <p:column
+          id="courseRecordSubmissionsAction"
+          rendered="#{courseRecordSubmissionsView.showSubmissionDetails()}"
+          width="130">
+          <p:linkButton
+            id="btnViewSubmissionId"
+            icon="fas fa-search fa-sm"
+            title="#{msg['global.view']}"
+            outcome="#{viewId.submissionDetails}">
+            <f:param
+              name="submission"
+              value="#{submission.id}" />
+            <c:if test="#{courseRecordSubmissionsView.courseId > 0}">
+              <f:param
+                name="course"
+                value="#{courseRecordSubmissionsView.courseId}" />
+            </c:if>
+            <c:if test="#{courseRecordSubmissionsView.courseOfferId > 0}">
+              <f:param
+                name="courseOffer"
+                value="#{courseRecordSubmissionsView.courseOfferId}" />
+            </c:if>
+          </p:linkButton>
+          <h:panelGroup id="submissionDeletionGroup">
+            <p:commandButton
+              id="btnRestartExercise"
+              title="#{msg['coursePlayer.restart']}"
+              icon="fas fa-redo-alt fa-sm"
+              onclick="PF('restartExercise#{submissionTableRow}').show();"
+              rendered="#{courseRecordSubmissionsView.userHasGradeRightsOnCourseRecord() and courseRecordSubmissionsView.isLatestSubmissionForExercise(submission)}"
+              disabled="#{submission.courseRecord.isClosed()}" />
+            <p:confirmDialog
+              id="dialogRestartExercise#{submissionTableRow}"
+              header="#{msg['courseRecordSubmissions.restartExerciseDialog.header']}"
+              widgetVar="restartExercise#{submissionTableRow}"
+              width="600px"
+              message="#{msg['courseRecordSubmissions.restartExerciseDialog.question']}">
+              <p:commandButton
+                id="buttonDialogRestartExercise#{submissionTableRow}Ok"
+                action="#{courseRecordSubmissionsView.restartExercise(submission)}"
+                value="#{msg['global.ok']}"
+                update="courseRecordSubmissionsMainForm globalGrowl"
+                onclick="PF('restartExercise#{submissionTableRow}').hide();" />
+              <p:commandButton
+                id="buttonDialogRestartExercise#{submissionTableRow}Cancel"
+                value="#{msg['global.cancel']}"
+                onclick="PF('restartExercise#{submissionTableRow}').hide();" />
+            </p:confirmDialog>
+
+            <p:commandButton
+              id="btnDeleteSubmission"
+              icon="fas fa-trash-alt fa-sm"
+              disabled="#{!courseRecordSubmissionsView.userHasGradeRightsOnCourseRecord()}"
+              rendered="#{courseRecordSubmissionsView.isAllowedToDeleteCourseRecord()}"
+              actionListener="#{courseRecordSubmissionsView.prepareSubmissionDeletion(submission)}"
+              onclick="PF('deleteDialog').show()" />
+          </h:panelGroup>
+          <p:tooltip
+            for="submissionDeletionGroup"
+            value="#{msg['global.deletionInfoStudentSubmission']}"
+            escape="false"
+            rendered="#{!courseRecordSubmissionsView.userHasGradeRightsOnCourseRecord()}" />
+        </p:column>
+      </p:dataTable>
+
+      <h:outputText
+        value="#{msg['courseRecordSubmissions.scoresLast']}"
+        rendered="#{courseRecordSubmissionsView.scoringMode=='LAST'}" />
+      <h:outputText
+        value="#{msg['courseRecordSubmissions.scoresBest']}"
+        rendered="#{courseRecordSubmissionsView.scoringMode=='BEST'}" />
+
+      <c:if
+				test="#{courseRecordSubmissionsView.neverStartedExercises.size() > 0}">
+				<h3>#{msg['statistics.notStartedExercises']}</h3>
+				<p:dataTable id="notStartedExercises" var="exercise"
+					value="#{courseRecordSubmissionsView.neverStartedExercises}"
+					tableStyle="table-layout:auto;">
+					<p:column
+						headerText="#{msg['statistics.notStartedExercisesHeader']}">
+						<h:outputText value="#{exercise.name}" />
+					</p:column>
+				</p:dataTable>
+			</c:if>
+			<c:if
+				test="#{courseRecordSubmissionsView.courseRecord.closed 
+						and (not courseRecordSubmissionsView.courseRecord.courseOffer.present 
+							or (courseRecordSubmissionsView.courseRecord.courseOffer.get().courseResultDisplay.name() == 'TEXT' 
+							or courseRecordSubmissionsView.courseRecord.courseOffer.get().courseResultDisplay.name() == 'BOTH')) 
+						and not empty courseRecordSubmissionsView.courseRecord.courseFeedback}">
+				<h3>#{msg['courseRecordSubmissions.feedback']}</h3>
+				<h:outputText
+					value="#{courseRecordSubmissionsView.courseRecord.courseFeedback}"
+					escape="false" />
+
+				<p:commandButton
+					value="#{msg['courseRecordSubmissions.exportFeedback']}"
+					action="#{courseRecordSubmissionsView.exportFeedback}"
+					rendered="#{courseRecordSubmissionsView.courseHasCourseResource()}"
+					update="globalGrowl" />
+			</c:if>
+		</h:form>
+	</ui:define>
+
+  <ui:define name="dialogs">
+    <ui:include src="/WEB-INF/includes/dialogs/deletionDialog.xhtml">
+      <ui:param
+        name="formId"
+        value="deleteSubmissionForm" />
+      <ui:param
+        name="dialogTitle"
+        value="#{msg['courseRecordSubmissions.deleteSubmissionDialog']}" />
+      <ui:param
+        name="messageOne"
+        value="#{msg['courseRecordSubmissions.deleteSubmissionDialog.info']}" />
+      <ui:param
+        name="messageTwo"
+        value="" />
+      <ui:param
+        name="inputLabel"
+        value="#{msg['courseRecordSubmissions.deleteSubmissionDialog.exerciseName']}" />
+      <ui:param
+        name="validatorErrorMessage"
+        value="#{msg['courseRecordSubmissions.deleteSubmissionDialog.wrongExerciseName']}" />
+      <ui:param
+        name="invokeDeletionBean"
+        value="#{courseRecordSubmissionsView}" />
+      <ui:param
+        name="invokeDeletionMethodName"
+        value="deleteSubmissionAndCloseDialog" />
+    </ui:include>
+  </ui:define>
+
+</ui:composition>

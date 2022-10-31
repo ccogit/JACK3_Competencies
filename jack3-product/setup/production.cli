@@ -1,0 +1,14 @@
+# This file contains CLI commands that should be executed in a production environment only.
+
+embed-server --server-config=standalone.xml --admin-only
+
+# Disable the admin console
+/core-service=management/management-interface=http-interface:write-attribute(name=console-enabled,value=true)
+
+# Enable HSTS
+cd subsystem=undertow
+./configuration=filter/response-header=hsts:add(header-name="strict-transport-security",header-value="max-age=15552000")
+./server=default-server/host=default-host/filter-ref=hsts:add
+cd /
+
+stop-embedded-server

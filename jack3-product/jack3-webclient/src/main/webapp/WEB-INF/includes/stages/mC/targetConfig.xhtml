@@ -1,0 +1,96 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:j="http://jack.s3.uni-due.de/ui-elements">
+
+  <h4>
+    <h:outputText value="#{msg['exerciseEdit.stageTransitions']}" />
+  </h4>
+  <p:dataTable
+    id="stageTransitions"
+    value="#{stageBean.stage.getStageTransitionsForReorder()}"
+    var="transition"
+    emptyMessage="#{msg['exerciseEdit.noStageTransitions']}"
+    draggableRows="#{exerciseEditView.newestRevision}"
+    style="width:100%;">
+    <p:ajax
+      event="rowReorder"
+      listener="#{stageBean.onTransitionReorder}"
+      oncomplete="processChange()"
+      update="stageTransitions" />
+    <p:column
+      id="headerTextMcStageTargetPattern"
+      headerText="#{msg['exerciseEdit.mc.pattern']}"
+      style="width:150px;text-align:center;">
+      <ui:include src="stagePattern.xhtml">
+        <ui:param
+          name="patternList"
+          value="#{stageBean.getRulesList(transition)}" />
+      </ui:include>
+    </p:column>
+    <p:column
+      id="headerTextStageCondition"
+      headerText="#{msg['evaluator.optionalExpression']}">
+      <j:evaluatorInputField
+        id="editStageExpression"
+        evaluatorExpression="#{transition.conditionExpression}"
+        width="30"
+        disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+        onChange="processChange()"
+        onKeyDown="checkUserInputForActivationOfSaveButtonNoReturnSurpession()" />
+    </p:column>
+    <p:column
+      headerText="#{msg['exerciseEdit.target']}"
+      id="headerTextMcStageTarget"
+      width="200">
+      <h:selectOneMenu
+        id="target"
+        disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+        value="#{transition.target}"
+        converter="stageSelectOneMenuConverter"
+        onchange="processChange()">
+        <f:selectItem
+          itemLabel="#{msg['exerciseEdit.endStage']}"
+          itemValue="#{null}"
+          disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}" />
+        <f:selectItem
+          itemLabel="#{msg['exerciseEdit.repeatStage']}"
+          itemValue="#{exerciseEditView.repeatStage}"
+          disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}" />
+        <f:selectItems
+          value="#{exerciseEditView.exercise.stagesAsList}"
+          var="targetStage"
+          itemLabel="#{targetStage.internalName}"
+          itemValue="#{targetStage}"
+          disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}" />
+      </h:selectOneMenu>
+    </p:column>
+    <p:column style="width:43px;">
+      <p:commandButton
+        id="cbRemoveMcStageTransition"
+        icon="fas fa-trash-alt fa-sm"
+        action="#{stageBean.removeStageTransition(transition)}"
+        disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+        update="@parent:@parent:stageTransitions"
+        oncomplete="processChange()" />
+    </p:column>
+  </p:dataTable>
+
+  <ui:include src="patternConfig.xhtml">
+    <ui:param
+      name="id"
+      value="target" />
+    <ui:param
+      name="header"
+      value="#{msg['exerciseEdit.addTransitionTarget']}" />
+    <ui:param
+      name="action"
+      value="addNewTargetOption" />
+    <ui:param
+      name="update"
+      value="stageTransitions" />
+  </ui:include>
+</ui:composition>

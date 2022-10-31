@@ -1,0 +1,254 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:c="http://java.sun.com/jsp/jstl/core"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:j="http://jack.s3.uni-due.de/ui-elements"
+    template="/WEB-INF/templates/template.xhtml">
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam
+                name="exercise"
+                value="#{exerciseSubmissionsView.exerciseId}" />
+            <f:viewAction action="#{exerciseSubmissionsView.loadExercise}" />
+            <f:event type="preRenderView" listener="#{exerciseSubmissionsView.updateBreadCrumb()}"/>
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="content">
+
+        <h:form id="exerciseSubmissions">
+            <p:breadCrumb
+                id="breadCrumbExerciseSubmissions"
+                model="#{userSession.model}" />
+
+            <h3>#{msg['statistics.submissions']}</h3>
+
+            <h:panelGrid
+                id="statistics"
+                styleClass="align-top"
+                columns="2">
+                <p:panelGrid
+                    id="statisticsParticipants"
+                    styleClass="ui-panelgrid-blank"
+                    columns="2">
+                    <h:outputLabel value="#{msg['statistics.studentSubmissions']}:" />
+                    <h:outputText
+                        id="submissionCount"
+                        value="#{exerciseSubmissionsView.nonTestingsubmissionCount}" />
+                    <h:outputLabel value="#{msg['statistics.testSubmissions']}:" />
+                    <h:outputText
+                        id="testSubmissionCount"
+                        value="#{exerciseSubmissionsView.testingSubmissionCount}" />
+                    <!-- TODO Add more statistics -->
+                </p:panelGrid>
+                <p:panelGrid
+                    id="statisticsAverage"
+                    styleClass="ui-panelgrid-blank"
+                    columns="2">
+                    <!-- TODO Add more statistics -->
+                </p:panelGrid>
+            </h:panelGrid>
+            <p:toolbar>
+                <f:facet name="left">
+                    <p:commandButton
+                        id="cbDeleteAllSubmissions"
+                        rendered="#{exerciseSubmissionsView.testingSubmissionCount > 0}"
+                        disabled="#{exerciseSubmissionsView.userNotAllowedToEdit()}"
+                        onclick="PF('deleteAllSubmissions').show()"
+                        value="#{msg['exerciseSubmissions.deleteAllSubmissions']}"
+                        icon="fas fa-trash-alt fa-sm" />
+                    <p:confirmDialog
+                        id="dialogDeleteAllSubmissions"
+                        widgetVar="deleteAllSubmissions"
+                        header="#{msg['exerciseSubmissions.deleteAllSubmissions']}"
+                        message="#{exerciseSubmissionsView.deletionMessage}"
+                        width="600px">
+                        <p:commandButton
+                            id="btDeleteSubmissionsYes"
+                            action="#{exerciseSubmissionsView.deleteAllTestSubmissions}"
+                            value="#{msg['global.yes']}"
+                            update="exerciseSubmissions"
+                            onclick="PF('deleteAllSubmissions').hide();"
+                            icon="fas fa-check fa-sm"
+                            onstart="PF('globalSpinner').show()"
+                            oncomplete="PF('globalSpinner').hide()" />
+                        <p:commandButton
+                            id="btDeleteSubmissionsNo"
+                            value="#{msg['global.no']}"
+                            onclick="PF('deleteAllSubmissions').hide();"
+                            icon="fas fa-times fa-sm" />
+                    </p:confirmDialog>
+                </f:facet>
+                <f:facet name="right">
+                    <p:selectBooleanButton
+                        id="GroupSwitch"
+                        value="#{userSession.statisticsStateHolder.groupSubmissionsByVersion}"
+                        onLabel="#{msg['exerciseSubmissions.groupByVersion']}"
+                        offLabel="#{msg['exerciseSubmissions.groupByVersion']}"
+                        onIcon="fas fa-times fa-sm"
+                        offIcon="fas fa-plus fa-sm">
+                        <p:ajax update="dtExerciseSubmission" />
+                    </p:selectBooleanButton>
+                    <p:commandButton
+                        id="csvDownloadButton"
+                        value="#{msg['global.downloadAsCsv']}"
+                        icon="fa fa-download"
+                        ajax="false">
+                        <p:dataExporter
+                            type="csv"
+                            target="dtExerciseSubmission"
+                            fileName="#{exerciseSubmissionsView.generateDownloadFileName()}" />
+                    </p:commandButton>
+                    <p:commandButton
+                        id="excelDownloadButton"
+                        value="#{msg['global.downloadAsXslx']}"
+                        icon="fa fa-download"
+                        ajax="false">
+                        <p:dataExporter
+                            type="xlsx"
+                            target="dtExerciseSubmission"
+                            fileName="#{exerciseSubmissionsView.generateDownloadFileName()}" />
+                    </p:commandButton>
+                </f:facet>
+            </p:toolbar>
+            <p:dataTable
+                id="dtExerciseSubmission"
+                var="submission"
+                value="#{exerciseSubmissionsView.plainSubmissionData}"
+                sortBy="#{userSession.statisticsStateHolder.groupSubmissionsByVersion != true? 0 : submission.groupKey}"
+                sortOrder="descending"
+                expandableRowGroups="#{userSession.statisticsStateHolder.groupSubmissionsByVersion}"
+                scrollable="true"
+                scrollHeight="1000">
+                <p:headerRow
+                    id="headerRowExerciseSubmissionForRevisionId"
+                    rendered="#{userSession.statisticsStateHolder.groupSubmissionsByVersion}">
+                    <p:column
+                        id="exerciseSubmissionForRevisionId"
+                        colspan="4">
+                        <h:outputText
+                            value="#{msg['exerciseSubmissions.forRevision']}: #{exerciseSubmissionsView.getRevisionNumber(submission)}" />
+                        <h:outputText
+                            styleClass="fas fa-star fa-sm"
+                            rendered="#{exerciseSubmissionsView.isFrozenRevision(submission)}"
+                            style="display:inline-block" />
+                    </p:column>
+                </p:headerRow>
+
+                <p:column
+                    id="headerTextExerciseSubmissionTimestamp"
+                    headerText="#{msg['exerciseSubmissions.timestamp']}">
+                    <h:outputText
+                        value="#{submission.creationTimestamp}"
+                        converter="shortTimestampConverter" />
+                    <h:outputText
+                        style="font-size: 80%; color: gray;"
+                        value=" [#{msg['exerciseSubmissions.testSubmission']}]"
+                        rendered="#{submission.isTestSubmission()}" />
+                    <h:outputText
+                        style="font-size: 80%; color: gray;"
+                        value=" [#{msg['exerciseSubmissions.pendingChecks']}]"
+                        rendered="#{submission.hasPendingStageChecks()}" />
+                    <h:outputText
+                        style="font-size: 80%; color: gray;"
+                        value=" [#{msg['exerciseSubmissions.notCompleted']}]"
+                        rendered="#{not submission.isCompleted()}" />
+                    <h:outputText
+                        style="font-size: 80%; color: gray;"
+                        value=" [#{msg['exerciseSubmissions.internalError']}]"
+                        rendered="#{submission.hasInternalErrors()}" />
+                    <h:outputText
+                        style="font-size: 80%; color: gray;"
+                        value=" [#{msg['exerciseSubmissions.reviewedManually']}]"
+                        rendered="#{submission.isReviewed()}" />
+                    <h:outputText
+                        style="font-size: 80%; color: gray;"
+                        value=" [#{msg['courseRecordSubmissions.unreadComments']}]"
+                        rendered="#{submission.hasUnreadComments()}" />
+                    <h:outputText
+                        style="font-size: 80%; color: gray;"
+                        value=" [#{msg['courseRecordSubmissions.comments']}]"
+                        rendered="#{submission.hasComments() and not submission.hasUnreadComments()}" />
+                </p:column>
+                <p:column
+                    id="headerTextSubmissionAuthor"
+                    headerText="#{msg['global.username']}"
+                    width="200">
+                    <j:publicUserName
+                      id="publicUserName"
+                      publicUserName="#{exerciseSubmissionsView.getPublicUserName(submission.author)}" />
+                </p:column>
+                <p:column
+                    id="headerTextSubmissionScore"
+                    headerText="#{msg['global.result']}"
+                    width="60">
+                    <h:outputText value="#{submission.resultPoints} %" />
+                </p:column>
+                <!-- Column for export only -->
+                <p:column
+                    id="revisionNumber"
+                    style="display:none;"
+                    headerText="#{msg['global.revisionNumber']}">
+                    <h:outputText value="#{exerciseSubmissionsView.getRevisionNumber(submission)}" />
+                </p:column>
+                <p:column
+                    id="columnSubmissionActions"
+                    exportable="false"
+                    width="85">
+                    <p:linkButton
+                        id="toSubmissionDetails"
+                        outcome="#{viewId.submissionDetails}"
+                        title="#{msg['global.view']}"
+                        icon="fas fa-search fa-sm">
+                        <f:param
+                            name="submission"
+                            value="#{submission.id}" />
+                    </p:linkButton>
+                    <h:panelGroup id="submissionDeleteGroup">
+                        <p:commandButton
+                            id="cbSubmissionDelete"
+                            icon="fas fa-trash-alt fa-sm"
+                            disabled="#{!exerciseSubmissionsView.userIsAllowedToDeleteSubmission(submission)}"
+                            action="#{exerciseSubmissionsView.deleteSubmission(submission)}"
+                            update="exerciseSubmissions"
+                            onstart="PF('globalSpinner').show()"
+                            oncomplete="PF('globalSpinner').hide()"
+                            title="#{msg['submissionDetails.deleteSubmission']}" />
+                    </h:panelGroup>
+                    <p:tooltip
+                        for="submissionDeleteGroup"
+                        value="#{msg['global.deletionInfoNoRights']}"
+                        escape="false"
+                        rendered="#{!exerciseSubmissionsView.userHasRightsForDeletion(submission)}" />
+                    <p:tooltip
+                        for="submissionDeleteGroup"
+                        value="#{msg['global.deletionInfoCourseTestSubmission']}"
+                        escape="false"
+                        rendered="#{not empty submission.courseRecord and submission.courseRecord.testSubmission and exerciseSubmissionsView.userHasRightsForDeletion(submission)}" />
+                    <p:tooltip
+                        for="submissionDeleteGroup"
+                        value="#{msg['global.deletionInfoStudentSubmission']}"
+                        escape="false"
+                        rendered="#{not empty submission.courseRecord and not submission.courseRecord.testSubmission and exerciseSubmissionsView.userHasRightsForDeletion(submission)}" />
+                </p:column>
+
+                <p:summaryRow id="summaryRowExerciseSubmissionForRevisionId">
+                    <p:column
+                        id="ExerciseSubmissionCount"
+                        style="text-align:right">
+                        <h:outputText
+                            value="#{msg['global.count']}: #{userSession.statisticsStateHolder.groupSubmissionsByVersion ? exerciseSubmissionsView.getSubmissionCount(submission.shownExerciseRevisionId) : exerciseSubmissionsView.plainSubmissionData.size()}" />
+                    </p:column>
+                    <p:column
+                        id="exerciseSubmissionForRevisionIdEmpty"
+                        colspan="3" />
+                </p:summaryRow>
+            </p:dataTable>
+        </h:form>
+    </ui:define>
+
+</ui:composition>

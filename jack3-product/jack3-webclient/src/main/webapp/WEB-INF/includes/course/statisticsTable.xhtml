@@ -1,0 +1,70 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:j="http://jack.s3.uni-due.de/ui-elements">
+
+  <h:panelGrid
+    id="statisticsGrid"
+    columns="2"
+    styleClass="align-top">
+
+    <p:panelGrid
+      id="statisticsParticipants"
+      columns="2"
+      styleClass="ui-panelgrid-blank">
+
+      <!-- Number of users, that have ever interacted with this course-->
+      <h:outputLabel value="#{msg['statistics.participantsCount']}:" />
+      <j:helperTooltip
+        id="participants"
+        text="#{courseStatisticsView.numberOfParticipants}"
+        tooltip="#{msg['statistics.participantsCount.info']}" />
+
+      <!-- Course Submissions (number of course records) -->
+      <h:outputLabel value="#{msg['statistics.courseSubmissions']}:" />
+      <j:helperTooltip
+        id="courseSubmissions"
+        text="#{courseStatisticsView.numberOfStudentCourseRecords}"
+        tooltip="#{msg['statistics.courseSubmissions.info']}" />
+
+      <!-- Unread comments -->
+      <h:outputLabel
+        style="font-weight:bold"
+        value="#{msg['statistics.unreadComments']}:"
+        rendered="#{courseStatisticsView.numberOfUnreadComments > 0}" />
+      <h:outputText
+        id="unreadComments"
+        style="font-weight:bold"
+        value="#{courseStatisticsView.numberOfUnreadComments}"
+        rendered="#{courseStatisticsView.numberOfUnreadComments > 0}" />
+    </p:panelGrid>
+
+    <p:panelGrid
+      id="statisticsAverage"
+      columns="2"
+      styleClass="ui-panelgrid-blank">
+
+      <!-- Average score -->
+      <h:outputLabel value="#{msg['statistics.avgScore']}:" />
+      <h:outputText
+        id="avgScore"
+        value="#{courseStatisticsView.averagePoints} %" />
+
+      <!-- Highest score -->
+      <h:outputLabel value="#{msg['statistics.highestScore']}:" />
+      <h:outputText
+        id="highestScore"
+        value="#{courseStatisticsView.highestScore} %" />
+
+      <!-- Lowest score -->
+      <h:outputLabel value="#{msg['statistics.lowestScore']}:" />
+      <h:outputText
+        id="lowestScore"
+        value="#{courseStatisticsView.lowestScore} %" />
+    </p:panelGrid>
+  </h:panelGrid>
+
+</ui:composition>

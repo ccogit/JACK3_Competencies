@@ -1,0 +1,17 @@
+# Maven "site" phase generates some reports including a OWASP security-scan
+# for the used librarys. To produce less errors the output of
+# mvn archetype:generate -DgroupId=org.eclipse.m2e -DartifactId=lifecycle-mapping -Dversion=1.0.0 -DarchetypeArtifactId=maven-archetype-mojo
+# is provided in Artifactory. See: https://stackoverflow.com/a/18568869
+Security:
+  stage: report
+  script:
+    - cd jack3-product
+    - mvn -U $MAVEN_CLI_OPTS -DskipTests site
+  artifacts:
+    when: always
+    expire_in: 1 week
+    paths:
+    - jack3-product/target/site
+  dependencies:
+    - Build
+  needs: ["Build"]

@@ -1,0 +1,45 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+  <h:outputScript
+    library="js"
+    name="ckEditorEditStage.js" />
+    
+  
+  <ui:param name="updateComponents" value="answers @form:tabs#{stageBean.stage.orderIndex}:feedback:feedbacks @form:tabs#{stageBean.stage.orderIndex}:feedback:feedbackTable @form:tabs#{stageBean.stage.orderIndex}:feedback:stageTransitions @form:tabs#{stageBean.stage.orderIndex}:feedback:targetTable" />
+
+ <ui:include page="../taskDescriptionEditor.xhtml" />
+
+  <h4>
+    <h:outputText value="#{msg['exerciseEdit.java.uploadFileSettings']}" />
+  </h4>
+
+  <p:panelGrid id="pgFileNames" styleClass="ui-panelgrid-blank" style="width:100%">
+    <p:row>
+      <p:column>
+        <h:outputText value="#{msg['exerciseEdit.java.uploadFileSettings.mandatoryFileNames']}" /><br />
+        <p:inputTextarea value="#{stageBean.stage.mandatoryFileNames}" style="width:100%" >
+          <p:ajax event="blur"
+            oncomplete="processChange()"></p:ajax>
+        </p:inputTextarea>
+      </p:column>
+      <p:column>
+        <h:outputText value="#{msg['exerciseEdit.java.uploadFileSettings.allowedFileNames']}" /><br />
+        <p:inputTextarea value="#{stageBean.stage.allowedFileNames}" style="width:100%" >
+          <p:ajax event="blur"
+            oncomplete="processChange()"></p:ajax>
+        </p:inputTextarea>
+      </p:column>
+    </p:row>
+  </p:panelGrid>
+  
+  <p:panelGrid id="pgFileCount" columns="2" styleClass="ui-panelgrid-blank">
+    <p:outputLabel value="#{msg['exerciseEdit.java.uploadFileSettings.minimum']}:" />
+    <p:spinner id="minFileCount" value="#{stageBean.stage.minimumFileCount}" min="0" style="width:50px;" onchange="processChange()" />
+    <p:outputLabel value="#{msg['exerciseEdit.java.uploadFileSettings.maximum']}:" />
+    <p:spinner id="maxFileCount" value="#{stageBean.stage.maximumFileCount}" min="1" style="width:50px;" onchange="processChange()" />
+  </p:panelGrid>
+
+</ui:composition>

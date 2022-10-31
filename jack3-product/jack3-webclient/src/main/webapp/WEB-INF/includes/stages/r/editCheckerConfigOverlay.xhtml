@@ -1,0 +1,89 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:j="http://jack.s3.uni-due.de/ui-elements">
+	<!-- editCheckerConfigOverlay -->
+	<p:overlayPanel
+		widgetVar="editCheckerConfigOverlay#{stageBean.stage.orderIndex}"
+		id="editCheckerConfigOverlay">
+		<p:panel header="#{msg['rStage.editCheckerConfigOverlay.title']}"
+			id="editCheckerConfigPanel">
+
+			<p:panelGrid columns="2">
+				<h:panelGroup>
+					<h:outputText
+						value="#{msg['rStage.editCheckerConfigOverlay.variableName']}" />
+					<j:helperTooltip id="validationNotImplementedYet"
+						tooltip="#{msg['rStage.editCheckerConfigOverlay.variableNameExplanation']}" />
+				</h:panelGroup>
+				<h:outputText value="c#{checkerConfig.id}"
+					disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+					rendered="#{checkerConfig != null}" style="width:96%" />
+
+				<h:outputText value="#{msg['global.name']}" />
+				<p:inputText
+					disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+					value="#{checkerConfig.name}" rendered="#{checkerConfig != null}"
+					style="width:96%" />
+
+				<!-- TODO: Disabled until feature is implemented
+					disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+					value="#{checkerConfig.resultLabel}" -->
+				<h:outputText
+					value="#{msg['rStage.editCheckerConfigOverlay.externalName']}" />
+				<p:inputText disabled="true" value=""
+					rendered="#{checkerConfig != null}" style="width:96%" />
+
+				<h:outputText
+					value="#{msg['rStage.editCheckerConfigOverlay.isActive']}" />
+				<!-- TODO: Disabled until feature is implemented
+					disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+					value="#{checkerConfig.active}" -->
+				<p:selectBooleanButton disabled="true" value="true" id="active"
+					onLabel="#{msg['global.yes']}" offLabel="#{msg['global.no']}"
+					onIcon="fas fa-check fa-sm" offIcon="fas fa-times fa-sm"
+					rendered="#{checkerConfig != null}" />
+
+				<h:outputText
+					value="#{msg['rStage.editCheckerConfigOverlay.resultVisibleForStudent']}" />
+				<!-- TODO: Disabled until feature is implemented
+					disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+					value="#{checkerConfig.hasVisibleResult}" -->
+				<p:selectBooleanButton disabled="true" value="true"
+					id="hasVisibleResult" onLabel="#{msg['global.yes']}"
+					offLabel="#{msg['global.no']}" onIcon="fas fa-check fa-sm"
+					offIcon="fas fa-times fa-sm" rendered="#{checkerConfig != null}" />
+				<!-- TODO: Disabled until feature is implemented	
+					disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+					value="#{checkerConfig.hasVisibleFeedback}"  -->
+				<h:outputText
+					value="#{msg['rStage.editCheckerConfigOverlay.feedbackVisibleForStudent']}" />
+				<p:selectBooleanButton id="hasVisibleFeedback" disabled="true"
+					value="true" onLabel="#{msg['global.yes']}"
+					offLabel="#{msg['global.no']}" onIcon="fas fa-check fa-sm"
+					offIcon="fas fa-times fa-sm" rendered="#{checkerConfig != null}" />
+
+				<!-- TODO: Disabled until feature is reworked	
+					disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+					value="#{checkerConfig.async}"  -->
+				<h:outputText
+					value="#{msg['rStage.editCheckerConfigOverlay.isAsync']}" />
+				<p:selectBooleanButton disabled="true" value="true" id="isAsync"
+					onLabel="#{msg['global.yes']}" offLabel="#{msg['global.no']}"
+					onIcon="fas fa-check fa-sm" offIcon="fas fa-times fa-sm"
+					rendered="#{checkerConfig != null}" />
+
+			</p:panelGrid>
+		</p:panel>
+
+		<p:commandButton value="#{msg['global.save']}"
+			disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+			oncomplete="processChange();PF('editCheckerConfigOverlay#{stageBean.stage.orderIndex}').hide();" />
+
+		<p:commandButton value="#{msg['rStage.closeDontSave']}"
+			oncomplete="PF('editCheckerConfigOverlay#{stageBean.stage.orderIndex}').hide()" />
+	</p:overlayPanel>
+
+</ui:composition>

@@ -1,0 +1,14 @@
+.borderless.ui-datatable thead {
+  display: none;
+}
+.borderless.ui-datatable tbody,
+.borderless.ui-datatable tbody tr,
+.borderless.ui-datatable tbody td {
+    border-style: none;
+}
+.borderless.ui-datatable .ui-datatable-even{
+background: white ;
+}
+.borderless.ui-datatable .ui-datatable-odd{
+background: white ;
+}

@@ -1,0 +1,496 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:c="http://java.sun.com/jsp/jstl/core"
+  xmlns:p="http://primefaces.org/ui"
+  template="/WEB-INF/templates/template.xhtml">
+
+  <ui:define name="metadata">
+    <f:metadata>
+      <f:viewParam
+        name="userGroup"
+        value="#{userGroupDetailsView.userGroupId}" />
+      <f:viewAction action="#{userGroupDetailsView.loadView()}" />
+    </f:metadata>
+  </ui:define>
+  <ui:define name="content">
+    <c:set
+      var="current"
+      value="#{'admin-userManagement'}"
+      scope="request" />
+    <h:form id="toolbar">
+      <p:toolbar id="userGroupDetailsToolbar">
+        <f:facet name="left">
+          <p:linkButton
+            id="backToOverview"
+            value="#{msg['global.back']}"
+            icon="fas fa-arrow-left"
+            outcome="#{viewId.tenantUserManagement}" />
+        </f:facet>
+        <f:facet name="right">
+          <p:commandButton
+            id="deleteUserGroup"
+            value="#{msg['tenantadmin.deleteUserGroup']}"
+            icon="fas fa-trash"
+            action="#{userGroupDetailsView.deleteUserGroup()}">
+            <p:confirm
+              header="#{msg['tenantadmin.deleteUserGroup']}"
+              message="#{msg['tenantadmin.deleteUserGroup.question']}" />
+          </p:commandButton>
+        </f:facet>
+      </p:toolbar>
+    </h:form>
+    <h:form id="generalInformation">
+      <h3>#{msg['global.usergroup']} "#{userGroupDetailsView.getUserGroupNameFromObject()}"</h3>
+      <p:panelGrid
+        id="generalInformation"
+        columns="2"
+        styleClass="ui-panelgrid-blank">
+        <p:outputLabel
+          for="userGroupName"
+          value="#{msg['tenantadmin.userGroupName']}:" />
+        <p:inputText
+          id="userGroupName"
+          size="30"
+          value="#{userGroupDetailsView.userGroupName}"
+          required="true"
+          onkeypress="if (event.keyCode == 13) { return false; }" />
+        <p:outputLabel
+          for="userGroupDescription"
+          value="#{msg['tenantadmin.userGroupDescription']}:" />
+        <p:inputTextarea
+          id="userGroupDescription"
+          rows="4"
+          cols="40"
+          autoResize="false"
+          value="#{userGroupDetailsView.userGroupDescription}" />
+      </p:panelGrid>
+      <p:messages
+        id="validationError"
+        showDetail="true"
+        for="generalInformation userGroupName"
+        skipDetailIfEqualsSummary="true" />
+      <p:commandButton
+        id="saveInformation"
+        value="#{msg['tenantadmin.userGroupDetails.saveGeneralInformation']}"
+        update="globalGrowl generalInformation"
+        action="#{userGroupDetailsView.saveGeneralInformation()}"
+        icon="fas fa-save" />
+    </h:form>
+    <hr />
+    <p:staticMessage
+      severity="info"
+      detail="#{msg['tenantadmin.userGroupDetails.immediateUpdate']}"
+      style="margin: 10px 0; padding: 10px 10px 10px 10px;" />
+
+    <h:form id="rightsInformation">
+
+      <!-- Rights of the User Group on Content Folders -->
+      <p:panel
+        id="contentRights"
+        header="#{msg['tenantadmin.userContentFolderRights']}"
+        toggleableHeader="true"
+        toggleable="true"
+        collapsed="#{userSession.isPanelCollapsed('rightsInformation:contentRights', true)}">
+        <p:ajax
+          event="toggle"
+          listener="#{userSession.togglePanel}" />
+        <p:treeTable
+          id="userGroupRightsData"
+          value="#{userGroupDetailsView.contentTree}"
+          var="userGroupRightsData"
+          resizableColumns="true"
+          liveResize="true"
+          emptyMessage="#{msg['tenantadmin.noUserFolderRights']}"
+          style="font-size:90%">
+          <p:column
+            id="headeruserGroupRightsDataAdminFolder"
+            headerText="#{msg['tenantadmin.folder']}">
+            <h:outputText
+              value="#{userGroupRightsData.folder.name}"
+              rendered="#{userGroupRightsData.folderAlias == null}" />
+            <h:outputText
+              value="#{userGroupRightsData.folderAlias}"
+              rendered="#{userGroupRightsData.folderAlias != null}" />
+          </p:column>
+          <p:column
+            id="userGroupRightsDataReadRights"
+            style="text-align:center;width:10%"
+            headerText="#{msg['AccessRight.short.READ']}">
+            <p:selectBooleanCheckbox
+              id="selectedUserGroupRightsDataReadRightsInherited"
+              value="#{userGroupRightsData.readRights}"
+              styleClass="inheritedRight"
+              rendered="#{userGroupRightsData.inheritedReadRights}"
+              disabled="#{userGroupRightsData.immutable or userGroupRightsData.readRightImmutable}">
+              <p:ajax
+                listener="#{userGroupDetailsView.updateUserRights(userGroupRightsData)}"
+                update="userGroupRightsData globalGrowl" />
+            </p:selectBooleanCheckbox>
+            <p:selectBooleanCheckbox
+              id="selectedUserGroupRightsDataReadRights"
+              value="#{userGroupRightsData.readRights}"
+              rendered="#{not userGroupRightsData.inheritedReadRights}"
+              disabled="#{userGroupRightsData.immutable or userGroupRightsData.readRightImmutable}">
+              <p:ajax
+                listener="#{userGroupDetailsView.updateUserRights(userGroupRightsData)}"
+                update="userGroupRightsData globalGrowl" />
+            </p:selectBooleanCheckbox>
+          </p:column>
+          <p:column
+            id="userGroupRightsDataExtRead"
+            style="text-align:center;width:10%"
+            headerText="#{msg['AccessRight.short.EXTENDED_READ']}">
+            <p:selectBooleanCheckbox
+              id="selecteduserGroupRightsDataExtendedReadRightsInherited"
+              value="#{userGroupRightsData.extendedReadRights}"
+              styleClass="inheritedRight"
+              rendered="#{userGroupRightsData.inheritedExtendedReadRights}"
+              disabled="#{userGroupRightsData.immutable or userGroupRightsData.extendedReadRightImmutable}">
+              <p:ajax
+                listener="#{userGroupDetailsView.updateUserRights(userGroupRightsData)}"
+                update="userGroupRightsData globalGrowl" />
+            </p:selectBooleanCheckbox>
+            <p:selectBooleanCheckbox
+              id="selecteduserGroupRightsDataExtendedReadRights"
+              value="#{userGroupRightsData.extendedReadRights}"
+              rendered="#{not userGroupRightsData.inheritedExtendedReadRights}"
+              disabled="#{userGroupRightsData.immutable or userGroupRightsData.extendedReadRightImmutable}">
+              <p:ajax
+                listener="#{userGroupDetailsView.updateUserRights(userGroupRightsData)}"
+                update="userGroupRightsData globalGrowl" />
+            </p:selectBooleanCheckbox>
+          </p:column>
+          <p:column
+            id="userGroupRightsDataWriteRights"
+            style="text-align:center;width:10%"
+            headerText="#{msg['AccessRight.short.WRITE']}">
+            <p:selectBooleanCheckbox
+              id="selectedUserGroupRightsDataWriteRightsInherited"
+              value="#{userGroupRightsData.writeRights}"
+              styleClass="inheritedRight"
+              rendered="#{userGroupRightsData.inheritedWriteRights}"
+              disabled="#{userGroupRightsData.immutable or userGroupRightsData.writeRightImmutable}">
+              <p:ajax
+                listener="#{userGroupDetailsView.updateUserRights(userGroupRightsData)}"
+                update="userGroupRightsData globalGrowl" />
+            </p:selectBooleanCheckbox>
+            <p:selectBooleanCheckbox
+              id="selectedUserGroupRightsDataWriteRights"
+              value="#{userGroupRightsData.writeRights}"
+              rendered="#{not userGroupRightsData.inheritedWriteRights}"
+              disabled="#{userGroupRightsData.immutable or userGroupRightsData.writeRightImmutable}">
+              <p:ajax
+                listener="#{userGroupDetailsView.updateUserRights(userGroupRightsData)}"
+                update="userGroupRightsData globalGrowl" />
+            </p:selectBooleanCheckbox>
+          </p:column>
+          <p:column
+            id="userGroupRightsDataGradeRights"
+            style="text-align:center;width:10%"
+            headerText="#{msg['AccessRight.short.GRADE']}">
+            <p:selectBooleanCheckbox
+              id="selectedUserGroupRightsDataGradeRightsInherited"
+              value="#{userGroupRightsData.gradeRights}"
+              styleClass="inheritedRight"
+              rendered="#{userGroupRightsData.inheritedGradeRights}"
+              disabled="#{userGroupRightsData.immutable or userGroupRightsData.gradeRightImmutable}">
+              <p:ajax
+                listener="#{userGroupDetailsView.updateUserRights(userGroupRightsData)}"
+                update="userGroupRightsData globalGrowl" />
+            </p:selectBooleanCheckbox>
+            <p:selectBooleanCheckbox
+              id="selectedUserGroupRightsDataGradeRights"
+              value="#{userGroupRightsData.gradeRights}"
+              rendered="#{not userGroupRightsData.inheritedGradeRights}"
+              disabled="#{userGroupRightsData.immutable or userGroupRightsData.gradeRightImmutable}">
+              <p:ajax
+                listener="#{userGroupDetailsView.updateUserRights(userGroupRightsData)}"
+                update="userGroupRightsData globalGrowl" />
+            </p:selectBooleanCheckbox>
+          </p:column>
+          <p:column
+            id="userGroupRightsDataManageRights"
+            style="text-align:center;width:10%"
+            headerText="#{msg['AccessRight.short.MANAGE']}">
+            <p:selectBooleanCheckbox
+              id="selectedUserGroupRightsDataManageRightsInherited"
+              value="#{userGroupRightsData.manageRights}"
+              styleClass="inheritedRight"
+              rendered="#{userGroupRightsData.inheritedManageRights}"
+              disabled="#{userGroupRightsData.immutable}">
+              <p:ajax
+                listener="#{userGroupDetailsView.updateUserRights(userGroupRightsData)}"
+                update="userGroupRightsData globalGrowl" />
+            </p:selectBooleanCheckbox>
+            <p:selectBooleanCheckbox
+              id="selectedUserGroupRightsDataManageRights"
+              value="#{userGroupRightsData.manageRights}"
+              rendered="#{not userGroupRightsData.inheritedManageRights}"
+              disabled="#{userGroupRightsData.immutable}">
+              <p:ajax
+                listener="#{userGroupDetailsView.updateUserRights(userGroupRightsData)}"
+                update="userGroupRightsData globalGrowl" />
+            </p:selectBooleanCheckbox>
+          </p:column>
+          <p:column
+            id="userGroupRightsDataActions"
+            style="text-align:center;width:6%">
+            <p:commandButton
+              id="cbuserGroupRightsDataUpdate"
+              icon="fas fa-plus"
+              actionListener="#{userGroupDetailsView.openUserRightsDialog(userGroupRightsData.folder)}"
+              update=":editRightsDialogForm"
+              oncomplete="PF('editRightsDialog').show(); return false;" />
+          </p:column>
+        </p:treeTable>
+      </p:panel>
+
+      <!-- Rights of the User Group on Presentation Folders -->
+      <p:panel
+        id="presentationRights"
+        header="#{msg['tenantadmin.userPresentationFolderRights']}"
+        toggleableHeader="true"
+        toggleable="true"
+        collapsed="#{userSession.isPanelCollapsed('rightsInformation:presentationRights', true)}">
+        <p:ajax
+          event="toggle"
+          listener="#{userSession.togglePanel}" />
+        <p:treeTable
+          id="userGroupRightsData2"
+          value="#{userGroupDetailsView.presentationTree}"
+          var="userGroupRightsData"
+          resizableColumns="true"
+          liveResize="true"
+          emptyMessage="#{msg['tenantadmin.noUserFolderRights']}"
+          style="font-size:90%">
+          <p:column
+            id="headerUserGroupPresentationFolderRightsFolder"
+            headerText="#{msg['tenantadmin.folder']}">
+            <h:outputText value="#{userGroupRightsData.folder.name}" />
+          </p:column>
+          <p:column
+            id="headerUserGroupPresentationFolderReadRights"
+            style="text-align:center;width:10%"
+            headerText="#{msg['AccessRight.short.READ']}">
+            <p:selectBooleanCheckbox
+              id="selectedUserGroupRightsDataReadRightsInherited"
+              value="#{userGroupRightsData.readRights}"
+              styleClass="inheritedRight"
+              rendered="#{userGroupRightsData.inheritedReadRights}"
+              disabled="#{userGroupRightsData.immutable or userGroupRightsData.readRightImmutable}">
+              <p:ajax
+                listener="#{userGroupDetailsView.updateUserRights(userGroupRightsData)}"
+                update="userGroupRightsData2 globalGrowl" />
+            </p:selectBooleanCheckbox>
+            <p:selectBooleanCheckbox
+              id="selectedUserGroupRightsDataReadRights"
+              value="#{userGroupRightsData.readRights}"
+              rendered="#{not userGroupRightsData.inheritedReadRights}"
+              disabled="#{userGroupRightsData.immutable or userGroupRightsData.readRightImmutable}">
+              <p:ajax
+                listener="#{userGroupDetailsView.updateUserRights(userGroupRightsData)}"
+                update="userGroupRightsData2 globalGrowl" />
+            </p:selectBooleanCheckbox>
+          </p:column>
+          <p:column
+            id="headerUserGroupPresentationFolderExtReadRights"
+            style="text-align:center;width:10%"
+            headerText="#{msg['AccessRight.short.EXTENDED_READ']}">
+            <p:selectBooleanCheckbox
+              id="selecteduserGroupRightsDataExtendedReadRightsInherited"
+              value="#{userGroupRightsData.extendedReadRights}"
+              styleClass="inheritedRight"
+              rendered="#{userGroupRightsData.inheritedExtendedReadRights}"
+              disabled="#{userGroupRightsData.immutable or userGroupRightsData.extendedReadRightImmutable}">
+              <p:ajax
+                listener="#{userGroupDetailsView.updateUserRights(userGroupRightsData)}"
+                update="userGroupRightsData2 globalGrowl" />
+            </p:selectBooleanCheckbox>
+            <p:selectBooleanCheckbox
+              id="selecteduserGroupRightsDataExtendedReadRights"
+              value="#{userGroupRightsData.extendedReadRights}"
+              rendered="#{not userGroupRightsData.inheritedExtendedReadRights}"
+              disabled="#{userGroupRightsData.immutable or userGroupRightsData.extendedReadRightImmutable}">
+              <p:ajax
+                listener="#{userGroupDetailsView.updateUserRights(userGroupRightsData)}"
+                update="userGroupRightsData2 globalGrowl" />
+            </p:selectBooleanCheckbox>
+          </p:column>
+          <p:column
+            id="headerUserGroupPresentationFolderWriteRights"
+            style="text-align:center;width:10%"
+            headerText="#{msg['AccessRight.short.WRITE']}">
+            <p:selectBooleanCheckbox
+              id="selectedUserPresentationFolderRightsWriteRightsInherited"
+              value="#{userGroupRightsData.writeRights}"
+              styleClass="inheritedRight"
+              rendered="#{userGroupRightsData.inheritedWriteRights}"
+              disabled="#{userGroupRightsData.immutable or userGroupRightsData.writeRightImmutable}">
+              <p:ajax
+                listener="#{userGroupDetailsView.updateUserRights(userGroupRightsData)}"
+                update="userGroupRightsData2 globalGrowl" />
+            </p:selectBooleanCheckbox>
+            <p:selectBooleanCheckbox
+              id="selectedUserPresentationFolderRightsWriteRights"
+              value="#{userGroupRightsData.writeRights}"
+              rendered="#{not userGroupRightsData.inheritedWriteRights}"
+              disabled="#{userGroupRightsData.immutable or userGroupRightsData.writeRightImmutable}">
+              <p:ajax
+                listener="#{userGroupDetailsView.updateUserRights(userGroupRightsData)}"
+                update="userGroupRightsData2 globalGrowl" />
+            </p:selectBooleanCheckbox>
+          </p:column>
+          <p:column
+            id="headerUserGroupPresentationFolderGradeRights"
+            style="text-align:center;width:10%"
+            headerText="#{msg['AccessRight.short.GRADE']}">
+            <p:selectBooleanCheckbox
+              id="selectedUserPresentationFolderRightsGradeRightsInherited"
+              value="#{userGroupRightsData.gradeRights}"
+              styleClass="inheritedRight"
+              rendered="#{userGroupRightsData.inheritedGradeRights}"
+              disabled="#{userGroupRightsData.immutable or userGroupRightsData.gradeRightImmutable}">
+              <p:ajax
+                listener="#{userGroupDetailsView.updateUserRights(userGroupRightsData)}"
+                update="userGroupRightsData2 globalGrowl" />
+            </p:selectBooleanCheckbox>
+            <p:selectBooleanCheckbox
+              id="selectedUserPresentationFolderRightsGradeRights"
+              value="#{userGroupRightsData.gradeRights}"
+              rendered="#{not userGroupRightsData.inheritedGradeRights}"
+              disabled="#{userGroupRightsData.immutable or userGroupRightsData.gradeRightImmutable}">
+              <p:ajax
+                listener="#{userGroupDetailsView.updateUserRights(userGroupRightsData)}"
+                update="userGroupRightsData2 globalGrowl" />
+            </p:selectBooleanCheckbox>
+          </p:column>
+          <p:column
+            id="headerUserGroupPresentationFolderManageRights"
+            style="text-align:center;width:10%"
+            headerText="#{msg['AccessRight.short.MANAGE']}">
+            <p:selectBooleanCheckbox
+              id="selectedUserPresentationFolderRightsManageRightsInherited"
+              value="#{userGroupRightsData.manageRights}"
+              styleClass="inheritedRight"
+              rendered="#{userGroupRightsData.inheritedManageRights}"
+              disabled="#{userGroupRightsData.immutable}">
+              <p:ajax
+                listener="#{userGroupDetailsView.updateUserRights(userGroupRightsData)}"
+                update="userGroupRightsData2 globalGrowl" />
+            </p:selectBooleanCheckbox>
+            <p:selectBooleanCheckbox
+              id="selectedUserPresentationFolderRightsManageRights"
+              value="#{userGroupRightsData.manageRights}"
+              rendered="#{not userGroupRightsData.inheritedManageRights}"
+              disabled="#{userGroupRightsData.immutable}">
+              <p:ajax
+                listener="#{userGroupDetailsView.updateUserRights(userGroupRightsData)}"
+                update="userGroupRightsData2 globalGrowl" />
+            </p:selectBooleanCheckbox>
+          </p:column>
+          <p:column
+            id="selectedUserPresentationFolderRightsActions"
+            style="text-align:center;width:6%">
+            <p:commandButton
+              id="cbSelectedUserPresentationFolderRightsUpdate"
+              icon="fas fa-plus"
+              actionListener="#{userGroupDetailsView.openUserRightsDialog(userGroupRightsData.folder)}"
+              update=":editRightsDialogForm"
+              oncomplete="PF('editRightsDialog').show(); return false;" />
+          </p:column>
+        </p:treeTable>
+      </p:panel>
+
+    </h:form>
+
+    <h:form id="memberInformation">
+
+      <!-- Member users of the User Group -->
+      <p:panel
+        id="userGroupMemberUsers"
+        header="#{msg['tenantadmin.userGroupMembers']}"
+        toggleableHeader="true"
+        toggleable="true"
+        collapsed="#{userSession.isPanelCollapsed('memberInformation:userGroupMemberUsers', true)}">
+        <p:ajax
+          event="toggle"
+          listener="#{userSession.togglePanel}" />
+        <p:pickList
+          id="memberPickList"
+          value="#{userGroupDetailsView.memberUsersModel}"
+          var="user"
+          itemLabel="#{user.loginName}"
+          itemValue="#{user}"
+          converter="userPickListConverter"
+          showSourceFilter="true"
+          showTargetFilter="true"
+          filterMatchMode="contains"
+          responsive="true">
+          <f:facet name="sourceCaption">#{msg['tenantadmin.userGroups.available']}</f:facet>
+          <f:facet name="targetCaption">#{msg['tenantadmin.userGroups.selected']}</f:facet>
+          <p:ajax
+            event="transfer"
+            listener="#{userGroupDetailsView.onMemberUsersTransfer}"
+            update="memberPickList" />
+        </p:pickList>
+      </p:panel>
+
+      <!-- Member groups of the User Group -->
+      <p:panel
+        id="userGroupMemberGroups"
+        header="#{msg['tenantadmin.userGroupChildren']}"
+        toggleableHeader="true"
+        toggleable="true"
+        collapsed="#{userSession.isPanelCollapsed('memberInformation:userGroupMemberGroups', true)}">
+        <p:ajax
+          event="toggle"
+          listener="#{userSession.togglePanel}" />
+        <p:pickList
+          id="childrenPickList"
+          value="#{userGroupDetailsView.memberGroupsModel}"
+          var="group"
+          itemLabel="#{group.name}"
+          itemValue="#{group}"
+          converter="userGroupPickListConverter"
+          showSourceFilter="true"
+          showTargetFilter="true"
+          filterMatchMode="contains"
+          responsive="true">
+          <f:facet name="sourceCaption">#{msg['tenantadmin.userGroups.available']}</f:facet>
+          <f:facet name="targetCaption">#{msg['tenantadmin.userGroups.selected']}</f:facet>
+          <p:ajax
+            event="transfer"
+            listener="#{userGroupDetailsView.onMemberGroupsTransfer}"
+            update="childrenPickList" />
+        </p:pickList>
+      </p:panel>
+    </h:form>
+  </ui:define>
+  
+  <ui:define name="dialogs">
+    <!-- Edit user rights dialog, has its own form -->
+    <ui:include src="/WEB-INF/includes/dialogs/userRightsDialog.xhtml" />
+
+    <h:form id="globalConfirmForm">
+      <!-- Generic confirm dialog with Ok and Cancel button -->
+      <p:confirmDialog
+        id="globalConfirmDialog"
+        global="true"
+        width="400px">
+        <p:commandButton
+          id="confirmOk"
+          value="#{msg['global.ok']}"
+          styleClass="ui-confirmdialog-yes"
+          icon="fas fa-check" />
+        <p:commandButton
+          id="confirmCancel"
+          value="#{msg['global.cancel']}"
+          styleClass="ui-confirmdialog-no button-white"
+          icon="fas fa-times" />
+      </p:confirmDialog>
+    </h:form>
+  </ui:define>
+</ui:composition>

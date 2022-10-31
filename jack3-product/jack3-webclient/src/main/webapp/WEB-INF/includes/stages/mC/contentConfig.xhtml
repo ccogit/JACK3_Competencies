@@ -1,0 +1,158 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:pe="http://primefaces.org/ui/extensions">
+  <h:outputScript
+    library="js"
+    name="ckEditorEditStage.js" />
+    
+  
+  <ui:param name="updateComponents" value="answers @form:tabs#{stageBean.stage.orderIndex}:feedback:feedbacks @form:tabs#{stageBean.stage.orderIndex}:feedback:feedbackTable @form:tabs#{stageBean.stage.orderIndex}:feedback:stageTransitions @form:tabs#{stageBean.stage.orderIndex}:feedback:targetTable" />
+
+ <ui:include page="../taskDescriptionEditor.xhtml" />
+   <p:spacer width="5" height="30" />
+  <h4>
+    <h:outputText value="#{msg['exerciseEdit.mc.answerOptions']}" />
+  </h4>
+  <p:dataTable
+    id="answers"
+    value="#{stageBean.stage.getAnswerOptionsForReoder()}"
+    var="answer"
+    emptyMessage="#{msg['exerciseEdit.mc.noAnswerOptions']}"
+    draggableRows="#{exerciseEditView.newestRevision}"
+    style="width:100%;"
+    rowIndexVar="rowNumber">
+    <p:ajax
+      event="rowReorder"
+      listener="#{stageBean.onAnswerReorder}"
+      update="#{updateComponents}"
+      oncomplete="processChange()" />
+    <p:column
+      id="headerTextMcAnswers"
+      headerText="#{msg['exerciseEdit.mc.answer']}">
+      <p:panelGrid style="width:100%;">
+	<p:column colspan="2" style="border-style: none;">
+	<h:outputText 
+		id="answerTextRow"
+		value="#{answer.text}" 
+		style="width:100%;align:left;"
+		escape="false" />
+	</p:column>
+	<p:column colspan="1" style="text-align: right;border-style: none;">
+	<ui:include page="../editorOverlay.xhtml" >
+		<ui:param name="textSource" value="answerTextRow" />
+	 	<ui:param name="readOnlyParam" value="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}" />
+	 	<ui:param name="valueParam" value="#{answer.text}" />
+	 	<ui:param name="editorWidgetVarId" value="answerTextWidgetVar+#{rowNumber}" /> 
+	</ui:include>
+	</p:column>
+	</p:panelGrid>
+    </p:column>
+    <p:column
+      id="headerTextMcCorrect"
+      headerText="#{msg['exerciseEdit.mc.correct']}"
+      style="width:250px;text-align:center;">
+      <p:selectOneButton
+        id="mcCorrectSelectOneButton"
+        value="#{answer.rule}"
+        onchange="processChange()"
+        disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+        unselectable="false">
+        <p:ajax
+          event="change"
+          update="#{updateComponents}" />
+        <f:selectItem
+          itemLabel="#{msg['global.no']}"
+          itemValue="WRONG" />
+        <f:selectItem
+          itemLabel="#{msg['global.yes']}"
+          itemValue="CORRECT" />
+        <f:selectItem
+          itemLabel="#{msg['exerciseEdit.mc.ticked.variable']}"
+          itemValue="VARIABLE"
+          itemDisabled="#{empty exerciseEditView.exercise.variableDeclarations}" />
+      </p:selectOneButton>
+      <br/>
+      <p:selectOneMenu
+        value="#{answer.variableName}"
+        onchange="processChange()"
+        disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+        rendered="#{answer.rule eq 'VARIABLE'}">
+        <p:ajax
+          event="change"
+          update="#{updateComponents}" />
+        <f:selectItem
+          itemLabel="#{msg['exerciseEdit.mc.ticked.chooseVariable']}"
+          itemDisabled="true"
+          itemValue="#{null}" />
+        <f:selectItems
+          id="selectAnswerIsCorrectVariableSelection"
+          value="#{exerciseEditView.exercise.variableDeclarations}"
+          var="variableDeclaration"
+          itemLabel="#{variableDeclaration.name}"
+          itemValue="#{variableDeclaration.name}" />
+      </p:selectOneMenu>
+    </p:column>
+    <p:column
+      id="columnMcRemoveAnswer"
+      style="width:43px;">
+      <p:commandButton
+        id="cbRemoveMcAnswerOption"
+        icon="fas fa-trash-alt fa-sm"
+        action="#{stageBean.removeAnswerOption(answer)}"
+        update="#{updateComponents}"
+        oncomplete="processChange()"
+        disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}" />
+    </p:column>
+  </p:dataTable>
+
+  <p:commandButton
+    id="cbAddMcAnswerOption"
+    value="+"
+    action="#{stageBean.addNewAnswerOption}"
+    update="#{updateComponents}"
+    oncomplete="processChange()"
+    disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}" />
+
+  <h4>
+    <h:outputText value="#{msg['exerciseEdit.mc.moreSettings']}" />
+  </h4>
+  <p:panelGrid
+    id="pgMcStageOptions"
+    cellpadding="5"
+    styleClass="ui-panelgrid-blank">
+    <p:row>
+      <p:column id="columnMcShuffleAnswers">
+        <h:outputText
+          for="randomize"
+          value="#{msg['exerciseEdit.mc.shuffleAnswerOptions']}: " />
+      </p:column>
+      <p:column id="columnMcShuffleAnswersCheckbox">
+        <p:selectBooleanCheckbox
+          id="randomize"
+          value="#{stageBean.stage.randomize}"
+          onchange="processChange()"
+          disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}" />
+      </p:column>
+    </p:row>
+
+    <p:row>
+      <p:column id="columnMcSingleChoiceAnswer">
+        <h:outputText
+          for="singleChoice"
+          value="#{msg['exerciseEdit.mc.singleChoice']}: " />
+      </p:column>
+      <p:column id="columnMcSingleChoiceAnswerSelecte">
+        <p:selectBooleanCheckbox
+          id="singleChoice"
+          value="#{stageBean.stage.singleChoice}"
+          onchange="processChange()"
+          disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}" />
+      </p:column>
+    </p:row>
+  </p:panelGrid>
+
+</ui:composition>

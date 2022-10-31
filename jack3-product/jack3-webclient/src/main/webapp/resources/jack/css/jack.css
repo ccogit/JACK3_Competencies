@@ -1,0 +1,983 @@
+:root {
+	/* These are the colors from the official UDE corporate design. */
+	--ude-blue: #004c93;
+	--ude-beige: #efe4bf;
+	--ude-pale-blue: #dfe4f2;
+	--ude-black: #1a171b;
+	--ude-red: #ff8080;
+	--ude-green: #40a040;
+}
+
+/***************************************************/
+/* Tweaking and bugfixing for PF components        */
+.ui-panel {
+	margin: 2px 0 2px 0;
+}
+
+/* remove "no records found in <p:datatable /> */ 
+.ui-widget-content .ui-datatable-empty-message {
+   display: none;
+}
+
+/* remove unequal padding in <p:dialog> */ 
+.dialogWithEqualPadding .ui-dialog-content {
+   padding: 1em !important;
+}
+
+/* remove extra border in datagrids */
+.ui-datagrid-content {
+	border-width:0px;
+}
+ 
+.ui-tabs {
+	padding:0px !important;
+}
+
+ .ui-tabs-panel {
+ 	border: 1px solid #d5d5d5 !important;
+ 	border-radius: 3px;
+ }
+
+/* Disable padding in tab elements */
+.ui-tabs.no-padding > div.ui-tabs-panels > div.ui-tabs-panel {
+	border: 0 !important;
+	padding: 0;
+}
+
+/* fix layout glitch for dropdown menu triggers */
+.ui-selectonemenu .ui-selectonemenu-trigger {
+	border:0 !important;
+}
+
+/* hide bad positioned icon. See #900 */
+.ui-selectonemenu-filter-container .ui-icon.ui-icon-search {
+    display: none !important;
+}
+
+/* avoid line breaks in menus between menu icon and menu item text */
+.ui-menu {
+	width: auto !important;
+}
+.ui-menu .ui-menuitem  {
+	clear: none !important;
+}
+
+/* Removes unnecessary space in Primefaces' tree view */
+.ui-tree-droppoint {
+	margin-bottom: 4px !important;
+	height: 0px !important;
+}
+
+/* Force line breaks in tree nodes and adjust box size for highlighting */
+.ui-tree .ui-treenode-label {
+	overflow-wrap: break-word;
+	max-width: 360px;
+	padding: 1px 4px 3px !important;
+}
+
+/* Make highlighting of tree nodes less bold */
+.ui-treenode-label.ui-state-highlight {
+	background-color: #cfd8f2;
+	color: black;
+}
+
+/* Remove header from Primefaces' datatable */
+.without-header thead {
+	display:none;
+}
+
+/* Content of a panel grid is aligned to the top. */
+.align-top > tbody > tr > td {
+	vertical-align: top;
+}
+
+/* SelectManyCheckbox / SelectOneRadio: Labels to the right of the box */
+.fixed-select-many > tbody:nth-child(1) > tr > td:nth-child(1) {
+	display: flex;
+}
+
+.ui-blockui {
+	background-color: white;
+	opacity: 0.85;
+}
+
+/* Centers checkboxes in exercises. */
+.ui-selectmanycheckbox .ui-chkbox {
+	margin: auto 0;
+}
+
+/* Centers radiobuttons in exercises. */
+.ui-selectoneradio .ui-radiobutton {
+	margin: auto 0;
+}
+
+/* Icon on inplace editors */
+.inplaceIcon::after {
+	font-family: "Font Awesome 5 Free";
+	font-weight: 900;
+	font-size: .7em;
+	content: "\f304";
+	margin-left: 3px;
+	color: #9e9e9e;
+}
+
+/* Fix inline alignment of spinners */
+.ui-spinner {
+	top: -2px;
+}
+
+/* More space between checkbox and icon in selectable Trees */
+.fixed-tree-checkboxes .ui-chkbox {
+	margin-right: 7px;
+}
+
+/***************************************************/
+/* Tweaking and bugfixing for CKEditor             */
+
+.cke {
+	border:1px solid #d6d6d6;
+	border-radius:3px;
+	box-shadow:none;
+}
+
+.cke_inner {
+	border-radius:3px;
+}
+
+.cke_top {
+	border-top-left-radius:3px;
+	border-top-right-radius:3px;
+}
+
+.cke_contents {
+	border-bottom-left-radius:3px;
+	border-bottom-right-radius:3px;
+}
+
+.cke_focus {
+	border:1px solid #c0c0c0;
+	box-shadow:0 0 5px #1f89ce;
+}
+
+/***************************************************/
+/* JACK layout                                     */
+
+.courseExercisesColumn {
+	width: 440px;
+	padding-right: 10px;
+	height: auto
+}
+
+.availableExerciesColumn {
+	width: 4000px;
+	height: auto
+}
+
+.column1 {
+	width: 240px;
+	height: auto
+}
+
+.column2 {
+	width: 50px;
+	height: auto
+}
+
+.column3 {
+	width: 180px;
+	height: auto
+}
+
+.column4 {
+	width: 30px;
+	height: auto
+}
+
+.ui-gridz {
+	padding-left: 0px;
+	padding-bottom: 5px;
+	padding-right: 10px;
+	padding-top: 5px;
+}
+
+.ui-gridzz {
+	padding-left: 0px;
+	padding-right: 40px;
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+
+body
+{
+	color:		#1a171b;
+	background: #efe4bf;
+		
+	margin:		0px;
+	border:		0px;
+	padding:	0px;
+	
+	/* PrimeFaces theme 'Omega' provides the font 'Lato Regular' as the default font for all UI components */
+	font-family: "latoregular", "Trebuchet MS", Arial, Helvetica, sans-serif;
+}
+
+h1
+{
+	background-color:	#004c93;
+	color:				white;
+
+	margin:				0px;
+	margin-bottom:		0.25em;
+	margin-top:			0.25em;
+}
+
+h1 img
+{
+	vertical-align:		text-bottom;
+	margin:				2px;
+	margin-left:		4px;
+	margin-right: 		6px;
+}
+
+h2
+{
+	background-color:	#dfe4f2;
+	
+	margin: 			0px;
+	margin-bottom: 		0.5em;
+	margin-top: 		0.5em;
+}
+
+img
+{
+		border:			0px; /* We need this for IE 9 & 10 compatibility. =( */
+}
+
+h2 img
+{
+	vertical-align:		text-bottom;
+	margin:				2px;
+	margin-left:		4px;
+	margin-right: 		6px;
+}
+
+form
+{
+	display:	inline;
+	margin:		0px;
+}
+
+a
+{
+		color:	#004c93;
+}
+
+table img
+{
+	vertical-align: text-bottom;
+}
+
+.tile
+{
+	width: 192px;
+}
+
+.task-cloze
+{
+	line-height: 2em;
+	width: 100%;
+}
+
+.task-default
+{
+	width: 100%;
+}
+
+.no-break
+{
+	white-space: nowrap;
+}
+
+/*
+ * Definition for the breadcrumb view.
+ */
+.breadcrumb
+{
+}
+
+.toolbar
+{
+	margin-top:		8px;
+	margin-bottom:	4px;
+	margin-left:	auto;
+	text-align: 	right;
+}
+
+.breadcrumb img
+{
+	vertical-align: text-top;
+}
+
+/*
+ * Definitions for faces messages
+ */
+.faces-message-info
+{
+/*	background-image:	url(# {resource['jack:images/icons/validation/info.png']});  remove space after # to re-activate! */
+	background-repeat:	no-repeat;
+	padding-left:		20px;
+	margin-left:		2px;
+}
+
+.faces-message-warning
+{
+/*	background-image:	url(# {resource['jack:images/icons/validation/warning.png']});  remove space after # to re-activate! */
+	background-repeat:	no-repeat;
+	padding-left:		20px;
+	margin-left:		2px;
+}
+
+.faces-message-error
+{
+/*	background-image:	url(# {resource['jack:images/icons/validation/error.png']});  remove space after # to re-activate! */
+	background-repeat:	no-repeat;
+	padding-left:		20px;
+	margin-left:		2px;
+}
+
+/*
+ * Definitions for the faces "messages" element
+ */
+#messages .error td
+{
+/*	background-image: url(/images/icons/validation/warning.png);*/
+	background-repeat: no-repeat;
+	padding-left: 16px;
+}
+
+td
+{
+	vertical-align: middle;
+}
+
+/*
+ * Definitions for the rich calendar.
+ */
+.rf-cal-extr
+{
+	background-color:	white;
+}
+
+
+/*
+ * Definitions for the header.
+ */
+
+#header
+{
+	height:			24px;
+	line-height:	24px;
+
+	margin-top:		2px;
+	margin-bottom:	2px;
+
+	border:			0px;
+	width:			100%;
+}
+
+#header-container
+{
+	float: right;
+}
+
+#header-container
+{
+	float: right;
+}
+
+.header-button
+{
+	border:			0px;
+	
+	display:		table-cell;
+
+	padding-left: 	16px;
+	padding-right:	16px;
+
+	text-align:		center;
+
+	vertical-align: middle;
+}
+
+#header a, #header a:visited
+{
+	color: inherit;
+}
+
+/*
+ * Definitions for the activity bar on top of the window.
+ */
+#activity-bar, #activity-bar:before {
+	height: 4px;
+	width: 100%;
+	margin: 0;
+}
+
+#activity-bar {
+	background-color: var(--ude-blue);
+	display: flex;
+	transition: background-color 0.5s;
+	border-bottom: var(--ude-pale-blue) 1px;
+	position: fixed;
+	top: 0px;
+	z-index: 3000;
+}
+
+#activity-bar.active {
+	background-color: unset;
+}
+
+#activity-bar.error {
+	background-color: var(--ude-red);
+}
+
+#activity-bar:before {
+	background-color: var(--ude-blue);
+	content: '';
+	animation: running-progress 2s cubic-bezier(0.4, 0.2, 0.2, 0.4) infinite;
+	transition: opacity 0.5s;
+	opacity: 0;
+}
+
+#activity-bar.active:before {
+	opacity: 1;
+}
+
+@keyframes running-progress {
+	0% {
+		margin-left: 0;
+		margin-right: 100%;
+	}
+	50% {
+		margin-left: 25%;
+		margin-right: 0%;
+	}
+	100% {
+		margin-left: 100%;
+		margin-right: 0;
+	}
+}
+
+#activity-bar-panel.ui-sticky {
+	top: 0 !important;
+}
+
+/* This is important to keep the toolbars under the activity bar. */
+.ui-sticky {
+	top: 4px !important;
+}
+
+/*
+ * Definitions for the content area.
+ */
+#container {
+	margin-top: 4px;
+} 
+
+#content
+{
+	max-width: 960px;
+	margin-left: auto;
+	margin-right: auto;
+	padding: 8px;
+	
+	background-color: white;
+
+	box-shadow: 0px 0px 14px rgba(0,0,0,.2);
+}
+
+#banner
+{
+	background-image:	url(#{resource['jack:images/banner/banner.png']});
+	height:				110px
+}
+
+#ude-logo
+{
+  float:		right;
+  margin-top:	12px;
+  clear: 		none;
+}
+
+#jack-logo
+{
+  float:		left;
+  margin-top:	12px;
+  clear:		none;
+}
+
+#menubar\:main-menubar	
+{
+	margin-top:		4px;
+	margin-bottom:	4px;
+}
+
+/*
+ * Definitions for the footer.
+ */
+
+#footer
+{
+	font-size: 			smaller;
+	text-align: 		center;
+	margin-bottom:		1em;
+	margin-top:			.5em;
+}
+
+/*
+ * Flowchart diagrams (stage graph)
+ */
+.ui-diagram-element {   
+    width:12em; 
+    height:3em;     
+    line-height:3em;
+    text-align: center;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.8);
+    border-radius: 4px;
+    border: 1px solid transparent;
+    background-color: #98AFC7;
+    color: #ffffff;
+}
+ 
+.flow-label {
+    font-size: 24px;
+    font-weight: bold;
+    color: #816A51;
+} 
+
+/*
+ * Special rules for printing
+ */
+@media print
+{
+	#header, #footer
+	{
+		display: none;
+	}
+
+	.screen-only
+	{
+		display: none;
+	}
+}
+
+.ui-datalist-content{
+	border: 0px; 
+}
+
+.draggableLayoutUnit .ui-layout-unit-content {
+	z-index: 1 !important;
+    overflow: visible  !important;
+}
+
+.ui-picklist.ui-picklist-responsive .ui-picklist-list-wrapper {
+	width: auto !important;
+}
+
+.ui-contextmenu {
+	width:300px !important;
+}
+
+div.inheritedRight div span.ui-icon-blank {
+	background-position: -64px -144px !important;
+	opacity: 0.4;
+}
+
+.tickPattern0 div.ui-state-disabled {
+	opacity: 0.8 !important;
+}
+
+.tickPattern1 div span.ui-icon-blank {
+	background-position: -96px -128px !important;
+}
+
+.tickPattern1 div.ui-state-disabled {
+	opacity: 0.8 !important;
+}
+
+.tickPattern2 div span.ui-icon-blank {
+	background-position: -48px -144px !important;
+}
+
+.tickPattern2 div.ui-state-disabled {
+	opacity: 0.8 !important;
+}
+
+.tickPattern3 div span.ui-icon-blank {
+	background-position: -112px -144px !important;
+}
+
+.tickPattern3 div.ui-state-disabled {
+	opacity: 0.8 !important;
+	pointer-events: all;
+}
+
+.customErrorMessage {
+	background: #f88;
+}
+
+::placeholder {
+	font-style:italic;
+	color: #aaa;
+}
+
+.ui-breadcrumb ul li .ui-menuitem-link.ui-icon-home {
+	position: relative;
+}
+
+.ui-breadcrumb ul li .ui-menuitem-link.ui-icon-home {
+	font-family: "Font Awesome 5 Free";
+	font-style: normal;
+    font-variant: normal;
+    font-weight: 700;
+	background: none repeat scroll 0 0 transparent!important;
+    text-indent: 0!important;
+    text-align: left;
+    text-rendering: auto;
+    width: 1.25em;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+    display: inline-block; 
+    margin-top: 3px;
+} 
+
+.ui-breadcrumb li:first-child .ui-menuitem-text {
+	display: none;/*Suppresses the Label for the first Item in a normal Breadcrumb. Otherwise the first few pixel will be displayed on error.*/
+}
+
+.ui-breadcrumb .ui-icon-home:before {
+    content: "\f015";
+}
+
+/*Separate Style for Breadcrumbs, which are not displaying the current Location.*/
+.ui-breadcrumb.small {
+	padding: 		unset;
+	font-weight: 	normal;
+	background: 	none;
+	border:			none;
+}
+
+.ui-breadcrumb.small .ui-breadcrumb-chevron {
+	font-family: "Font Awesome 5 Free";
+	font-style: normal;
+    font-variant: normal;
+    font-weight: 700;
+	background: none repeat scroll center/contain transparent!important;
+    text-indent: 0!important;
+    text-align: left;
+    text-rendering: auto;
+    width: 0.5em;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+    display: inline-block; 
+    margin-top: 3px;
+} 
+
+.ui-breadcrumb.small .ui-breadcrumb-chevron:before {
+	content: "\\";
+}
+
+.ui-breadcrumb.small li:first-child .ui-menuitem-text {
+	display: inline;/*Overwrites the suppression of the Label.*/
+}
+
+/* Sticky element on top of the page */
+.sticky-top {
+	position: -webkit-sticky; /* Safari */
+	position: sticky;
+	top: 0px;
+	height: min-content;
+}
+.sticky-toolbar {
+	position: -webkit-sticky; /* Safari */
+	position: sticky;
+	top: 4px;
+	z-index: 100;
+}
+
+.weaker {
+	font-size: smaller;
+	color: gray;
+}
+.weaker-button {
+	font-size: smaller !important;
+}
+
+.button-white {
+	color: #555555 !important;
+	border-color: #d5d5d5 !important;
+	background-color: white !important; 
+}
+.button-white:hover {
+	border-color: #dddddd !important;
+	background-color: #f4f4f4 !important; 
+}
+.button-white:active {
+	border-color: #dddddd !important;
+	background-color: #dddddd !important; 
+}
+
+.button-red {
+	border-color: #d2442a !important;
+	background-color: #d2562d !important; 
+}
+.button-red:hover {
+	border-color: #a8320b !important;
+	background-color: #d2442a !important; 
+}
+.button-red:active {
+	border-color: #a8320b !important;
+	background-color: #a8320b !important; 
+}
+
+/* Wrap each text*/
+.ui-widget-content 
+{
+	overflow-wrap:break-word;
+}
+
+
+.ckEdtiorOutputPanelcolumn1
+{
+	word-break: break-word;
+}
+
+/* Monospace font */
+.monospace {
+	font-family: "Consolas", "Courier New", monospace;
+	white-space: pre-wrap;
+}
+
+.monospaceForce {
+	font-family: "Consolas", "Courier New", monospace !important;
+	white-space: pre-wrap !important;
+}
+
+.small-monospace {
+	font-family: "Consolas", "Courier New", monospace;
+	white-space: pre-wrap;
+	font-size: small !important;
+}
+
+/* Panel with horizontal scrollbar only */
+.panel-scroll-x {
+	display: block;
+	overflow-x: auto;
+	overflow-y: hidden;
+	width: 100%;
+}
+.panel-scroll-x > * {
+	padding: 4px 10px !important;
+}
+/* Fixes not working auto-width for MathJax formulas */
+.panel-scroll-x-mathjax > * > span {
+	width: 50px;
+	display: inline-block;
+}
+.nopadding {
+	padding:0 !important;
+}
+
+.nopadding-panel.ui-panel .ui-panel-content,
+.nopadding-panel.ui-overlaypanel .ui-overlaypanel-content {
+	padding: 0;
+	margin: -1px;
+}
+.nopadding-panel > .ui-panel-content > .ui-datatable:last-child > .ui-datatable-tablewrapper {
+	-moz-border-radius-bottomright: 3px;
+	-webkit-border-bottom-right-radius: 3px;
+	-khtml-border-bottom-right-radius: 3px;
+	border-bottom-right-radius: 3px;
+	-moz-border-radius-bottomleft: 3px;
+	-webkit-border-bottom-left-radius: 3px;
+	-khtml-border-bottom-left-radius: 3px;
+	border-bottom-left-radius: 3px;
+}
+.ui-datatable-panel-header > .ui-datatable-header {
+	padding: .5em 1em .3em !important;
+	text-align: left !important;
+}
+
+/* Removes background on datatables */
+.nobackground > * > table > tbody,
+.nobackground > * > table > tbody > tr {
+	background: transparent !important;
+}
+
+.preformatted {
+    white-space: pre-wrap;
+}
+
+.alnright {
+	text-align: right;
+}
+
+.row_border_bottom
+{
+	height: 20px;
+	border-bottom: 1px solid black;
+}
+
+.blank_row
+{
+	height: 20px;
+}
+
+.table_with_border
+{
+	border-collapse: collapse;
+}
+
+/* For columns which should be only shown in export*/
+.export-hidden-column {
+    display: none;
+    width: 0;
+    height: 0;
+}
+
+/* Inverts a button */
+.flat-button, .flat-button.ui-menubutton > button {
+	border: none !important;
+	background: none !important;
+	color: black !important;
+}
+
+/* Align icon to the middle */
+.icon-middle-align > .fas::before, .icon-middle-align > .far::before {
+	vertical-align: sub;
+}
+
+#revisionSmall{
+	font-size: 80%;
+	color: gray;
+}
+
+
+.formattedText{
+	white-space: pre-wrap;
+}
+
+.ui-fileupload-content {
+    overflow: auto;
+    height: 100px;
+}
+
+/* Shows a text within a colored rounded tag */
+.colored-tag {
+	background-color:#2399e5;
+	color:#fff;
+	border-radius:100px;
+	padding:1px 8px;
+	margin:0px 2px;
+	font-size:80%;
+	overflow-wrap: normal;
+
+}
+
+.colored-tag.shortened {
+	max-width: 150px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.hidden-file-replace {  
+    display: none;  
+}
+
+/*Highlight selectable checkboxes in tree*/
+.contentDeletionTree .ui-chkbox-box:not(.ui-state-disabled){
+	border-color: #2399e5;
+	border-width: 2px;
+}
+
+.contentDeletionTree .ui-treenode-selected .ui-chkbox-box{
+	background-color: #2399e5;
+}
+
+.contentDeletionConfirm .ui-dialog-content .ui-icon{
+	height: 36px;
+	width: 36px;
+	line-height: 1em;
+}
+
+/* Simulate layout of confirm dialog for normal dialogs */
+.dialog-like-confirmdialog .ui-dialog-footer {
+	padding: .3em 1em .5em .4em;
+}
+.dialog-like-confirmdialog .ui-dialog-footer button {
+	margin: .5em .4em .5em 0;
+}
+.dialog-like-confirmdialog .ui-message {
+	margin: .5em 0;
+}
+.dialog-like-confirmdialog .ui-message:last-child {
+	margin-bottom: 0;
+}
+.dialog-like-confirmdialog .ui-message:first-child {
+	margin-top: 0;
+}
+
+.warn-text {
+	color: #c48000;
+}
+
+/* Override "ui-panelgrid-blank" so that datatables in a panel grid element have the original style */
+.ui-panelgrid-blank-datatable .ui-widget-content {
+	border: 1px solid #d9d9d9 !important;
+}
+.ui-panelgrid-blank-datatable .ui-datatable-odd {
+	background-color: #fafafb !important;
+}
+.ui-panelgrid-blank-datatable .ui-datatable-even {
+	background-color: #fff !important;
+}
+
+/* Grey shaded header */
+.shadow-header {
+	background-color: #ebedf0;
+	padding: 0.5em 0;
+	margin: 0;
+	text-align: center;
+	border-bottom: 1px solid;
+	border-color: inherit;
+}
+
+.background-orange {
+	background-color: #f9c189 !important;
+	background-image: none !important;
+	color: #000000 !important;
+}
+
+/* Legend for symbols (tables where the first column contains only one icon) */
+.symbol-legend-panel td:first-child {
+	text-align: center;
+	padding: 0;
+}
+
+.global-spinner {
+	position: fixed !important;
+	left: 50% !important;
+	top: 50% !important;
+	transform: translate(-50%, -50%);
+}
+
+.jack-input-group > input:first-child,
+.jack-input-group > button:first-child {
+	margin-left: 0px;
+}
+.jack-input-group > input,
+.jack-input-group > button {
+	margin-left: 10px;
+}
+.jack-input-group > button {
+	height: 28px;
+}

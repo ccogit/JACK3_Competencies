@@ -1,0 +1,31 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:p="http://primefaces.org/ui">
+  <p:repeat
+    value="#{patternList}"
+    var="tick">
+    <p:selectBooleanCheckbox
+      styleClass="tickPattern0"
+      disabled="true"
+      rendered="#{tick eq 'WRONG'}"
+      title="#{msg['exerciseEdit.mc.ticked.no']}" />
+    <p:selectBooleanCheckbox
+      styleClass="tickPattern1"
+      disabled="true"
+      rendered="#{tick eq 'CORRECT'}"
+      title="#{msg['exerciseEdit.mc.ticked.yes']}" />
+    <p:selectBooleanCheckbox
+      styleClass="tickPattern2"
+      disabled="true"
+      rendered="#{tick eq 'NO_MATTER'}"
+      title="#{msg['exerciseEdit.mc.ticked.dontcare']}" />
+    <p:selectBooleanCheckbox
+      styleClass="tickPattern3"
+      disabled="true"
+      rendered="#{not (tick eq 'WRONG' or tick eq 'CORRECT' or tick eq 'NO_MATTER')}"
+      title="#{msg['exerciseEdit.mc.ticked.variable']} '#{tick}'" />
+  </p:repeat>
+</ui:composition>

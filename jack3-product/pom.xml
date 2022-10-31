@@ -1,0 +1,229 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>de.uni-due.s3.jack3</groupId>
+	<artifactId>jack3-product</artifactId>
+	<version>${revision}</version>
+	<packaging>pom</packaging>
+	<name>jack3-product</name>
+	<properties>
+		<revision>0.4.0</revision>
+		<maven.compiler.source>11</maven.compiler.source>
+		<maven.compiler.target>11</maven.compiler.target>
+		<maven.build.timestamp.format>yyyyMMdd.HHmmss'UTC'</maven.build.timestamp.format>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../jack3-tests/target/site/jacoco-aggregate/jacoco.xml,
+			${project.basedir}/../jack3-ui-tests/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+	</properties>
+	<modules>
+		<module>jack3-core</module>
+		<module>jack3-business</module>
+		<module>jack3-webclient</module>
+		<module>jack3-tests</module>
+		<module>jack3-ui-tests</module>
+	</modules>
+
+	<repositories>
+		<repository>
+			<id>s3gitlab-maven</id>
+			<url>https://s3gitlab.paluno.uni-due.de/api/v4/groups/JACK/-/packages/maven</url>
+		</repository>
+		<repository>
+			<id>jboss</id>
+			<url>https://repository.jboss.org/nexus/content/repositories/releases/</url>
+		</repository>
+	</repositories>
+
+	<dependencies>
+		<dependency>
+			<groupId>javax</groupId>
+			<artifactId>javaee-api</artifactId>
+			<version>8.0</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.logging</groupId>
+			<artifactId>jboss-logging</artifactId>
+			<version>3.4.1.Final</version>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
+
+	<dependencyManagement>
+		<dependencies>
+			<!-- Wildfly 25.0.0 provides Hibernate in Version 5.3.23. If you want to use
+				a later version of Hibernate, you have to update to a newer Wildfly or follow
+				on of these links: https://docs.jboss.org/author/display/WFLY10/JPA+Reference+Guide#JPAReferenceGuide-ReplacingthecurrentHibernate5.xjarswithanewerversion
+				https://docs.jboss.org/hibernate/orm/5.3/topical/html_single/wildfly/Wildfly.html -->
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-core</artifactId>
+				<version>5.3.23.Final</version>
+				<scope>provided</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-envers</artifactId>
+				<version>5.3.23.Final</version>
+				<scope>provided</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<build>
+		<plugins>
+
+			<!-- FindBugs looks for bugs in Java programs. It is based on the concept
+				of bug patterns. A bug pattern is a code idiom that is often an error. This
+				plugin can be used to display the errors in Hudson. homepage: http://gleclaire.github.io/findbugs-maven-plugin/
+				toolpage: http://findbugs.sourceforge.net/factSheet.html -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>findbugs-maven-plugin</artifactId>
+				<version>3.0.3</version>
+				<configuration>
+					<findbugsXmlOutput>true</findbugsXmlOutput>
+					<findbugsXmlWithMessages>true</findbugsXmlWithMessages>
+					<xmlOutput>true</xmlOutput>
+					<excludeFilterFile>findbugs-exclude.xml</excludeFilterFile>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.wildfly.plugins</groupId>
+				<artifactId>wildfly-maven-plugin</artifactId>
+				<version>3.0.0.Final</version>
+				<configuration>
+					<filename>jack3-webclient.war</filename>
+					<hostname>10.168.68.75</hostname>
+					<port>9993</port>
+					<username>s3gitlab</username>
+					<password>${env.CI_DEPLOY_KEY}</password>
+					<protocol>https-remoting</protocol>
+				</configuration>
+			</plugin>
+			<!-- Resource Filtering with UTF-8 -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.1.0</version>
+				<configuration>
+					<encoding>UTF-8</encoding>
+				</configuration>
+			</plugin>
+			<!-- This plugin flattens the pom files in order to replace the ${revision}
+			  property in the child project's pom. -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>flatten-maven-plugin</artifactId>
+				<version>1.2.7</version>
+				<configuration/>
+				<executions>
+					<execution>
+						<id>flatten</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>flatten</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>flatten.clean</id>
+						<phase>clean</phase>
+						<goals>
+							<goal>clean</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.3.0</version>
+				<configuration>
+					<!-- Render Javadoc for private methods -->
+					<show>private</show>
+					<!-- Dont render links to module "undefined", this has lead to broken
+						links -->
+					<additionalJOption>--no-module-directories</additionalJOption>
+				</configuration>
+			</plugin>
+
+		</plugins>
+
+		<pluginManagement>
+			<plugins>
+				<!--This plugin's configuration is used to store Eclipse m2e settings
+					only. It has no influence on the Maven build itself. -->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.codehaus.mojo</groupId>
+										<artifactId>buildnumber-maven-plugin</artifactId>
+										<versionRange>[1.2,)</versionRange>
+										<goals>
+											<goal>create-timestamp</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<execute></execute>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.wildfly.plugins</groupId>
+										<artifactId>wildfly-maven-plugin</artifactId>
+										<versionRange>[1.0,)</versionRange>
+										<goals>
+											<goal>install</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+
+				<!-- To prevent a ClassNotFoundException in mavens "site" phase we need
+					to use a newer plugin here -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-site-plugin</artifactId>
+					<version>3.9.1</version>
+				</plugin>
+
+				<!-- To prevent a ClassNotFoundException in mavens "site" phase we need
+					to use a newer plugin here -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-project-info-reports-plugin</artifactId>
+					<version>3.1.1</version>
+				</plugin>
+
+			</plugins>
+		</pluginManagement>
+	</build>
+
+	<!-- This gets triggered by mavens "site" phase and then scans the dependent
+		jars for known vulnerabilities -->
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.owasp</groupId>
+				<artifactId>dependency-check-maven</artifactId>
+				<version>6.2.2</version>
+				<!-- https://jeremylong.github.io/DependencyCheck/dependency-check-maven/configuration.html -->
+				<configuration>
+					<failBuildOnCVSS>8</failBuildOnCVSS>
+				</configuration>
+			</plugin>
+		</plugins>
+	</reporting>
+</project>

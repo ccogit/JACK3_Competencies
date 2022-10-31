@@ -1,0 +1,117 @@
+<!-- Used for testing evaluator expressions. Shows the result of the evaluation and the time required. 
+Parameters:
+id - The id of this evaluator shell. Must be unique if the shell is used multiple times on the same page.
+collapsed - (optional) If the shell is collapsable and collapsed by default.
+showLecturerHint - (optional) If the info "This content is only visible for lecturers" should be shown.
+-->
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:c="http://java.sun.com/jsp/jstl/core"
+  xmlns:p="http://primefaces.org/ui">
+
+  <p:panel
+    id="evaluatorShellPanel#{id}"
+    header="#{msg['evaluator.shell']}"
+    collapsed="#{empty collapsed ? false : collapsed}"
+    toggleable="#{empty collapsed ? false : true}">
+    <p:ajax event="toggle" listener="#{exerciseEditView.onToggle}"/>
+
+    <p:staticMessage
+      rendered="#{empty showLecturerHint ? false : showLecturerHint}"
+      style="margin:0px"
+      severity="info"
+      detail="#{msg['exercisePlayer.onlyForLecturers']}" />
+
+    <p:panelGrid
+      id="evaluatorShell_#{id}"
+      styleClass="ui-panelgrid-blank"
+      style="width:100%;">
+
+      <p:row>
+        <p:column style="width:80px">
+          <p:outputLabel
+            id="expressionInputLabel"
+            for="expressionInput"
+            value="#{msg['evaluator.expression']}:" />
+        </p:column>
+        <p:column>
+          <p:inputTextarea
+            id="expressionInput"
+            value="#{evaluatorShellView.getRequest(id).expression.code}"
+            style="width:100%"
+            rows="1"
+            styleClass="monospaceForce" />
+        </p:column>
+      </p:row>
+      <p:row>
+        <p:column>
+          <p:outputLabel
+            id="domainInputLabel"
+            for="domainInput"
+            value="#{msg['global.domain']}:" />
+        </p:column>
+        <p:column>
+          <p:importEnum
+            type="de.uni_due.s3.jack3.entities.tenant.EvaluatorExpression$EDomain"
+            var="EVariableDomains" />
+          <p:selectOneMenu
+            id="domainInput"
+            value="#{evaluatorShellView.getRequest(id).expression.domain}"
+            style="margin-right:15px">
+            <f:selectItems value="#{EVariableDomains.ALL_VALUES}" />
+          </p:selectOneMenu>
+          <p:selectOneMenu
+            id="representationInput"
+            value="#{evaluatorShellView.getRequest(id).representation}"
+            style="margin-right:15px">
+            <f:selectItems
+              value="#{evaluatorShellView.representations}"
+              var="representation"
+              itemLabel="#{msg['enum.EvaluatorShellRepresentation.' += representation.name()]}" />
+          </p:selectOneMenu>
+          <p:commandButton
+            id="evaluateButton"
+            value="#{msg['evaluator.evaluate']}"
+            action="#{evaluatorShellView.evaluate(id)}"
+            update="evaluatorShell_#{id}"/>
+        </p:column>
+      </p:row>
+      <p:row rendered="#{not (empty evaluatorShellView.getRequest(id).result)}">
+        <p:column>
+          <p:outputLabel
+            id="resultResponseTimeLabel"
+            for="resultResponseTime"
+            value="#{msg['evaluator.shell.time']}:" />
+        </p:column>
+        <p:column>
+          <h:outputText
+            id="resultResponseTime"
+            value="#{evaluatorShellView.getRequest(id).responseTime}" />
+        </p:column>
+      </p:row>
+      <p:row rendered="#{not (empty evaluatorShellView.getRequest(id).result)}">
+        <p:column>
+          <p:outputLabel
+            id="resultResponseLabel"
+            for="resultResponseTime"
+            value="#{msg['global.result']}:" />
+        </p:column>
+        <p:column style="border: 1px solid #d9d9d9;" styleClass="nopadding">
+          <h:panelGroup styleClass="panel-scroll-x panel-scroll-x-mathjax">
+            <h:outputText
+              id="resultResponse"
+              value="#{evaluatorShellView.getRequest(id).result}"
+              escape="false"
+              styleClass="monospace"
+              style="width:100px" />
+          </h:panelGroup>
+        </p:column>
+      </p:row>
+    </p:panelGrid>
+
+  </p:panel>
+
+</ui:composition>

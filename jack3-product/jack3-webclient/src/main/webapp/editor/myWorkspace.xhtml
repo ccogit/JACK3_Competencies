@@ -1,0 +1,309 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:c="http://java.sun.com/jsp/jstl/core"
+  xmlns:p="http://primefaces.org/ui"
+  template="/WEB-INF/templates/template.xhtml">
+
+  <ui:define name="metadata">
+    <f:metadata>
+      <f:viewParam
+        name="location"
+        value="#{myWorkspaceView.locationId}" />
+      <f:viewAction actionListener="#{myWorkspaceView.loadLocation()}" />
+    </f:metadata>
+  </ui:define>
+
+  <ui:define name="content">
+    <c:set
+      var="current"
+      value="#{'myWorkspace'}"
+      scope="request" />
+
+    <h3>#{msg['start.myWorkspace']}</h3>
+
+    <h:form id="treeForm">
+      <ui:include src="/WEB-INF/includes/start/workspaceTree.xhtml" />
+    </h:form>
+
+  </ui:define>
+
+  <ui:define name="dialogs">
+    <!-- Import exercise dialog, has its own form -->
+    <ui:include src="/WEB-INF/includes/dialogs/importExerciseDialog.xhtml" />
+
+    <!-- Edit user rights dialog, has its own form -->
+    <ui:include src="/WEB-INF/includes/dialogs/userRightsDialog.xhtml" />
+
+    <!-- Rename folder dialog, has its own form -->
+    <ui:include src="/WEB-INF/includes/dialogs/folderRenameDialog.xhtml" />
+
+    <!-- Dialog for duplication of a Course -->
+    <h:form id="duplicateCourseForm">
+      <p:dialog
+        id="duplicateCourseDialog"
+        widgetVar="duplicateCourseDialog"
+        closable="true"
+        closeOnEscape="true"
+        header="#{msg['start.duplicateCourseButton']}"
+        modal="true"
+        draggable="false"
+        resizable="false"
+        styleClass="dialog-like-confirmdialog"
+        width="600">
+        <p:staticMessage
+          id="duplicateCourseDialogNoRightsForAllExercisesWarning"
+          rendered="#{not empty myWorkspaceView.courseDuplicateWarning}"
+          summary="#{msg['global.warn']}"
+          detail="#{myWorkspaceView.courseDuplicateWarning}"
+          severity="warn" />
+        <p:outputLabel
+          for="duplicateCourseDialogInput"
+          value="#{msg['start.duplicateNewName']}: "
+          style="vertical-align:baseline;" />
+        <p:inputText
+          id="duplicateCourseDialogInput"
+          value="#{myWorkspaceView.courseDuplicateName}"
+          placeholder="#{myWorkspaceView.selectedNodeName}"
+          size="40"
+          validator="requiredValidator" />
+        <p:message
+          id="validationError"
+          for="duplicateCourseDialogInput" />
+        <f:facet name="footer">
+          <p:commandButton
+            id="duplicateCourseDialogOk"
+            value="#{msg['global.ok']}"
+            oncomplete="if (args &amp;&amp; !args.validationFailed) PF('duplicateCourseDialog').hide();"
+            update=":treeForm:contentTree globalGrowl validationError"
+            action="#{myWorkspaceView.duplicateCourse}"
+            icon="fas fa-check" />
+          <p:commandButton
+            id="duplicateCourseDialogCancel"
+            value="#{msg['global.cancel']}"
+            onclick="PF('duplicateCourseDialog').hide()"
+            type="button"
+            styleClass="button-white"
+            icon="fas fa-times" />
+        </f:facet>
+      </p:dialog>
+    </h:form>
+
+    <!-- Dialog for duplication of an Exercise -->
+    <h:form id="duplicateExerciseForm">
+      <p:dialog
+        id="duplicateExerciseDialog"
+        widgetVar="duplicateExerciseDialog"
+        closable="true"
+        closeOnEscape="true"
+        header="#{msg['start.duplicateExerciseButton']}"
+        modal="true"
+        draggable="false"
+        resizable="false"
+        styleClass="dialog-like-confirmdialog"
+        width="600">
+        <p:outputLabel
+          for="duplicateExerciseDialogInput"
+          value="#{msg['start.duplicateNewName']}: "
+          style="vertical-align:baseline;" />
+        <p:inputText
+          id="duplicateExerciseDialogInput"
+          value="#{myWorkspaceView.duplicateExerciseName}"
+          placeholder="#{myWorkspaceView.selectedNodeName}"
+          size="40"
+          validator="requiredValidator" />
+        <p:message
+          id="validationError"
+          for="duplicateExerciseDialogInput" />
+        <f:facet name="footer">
+          <p:commandButton
+            id="duplicateExerciseDialogOk"
+            value="#{msg['global.ok']}"
+            oncomplete="if (args &amp;&amp; !args.validationFailed) PF('duplicateExerciseDialog').hide();"
+            update=":treeForm:contentTree globalGrowl validationError"
+            action="#{myWorkspaceView.duplicateExercise}"
+            icon="fas fa-check" />
+          <p:commandButton
+            id="duplicateExerciseDialogCancel"
+            value="#{msg['global.cancel']}"
+            onclick="PF('duplicateExerciseDialog').hide()"
+            type="button"
+            styleClass="button-white"
+            icon="fas fa-times"/>
+        </f:facet>
+      </p:dialog>
+    </h:form>
+
+    <!-- Dialog for deletion of a Course -->
+    <h:form id="deleteCourseForm">
+      <p:confirmDialog
+        id="dialogDeleteCourse"
+        header="#{msg['start.deleteCourse']}"
+        widgetVar="deleteCourse"
+        closable="false"
+        width="600px"
+        message="#{msg['start.deleteCourse.question']}">
+        <p:commandButton
+          id="buttonDialogDeleteCourseOk"
+          action="#{myWorkspaceView.deleteCourse}"
+          update=":treeForm:contentTree globalGrowl"
+          value="#{msg['global.yes']}"
+          onclick="PF('deleteCourse').hide();"
+          icon="fas fa-check"
+          onstart="PF('globalSpinner').show()"
+          oncomplete="PF('globalSpinner').hide()" />
+        <p:commandButton
+          id="buttonDialogDeleteCourseCancel"
+          value="#{msg['global.no']}"
+          onclick="PF('deleteCourse').hide();"
+          type="button"
+          styleClass="button-white"
+          icon="fas fa-times" />
+      </p:confirmDialog>
+    </h:form>
+
+    <!-- Dialog for deletion of an Exercise -->
+    <h:form id="deleteExerciseForm">
+      <p:confirmDialog
+        id="dialogDeleteExercise"
+        header="#{msg['start.deleteExercise']}"
+        widgetVar="deleteExercise"
+        closable="false"
+        width="600px"
+        message="#{myWorkspaceView.confirmExerciseDeletionMessage}">
+        <p:commandButton
+          id="buttonDialogDeleteExerciseYes"
+          action="#{myWorkspaceView.deleteExercise}"
+          update=":treeForm:contentTree globalGrowl"
+          value="#{msg['global.yes']}"
+          onclick="PF('deleteExercise').hide();"
+          icon="fas fa-check"
+          onstart="PF('globalSpinner').show()"
+          oncomplete="PF('globalSpinner').hide()" />
+        <p:commandButton
+          id="buttonDialogDeleteExerciseNo"
+          value="#{msg['global.no']}"
+          onclick="PF('deleteExercise').hide();"
+          type="button"
+          styleClass="button-white"
+          icon="fas fa-times" />
+      </p:confirmDialog>
+    </h:form>
+
+    <!-- Confirm dialog for moving a Folder -->
+    <h:form id="moveFolderForm">
+      <p:confirmDialog
+        id="dialogMoveFolder"
+        header="#{msg['global.confirm']}"
+        widgetVar="moveFolder"
+        closable="false"
+        width="600">
+        <f:facet name="message">
+          <h:outputText value="#{myWorkspaceView.moveOperationConfirmText}" />
+          <br />
+          <br />
+          <h:outputText value="#{msg['global.continue']}?" />
+        </f:facet>
+        <p:commandButton
+          id="buttonDialogMoveFolder"
+          action="#{myWorkspaceView.moveFolder()}"
+          update=":treeForm:contentTree globalGrowl"
+          value="#{msg['global.yes']}"
+          onclick="PF('moveFolder').hide();"
+          icon="fas fa-check" />
+        <p:commandButton
+          id="buttonDialogMoveFolderCloseDialog"
+          action="#{myWorkspaceView.undoDragDrop()}"
+          update=":treeForm:contentTree globalGrowl"
+          value="#{msg['global.no']}"
+          onclick="PF('moveFolder').hide();"
+          icon="fas fa-times"
+          styleClass="button-white" />
+      </p:confirmDialog>
+    </h:form>
+
+    <!-- Confirm dialog for moving an Exercise -->
+    <h:form id="moveExerciseForm">
+      <p:confirmDialog
+        id="dialogMoveExercise"
+        header="#{msg['start.moveExercise']}"
+        widgetVar="moveExercise"
+        closable="false"
+        width="600">
+        <f:facet name="message">
+          <h:outputText value="#{myWorkspaceView.moveOperationConfirmText} " />
+          <h:outputText value="#{msg['start.confirmMoveOperation.optionToDuplicate']}" />
+          <br />
+          <br />
+          <h:outputText value="#{msg['global.continue']}?" />
+        </f:facet>
+        <p:commandButton
+          id="buttonDialogMoveExercise"
+          action="#{myWorkspaceView.moveExercise()}"
+          update=":treeForm:contentTree globalGrowl"
+          value="#{msg['start.moveExercise']}"
+          onclick="PF('moveExercise').hide();" />
+        <p:commandButton
+          id="buttonDialogMoveExerciseDuplicate"
+          action="#{myWorkspaceView.duplicateExerciseAfterDragAndDrop()}"
+          update=":treeForm:contentTree globalGrowl"
+          value="#{msg['start.duplicateExerciseButton']}"
+          onclick="PF('moveExercise').hide();" />
+        <p:commandButton
+          id="buttonDialogMoveExerciseCloseDialog"
+          action="#{myWorkspaceView.undoDragDrop()}"
+          update=":treeForm:contentTree globalGrowl"
+          value="#{msg['global.cancel']}"
+          onclick="PF('moveExercise').hide();"
+          icon="fas fa-times"
+          styleClass="button-white" />
+      </p:confirmDialog>
+    </h:form>
+
+    <!-- Confirm dialog for moving a Course -->
+    <h:form id="moveCourseForm">
+      <p:confirmDialog
+        id="dialogMoveCourse"
+        header="#{msg['start.moveCourse']}"
+        widgetVar="moveCourse"
+        closable="false"
+        width="600">
+        <f:facet name="message">
+          <h:outputText value="#{myWorkspaceView.moveOperationConfirmText} " />
+          <h:outputText value="#{msg['start.confirmMoveOperation.optionToDuplicate']}" />
+          <br />
+          <br />
+          <h:outputText value="#{msg['global.continue']}?" />
+        </f:facet>
+        <p:commandButton
+          id="buttonDialogMoveCourse"
+          action="#{myWorkspaceView.moveCourse()}"
+          update=":treeForm:contentTree globalGrowl"
+          value="#{msg['start.moveCourse']}"
+          onclick="PF('moveCourse').hide();" />
+        <p:commandButton
+          id="buttonDialogMoveCourseDuplicate"
+          action="#{myWorkspaceView.duplicateCourseAfterDragAndDrop()}"
+          update=":treeForm:contentTree globalGrowl"
+          value="#{msg['start.duplicateCourseButton']}"
+          onclick="PF('moveCourse').hide();" />
+        <p:commandButton
+          id="buttonDialogMoveCourseCloseDialog"
+          action="#{myWorkspaceView.undoDragDrop()}"
+          update=":treeForm:contentTree globalGrowl"
+          value="#{msg['global.cancel']}"
+          onclick="PF('moveCourse').hide();"
+          icon="fas fa-times"
+          styleClass="button-white" />
+      </p:confirmDialog>
+    </h:form>
+
+    <!-- Dialog for extended deletion of tree elements -->
+    <h:form id="treeDeletionForm">
+      <ui:include src="/WEB-INF/includes/dialogs/treeContentDeletionDialog.xhtml" />
+    </h:form>
+  </ui:define>
+</ui:composition>
+

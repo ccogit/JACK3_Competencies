@@ -1,0 +1,136 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+  <p:panelGrid
+    id="pgUmlStageTargetOptions"
+    cellpadding="5"
+    styleClass="ui-panelgrid-blank">
+    <p:row>
+      <p:column id="columnPythonIgnorePendingChecksCheckbox">
+        <p:selectBooleanCheckbox
+          id="ignore"
+          value="#{stageBean.stage.ignorePendingJobs}"
+          onchange="processChange()"
+          disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}" />
+      </p:column>
+      <p:column id="columnPythonIgnorePendingChecks">
+        <h:outputText
+          for="ignore"
+          value="#{msg['exerciseEdit.python.ignorePendingChecks']}" />
+      </p:column>
+    </p:row>
+  </p:panelGrid>
+
+                    <h4>
+                      <h:outputText value="#{msg['exerciseEdit.stageTransitions']}" />
+                    </h4>
+                    <p:dataTable
+                      id="stageTransitions"
+                      value="#{stageBean.stage.getStageTransitionsForReorder()}"
+                      var="transition"
+                      emptyMessage="#{msg['exerciseEdit.noStageTransitions']}"
+                      draggableRows="#{exerciseEditView.newestRevision}"
+                      style="width:100%;">
+                      <p:ajax
+                        event="rowReorder"
+                        listener="#{stageBean.onTransitionReorder}"
+                        oncomplete="processChange()"
+                        update="stageTransitions" />
+                      <p:column
+                        id="headerTextStageCondition"
+                        headerText="#{msg['exerciseEdit.condition']}">
+                        <p:inplace
+                          id="editTransitionCondition"
+                          editor="true">
+                          <f:facet
+                            id="facetTransitionConditionOutput"
+                            name="output">
+                            <h:outputText
+                              id="exerciseTransitionStageExpression"
+                              value="#{transition.stageExpression.code}"
+                              rendered="#{transition.stageExpression.code!=null and transition.stageExpression.code!=''}"/>
+                            <h:outputText
+                              id="exerciseTransitionEmptyExpression"
+                              value="#{msg['exerciseEdit.blankCondition']}"
+                              style="font-style:italic"
+                              rendered="#{transition.stageExpression.code==null or transition.stageExpression.code==''}" />
+                          </f:facet>
+                          <f:facet
+                            id="facetTransitionConditionInput"
+                            name="input">
+                            <p:inputText
+                              id="inputTransitionStageExpression"
+                              value="#{transition.stageExpression.code}"
+                              disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+                              size="20"
+                              onkeypress="return event.keyCode != 13"
+                              onchange ="processChange()"/>
+                          </f:facet>
+                        </p:inplace>
+                      </p:column>
+                      <p:column
+                        id="headerTextVarDomain"
+                        headerText="#{msg['global.domain']}"
+                        style="width:80px;">
+                        <h:selectOneMenu
+                          id="soExpressionDomain"
+                          value="#{transition.stageExpression.domain}"
+                          onchange="processChange()">
+                          <f:selectItems
+                            id="selectedExpressionDomain"
+                            value="#{exerciseEditView.availableVariableDomains}"
+                            var="expressionDomain"
+                            disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}" />
+                        </h:selectOneMenu>
+                      </p:column>
+                      <p:column
+                        id="headerTextTransitionTarget"
+                        headerText="#{msg['exerciseEdit.target']}">
+                        <h:selectOneMenu
+                          id="transitionTarget"
+                          value="#{transition.target}"
+                          disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+                          converter="stageSelectOneMenuConverter"
+                          onchange="processChange()">
+                          <f:selectItem
+                            id="stageTransitionEnd"
+                            itemLabel="#{msg['exerciseEdit.endStage']}"
+                            itemValue="#{null}" />
+                          <f:selectItem
+                            id="stageTransitionRepeat"
+                            itemLabel="#{msg['exerciseEdit.repeatStage']}"
+                            itemValue="#{exerciseEditView.repeatStage}" />
+                          <f:selectItems
+                            id="stageTransitionStagesAsList"
+                            value="#{exerciseEditView.exercise.stagesAsList}"
+                            var="stageTargetStage"
+                            itemLabel="#{stageTargetStage.internalName}"
+                            itemValue="#{stageTargetStage}" />
+                        </h:selectOneMenu>
+                      </p:column>
+                      <p:column
+                        id="columnRemoveStageTransition"
+                        style="width:43px;">
+                        <p:commandButton
+                          id="cbRemoveStageTransition"
+                          icon="fas fa-trash-alt fa-sm"
+                          disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+                          action="#{stageBean.removeStageTransition(transition)}"
+                          update="stageTransitions"
+                          oncomplete="processChange()" />
+                      </p:column>
+                    </p:dataTable>
+
+                  <p:commandButton
+                    id="cbAddNewStageTransition"
+                    disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+                    value="#{msg['exerciseEdit.addTransitionTarget']}"
+                    action="#{stageBean.addNewStageTransition()}"
+                    update="stageTransitions"
+                    oncomplete="processChange()" />
+                    
+
+</ui:composition>

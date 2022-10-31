@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="jack3-ui-tests" />
+        <module name="jack3-business" />
+        <module name="jack3-tests" />
+        <module name="jack3-webclient" />
+        <module name="jack3-core" />
+      </profile>
+    </annotationProcessing>
+  </component>
+</project>

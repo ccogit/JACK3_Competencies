@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: de.uni-due.s3.jack2import:jack2import:0.2.2">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/de/uni-due/s3/jack2import/jack2import/0.2.2/jack2import-0.2.2.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/de/uni-due/s3/jack2import/jack2import/0.2.2/jack2import-0.2.2-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/de/uni-due/s3/jack2import/jack2import/0.2.2/jack2import-0.2.2-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

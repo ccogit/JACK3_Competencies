@@ -1,0 +1,106 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:p="http://primefaces.org/ui">
+
+	<!-- Javascript used in exerciseEdit.xhtml. Unfortunatly we cant just use an external *.js file,
+		 since the jsf bean properties wouldn't be evaluated. Using a xhtml-include as a workaround. -->
+	<script type="text/javascript">
+		//<![CDATA[
+
+		function processChange() {
+			// We want to enable the save button only when something has changed, to avoid saving redundant 
+			// revisions
+
+			// If user is not allowed to save anything don't enable the save-button.
+			// Don't rely on this client side script! This needs also to be checked in the backing bean in the save 
+			// method!
+			var userAllowedToEdit = ("#{exerciseEditView.userAllowedToEdit}" == 'true');
+			if (!userAllowedToEdit) {
+				return;
+			}
+
+			if (document.getElementById('exerciseEdit:saveExercise')) {
+				PF('saveExerciseButton').enable();
+				document.getElementById('exerciseEdit:validateExercise').disabled = true;
+				jQuery('#exerciseEdit\\:validateExercise').addClass(
+						"ui-state-disabled");
+				document
+						.querySelector('#exerciseEdit\\:testExercise > span:nth-child(2)').innerHTML = "#{msg['global.testAndSave']}";
+			}
+			preventUnload(true);
+		}
+
+		function preventUnload(state) {
+			message = "#{msg['global.preventUnloadMessage']}";
+			window.onbeforeunload = state ? function() {
+				return message;
+			} : null;
+		}
+
+		function saveAndTest() {
+			preventUnload(false);
+			if (!document.getElementById('exerciseEdit:saveExercise').disabled) {
+				saveBeforeTesting();
+			}
+			redirectToTest();
+		}
+
+		function checkUserInputForActivationOfSaveButton() {
+			var keyCode = event.keyCode;
+			// if Enter is pressed no save action
+			if (keyCode == 13) {
+				event.preventDefault();
+				return false;
+			}
+
+			//printable chars have lenght of 1, Backspace or Delete should also be handeld like them
+			if (event.key.length == 1 || keyCode == 8 || keyCode == 46) {
+				processChange();
+			}
+			return true;
+		}
+
+		function checkUserInputForActivationOfSaveButtonNoReturnSurpession() {
+			var keyCode = event.keyCode;
+
+			//printable chars have lenght of 1, Backspace, Delete or Carriage Return should also be handeld like them
+			if (event.key.length == 1 || keyCode == 8 || keyCode == 46
+					|| keyCode == 13) {
+				processChange();
+			}
+			return true;
+		}
+
+		function exerciseCouldNotBeSaved() {
+			processChange();
+			summary = "#{msg['exerciseEdit.savingFailed.summary']}";
+			detail = "#{msg['exerciseEdit.savingFailed.detail']}";
+			PF('w_globalGrowl').renderMessage({
+				"summary" : summary,
+				"detail" : detail,
+				"severity" : "error"
+			});
+		}
+
+		function savingExercise() {
+			PF('saveExerciseButton').disable();
+		}
+
+		function onkeydownExerciseName() {
+			if (event.keyCode === 27) {
+				PF('exerciseNameInput').cancel();
+				return false;
+			} else if (event.keyCode === 13) {
+				event.preventDefault();
+				PF('exerciseNameInput').save();
+				return false;
+			}
+		}
+		
+		//]]>
+	</script>
+
+</ui:composition>

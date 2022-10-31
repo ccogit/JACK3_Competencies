@@ -1,0 +1,52 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:p="http://primefaces.org/ui">
+
+  <h3>#{courseOfferEditView.courseOffer.toggleAllowlist ? msg['courseOfferEdit.toggleUserFilter.allowlist'] :
+    msg['courseOfferEdit.toggleUserFilter.blocklist']}</h3>
+  <p>
+    <h:outputText
+      value="#{msg['courseOfferEdit.toggleUserFilter.allowlistInfo']}"
+      rendered="#{courseOfferEditView.courseOffer.toggleAllowlist}" />
+    <h:outputText
+      value="#{msg['courseOfferEdit.toggleUserFilter.blocklistInfo']}"
+      rendered="#{not courseOfferEditView.courseOffer.toggleAllowlist}" />
+  </p>
+
+  <p:panelGrid
+    columns="2"
+    styleClass="ui-panelgrid-blank">
+    <h:outputLabel
+      for="filterModes"
+      value="#{msg['global.filter']}:" />
+    <p:selectCheckboxMenu
+      id="filterModes"
+      value="#{courseOfferEditView.userFilterView.profileFieldFilter}"
+      multiple="true"
+      onchange="processChange()"
+      layout="grid"
+      columns="2"
+      disabled="#{courseOfferEditView.readOnly}">
+      <f:selectItems
+        id="filterModesItems"
+        var="filterMode"
+        value="#{courseOfferEditView.userFilterView.profileFields}"
+        itemLabel="#{filterMode.toString()}" />
+      <p:ajax />
+    </p:selectCheckboxMenu>
+  </p:panelGrid>
+
+  <p:inputTextarea
+    id="courseOfferFilterList"
+    rows="10"
+    style="width: 100%; margin-top: 16px; max-height: 50vh;"
+    value="#{courseOfferEditView.userFilterView.filterText}"
+    onchange="processChange()"
+    disabled="#{courseOfferEditView.readOnly}">
+    <p:ajax update="@this" />
+  </p:inputTextarea>
+
+</ui:composition>

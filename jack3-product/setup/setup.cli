@@ -1,0 +1,101 @@
+embed-server --server-config=standalone.xml --admin-only
+
+# ----- Remove the H2 datasource and driver -----
+/subsystem=ee/service=default-bindings:undefine-attribute(name=datasource)
+/subsystem=datasources/data-source=ExampleDS:remove
+reload
+/subsystem=datasources/jdbc-driver=h2:remove
+
+# ----- Remove welcome content handler -----
+/subsystem=undertow/server=default-server/host=default-host/location=\/:remove
+/subsystem=undertow/configuration=handler/file=welcome-content:remove
+
+# ----- Create a file handler from where we serve resources -----
+/subsystem=undertow/configuration=handler/file=resources-handler:add(path="$${jboss.home.dir}/resources")
+/subsystem=undertow/server=default-server/host=default-host/location=\/resources:add(handler=resources-handler)
+
+# ----- Setup the default node identifier -----
+/subsystem=transactions:write-attribute(name=node-identifier,value=${jboss.node.name})
+
+# ----- Setup postgresl driver -----
+module add --name=org.postgresql --dependencies=[javax.api,javax.transaction.api] --resources=postgresql-42.5.0.jar
+/subsystem=datasources/jdbc-driver=postgresql:add(driver-name=postgresql,driver-class-name=org.postgresql.Driver,driver-module-name=org.postgresql)
+
+# ----- Increase max HTTP parameters -----
+/subsystem=undertow/server=default-server/https-listener=https:write-attribute(name=max-parameters,value=5000)
+reload
+
+# ----- Setup TLS -----
+
+/subsystem=elytron/key-store=jack-keystore:add(path=${keystore.file},relative-to=jboss.server.config.dir,credential-reference={clear-text="${keystore.password}"},type=JKS)
+/subsystem=elytron/key-manager=jack-keymanager:add(key-store=jack-keystore,alias-filter=${keystore.alias},credential-reference={clear-text="${keystore.privatekey.password}"})
+/subsystem=elytron/server-ssl-context=jack-ssl-context:add(key-manager=jack-keymanager)
+/subsystem=elytron/server-ssl-context=jack-ssl-context:write-attribute(name=cipher-suite-filter,value=TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256:TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384:TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA:TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA:TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256:TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384:TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256:TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384:TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA:TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA:TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256:TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384)
+/subsystem=elytron/server-ssl-context=jack-ssl-context:write-attribute(name=protocols, value=[TLSv1.2,TLSv1.3])
+
+batch
+/subsystem=undertow/server=default-server/https-listener=https:undefine-attribute(name=security-realm)
+/subsystem=undertow/server=default-server/https-listener=https:write-attribute(name=ssl-context,value=jack-ssl-context)
+run-batch
+
+/socket-binding-group=standard-sockets/socket-binding=https-extern:add(port="${jboss.https.port:443}")
+/subsystem=undertow/server=default-server/http-listener=default:write-attribute(name=redirect-socket,value=https-extern)
+
+# HTTP2 support is a nightmare currently. We disable it. 
+/subsystem=undertow/server=default-server/http-listener=default:write-attribute(name=enable-http2,value=false)
+/subsystem=undertow/server=default-server/https-listener=https:write-attribute(name=enable-http2,value=false)
+
+reload
+
+# ----- Create the jack security domain.
+
+# We first create a realm mapper that extracts the tenant identifier from the principal's name
+# and maps it to a security realm. The dummy=dummy mapping is required as realm-map is mandatory.
+/subsystem=elytron/mapped-regex-realm-mapper=jack-realm-mapper:add(pattern=([a-zA-Z0-9-]+)/.+,realm-map={dummy=dummy})
+
+# We also need a principal mapper that removes the tenant identifier from the principal names.
+/subsystem=elytron/regex-principal-transformer=jack-principal-transformer:add(pattern="[a-zA-Z0-9-]+/(.+)",replace-all=false,replacement="$1")
+
+# Then we can create the security domain ...
+/subsystem=elytron/security-domain=jack-security-domain:add(permission-mapper=default-permission-mapper,realm-mapper=jack-realm-mapper,post-realm-principal-transformer=jack-principal-transformer)
+
+# ... and also a http authentication factory.
+/subsystem=elytron/http-authentication-factory=jack-http-authentication-factory:add(http-server-mechanism-factory=global,security-domain=jack-security-domain,mechanism-configurations=[{mechanism-name=FORM}])
+
+# Now we need to map the application's legacy security domain to the elytron one.
+/subsystem=ejb3/application-security-domain=jack-legacy-security-domain:add(security-domain=jack-security-domain)
+
+# We also need to tell wildfly to use the new security domain within the http authentication factory.
+/subsystem=undertow/application-security-domain=jack-legacy-security-domain:add(http-authentication-factory=jack-http-authentication-factory)
+
+# ----- Setup HTTP headers to secure our clients. -----
+
+# Deny embedding content from this server in iframes.
+/subsystem=undertow/configuration=filter/response-header=x-frame-options:add(header-name="x-frame-options",header-value="DENY")
+/subsystem=undertow/server=default-server/host=default-host/filter-ref=x-frame-options:add
+
+# Only share referrers within the same origin
+/subsystem=undertow/configuration=filter/response-header=referrer-policy:add(header-name="referrer-policy",header-value="same-origin")
+/subsystem=undertow/server=default-server/host=default-host/filter-ref=referrer-policy:add
+
+# Activate XSS protection
+/subsystem=undertow/configuration=filter/response-header=x-xss-protection:add(header-name="x-xss-protection",header-value="1; mode=block")
+/subsystem=undertow/server=default-server/host=default-host/filter-ref=x-xss-protection:add
+
+# Prevent browser from sniffing mime types
+/subsystem=undertow/configuration=filter/response-header=x-content-type-options:add(header-name="x-content-type-options",header-value="nosniff")
+/subsystem=undertow/server=default-server/host=default-host/filter-ref=x-content-type-options:add
+
+# We reload the configuration to bring our changes to effect.
+reload
+
+# ----- Setup reactive messaging (kafka) -----
+batch
+/extension=org.wildfly.extension.microprofile.reactive-messaging-smallrye:add
+/extension=org.wildfly.extension.microprofile.reactive-streams-operators-smallrye:add
+/subsystem=microprofile-reactive-streams-operators-smallrye:add
+/subsystem=microprofile-reactive-messaging-smallrye:add
+run-batch
+reload
+
+stop-embedded-server

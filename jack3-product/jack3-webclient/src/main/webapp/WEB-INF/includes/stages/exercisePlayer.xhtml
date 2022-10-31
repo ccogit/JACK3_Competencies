@@ -1,0 +1,836 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:c="http://java.sun.com/jsp/jstl/core"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:j="http://jack.s3.uni-due.de/ui-elements">
+
+  <p:remoteCommand
+    onstart="PF('globalSpinner').show();updateSubmissionDetailsIfNecessary()"
+    oncomplete="PF('globalSpinner').hide()"
+    name="updatePlayerViewManually"
+    update="exercise stages currentVariablesWrapper"
+    action="#{exercisePlayerView.reloadPlayer()}" />
+  <script>
+			// Only update submission view header if visible ("submissionDetails" page)
+			function updateSubmissionDetailsIfNecessary() {
+				if (document
+						.getElementById('submissionDetails:pgSubmissionDetailsGeneral')) {
+					updateSubmissionViewHeader()
+				}
+			}
+
+  </script>
+
+  <c:forEach items="#{exercisePlayerView.stageTypes}" var="type">
+    <ui:include page="/WEB-INF/includes/stages/#{type}/prolog.xhtml"/>
+  </c:forEach>
+
+  <h:outputScript
+    library="js"
+    name="jsxgraphcore.js"
+    rendered="#{exercisePlayerView.isJSXGraphVisible()}"
+    target="head" />
+  <h:outputStylesheet
+    library="jack"
+    name="css/jsxgraph.css"
+    rendered="#{exercisePlayerView.isJSXGraphVisible()}"
+    target="head" />
+  <h:outputStylesheet>
+    .submissionAjaxStatus, .submissionAjaxStatus div {
+      display: inline;
+    }
+    
+    .consoleStyle {
+        opacity:1.00 !important;
+    }
+    
+  </h:outputStylesheet>
+
+  <p:panel id="exercise">
+    <h3>
+      <h:outputText value="#{exercisePlayerView.exercise.name}" />
+    </h3>
+    <h:outputText
+      rendered="#{exercisePlayerView.showResult}"
+      value="#{msg['exercisePlayer.currentScore']}:
+    						 #{exercisePlayerView.submission.resultPoints}%" />
+  </p:panel>
+  <p:panel
+    id="panelExerciseDescription"
+    header="#{msg['global.description']}"
+    rendered="#{not empty exercisePlayerView.exercise.publicDescription}"
+    toggleable="true"
+    toggleSpeed="500"
+    style="margin-bottom:10px">
+    <h:outputText
+      value="#{exercisePlayerView.exercise.publicDescription}"
+      escape="false" />
+  </p:panel>
+ 
+  <h:panelGroup id="stages">
+    <c:forEach
+      items="#{exercisePlayerView.stageSubmissionList}"
+      var="stageSubmission"
+      varStatus="loopStatus">
+      <p:panel
+        id="panelIDStage_#{loopStatus.index}"
+        header="#{exercisePlayerView.getStageSubmissionViewBean(stageSubmission).stage.externalName} 
+        		#{exercisePlayerView.isReviewMode()?exercisePlayerView.getStageSubmissionViewBean(stageSubmission).stage.internalName:''}"
+        toggleable="true"
+        rendered="#{exercisePlayerView.getStageSubmissionViewBean(stageSubmission).isVisible()}">
+        <h:panelGroup id="lecturerPanel#{loopStatus.index}">
+          <!-- Dummy group for updating only the lecturer panel -->
+          <c:if test="#{exercisePlayerView.showVariablesAndLogs}">
+
+            <!-- Variable list -->
+            <p:panel
+              id="panelStageSubmission_#{loopStatus.index}_PreVars"
+              header="#{msg['exercisePlayer.preVariablesAssignment']}"
+              rendered="#{not empty exercisePlayerView.getPreVariableValues(stageSubmission)}"
+              toggleable="true"
+              collapsed="true">
+              <p:staticMessage
+                style="margin:0px"
+                severity="info"
+                detail="#{msg['exercisePlayer.onlyForLecturers']}" />
+              <p:dataTable
+                id="preVariables_#{loopStatus.index}"
+                value="#{exercisePlayerView.getPreVariableValues(stageSubmission)}"
+                var="variableValue"
+                rendered="#{not empty exercisePlayerView.getVariableValues(stageSubmission)}"
+                filteredValue="#{exercisePlayerView.filteredVariablesValues}"
+                widgetVar="variableTable_#{loopStatus.index}">
+                <p:column
+                  id="columnVariableName"
+                  headerText="#{msg['global.name']}"
+                  filterBy="#{variableValue.name}"
+                  filterMatchMode="contains"
+                  width="250">
+                  <h:outputText value="#{variableValue.name}" />
+                </p:column>
+                <p:column
+                  id="columnVariableType"
+                  headerText="#{msg['global.type']}"
+                  filterBy="#{variableValue.type}"
+                  filterMatchMode="exact"
+                  sortBy="#{variableValue.type}"
+                  width="140">
+                  <f:facet name="filter">
+                    <p:selectOneButton
+                      onchange="PF('variableTable_#{loopStatus.index}').filter()"
+                      styleClass="custom-filter">
+                      <f:selectItems
+                        value="#{exercisePlayerView.variableTypeValues}"
+                        var="type"
+                        itemLabel="#{type.displayName}"
+                        itemValue="#{type}" />
+                    </p:selectOneButton>
+                  </f:facet>
+                  <h:outputText value="#{variableValue.type.displayName}" />
+                  <j:helperTooltip
+                    id="preVariableHint#{loopStatus.index}"
+                    tooltip="#{msg['exercisePlayer.variableHint.' += variableValue.type.displayName]}" />
+                </p:column>
+                <p:column
+                  id="columnVariableValue"
+                  headerText="#{msg['global.value']}"
+                  styleClass="nopadding">
+                  <h:panelGroup styleClass="panel-scroll-x">
+                    <h:outputText value="#{exercisePlayerView.getLaTeXRepresentation(variableValue.value)}" />
+                  </h:panelGroup>
+
+                </p:column>
+              </p:dataTable>
+              <p:outputLabel
+                value="#{msg['exercisePlayer.noVariables']}"
+                rendered="#{empty exercisePlayerView.getVariableValues(stageSubmission)}" />
+            </p:panel>
+
+            <!-- Evaluator shell -->
+            <ui:include src="/WEB-INF/includes/evaluatorShell.xhtml">
+              <ui:param
+                name="id"
+                value="#{stageSubmission.id}" />
+              <ui:param
+                name="collapsed"
+                value="true" />
+              <ui:param
+                name="showLecturerHint"
+                value="true" />
+            </ui:include>
+            <hr />
+          </c:if>
+        </h:panelGroup>
+
+        <ui:include
+          page="/WEB-INF/includes/stages/#{stageSubmission==null?'default':
+        				exercisePlayerView.getStageSubmissionViewBean(stageSubmission).stage.type}/input.xhtml">
+          <ui:param
+            name="stageIndex"
+            value="#{loopStatus.index}" />
+        </ui:include>
+
+        <c:if test="#{exercisePlayerView.stageHasCodeTestCapability()}">
+          <p:panel id="consolePanel" header="#{msg['exercisePlayer.consoleHeader']}">
+            <p:inputTextarea id="console" cols="100" widgetVar="consoleWidget" styleClass="consoleStyle"
+              autoResize="true" disabled="true" style="width: 100%; box-sizing: border-box;"
+              value="#{exercisePlayerView.consoleLog}" />
+            </p:panel>
+ 		</c:if>
+
+        <h:panelGroup id="hintBlock#{loopStatus.index}">
+          <c:if test="#{exercisePlayerView.getStageSubmissionViewBean(stageSubmission).hints.size()>0}">
+            <hr style="clear: both" />
+            <h4>
+              <h:outputText value="#{msg['exercisePlayer.hints']}" />
+            </h4>
+
+            <ol>
+              <c:forEach
+                items="#{exercisePlayerView.getStageSubmissionViewBean(stageSubmission).hints}"
+                var="hint">
+
+                <!-- add a line break unless it is the first hint -->
+                <c:if test="#{exercisePlayerView.getStageSubmissionViewBean(stageSubmission).hints.indexOf(hint) != 0}">
+                  <br style="clear: both" />
+                </c:if>
+
+                <li><h:outputText
+                    value="#{hint}"
+                    escape="false" /></li>
+              </c:forEach>
+            </ol>
+          </c:if>
+        </h:panelGroup>
+
+        <!-- Stage resources -->
+        <c:if
+          test="#{not empty exercisePlayerView.getStageSubmissionViewBean(stageSubmission).stage.getStageResources() 
+        				and not (exercisePlayerView.reviewMode)}">
+          <hr style="clear: both" />
+          <h4>
+            <h:outputText value="#{msg['exercisePlayer.stageResourcesDownload']}" />
+          </h4>
+          <p:dataTable
+            id="dtStageResources"
+            value="#{exercisePlayerView.getStageSubmissionViewBean(stageSubmission).stage.getStageResources()}"
+            var="file">
+            <p:column
+              id="columnFilename"
+              headerText="#{msg['global.files']}">
+              <p:commandLink
+                id="clDownloadResource"
+                ajax="false"
+                value="#{file.exerciseResource.filename}"
+                disabled="#{not (exercisePlayerView.isCurrentStage(stageSubmission)) 
+                      or (exercisePlayerView.submission.isCompleted())
+                      or (exercisePlayerView.submission.hasInternalErrors())
+                            or (stageSubmission.hasPendingChecks())}">
+                <p:fileDownload value="#{exercisePlayerView.getStageResource(file)}" />
+              </p:commandLink>
+            </p:column>
+            <p:column
+              id="columnSize"
+              headerText="#{msg['global.size']}"
+              width="70">
+              <h:outputText value="#{exercisePlayerView.getStageResourceSize(file)}" />
+            </p:column>
+            <p:column
+              rendered="#{exercisePlayerView.isShowStageResourceDescription(exercisePlayerView.getStageSubmissionViewBean(stageSubmission).stage.getStageResources())}"
+              id="columnDescription"
+              headerText="#{msg['global.description']}"
+              width="500">
+              <h:outputText value="#{file.description}" />
+            </p:column>
+          </p:dataTable>
+        </c:if>
+
+        <c:if test="#{not (exercisePlayerView.isReviewMode())}">
+          <hr style="clear: both" />
+
+          	<script>
+				// Only update exercise list if present
+				function updateCoursePlayerExerciseListIfNecessary() {
+					if (PrimeFaces.widgets['coursePlayerExerciseList']) {
+						updateCoursePlayerExerciseList()
+					}
+				}
+			</script>
+			
+          <p:commandButton
+            id="submit#{loopStatus.index}"
+            value="#{msg['exercisePlayer.submit']}"
+            action="#{exercisePlayerView.submitSubmission}"
+            onclick="if (typeof handleStudentSubmission#{loopStatus.index} === 'function') { 
+            		handleStudentSubmission#{loopStatus.index}();
+            		}"
+            disabled="#{not (exercisePlayerView.isCurrentStage(stageSubmission)) 
+            			or (exercisePlayerView.submission.isCompleted())
+            			or (exercisePlayerView.submission.hasInternalErrors())
+                        or (stageSubmission.hasPendingChecks())}"
+            update="stages exercise globalGrowl currentVariablesWrapper"
+            oncomplete="updateCoursePlayerExerciseListIfNecessary()" />
+           
+           <p:commandButton
+	            id="testcode#{loopStatus.index}"
+	            value="#{msg['exercisePlayer.testCodeBtn']}"
+	            onclick="if (typeof handleStudentSubmission#{loopStatus.index} === 'function') {
+	            		handleStudentSubmission#{loopStatus.index}(false);
+	            	}
+	            	PF('consolePoll').start();"
+            	oncomplete="PF('consoleWidget').getJQ().animate({backgroundColor: '#D3D3D3'}, 'slow');"
+	            action="#{exercisePlayerView.testCode}"
+	            disabled="#{not (exercisePlayerView.isCurrentStage(stageSubmission)) 
+	            			or (exercisePlayerView.submission.isCompleted())
+	            			or (exercisePlayerView.submission.hasInternalErrors())
+	                        or (stageSubmission.hasPendingChecks())}"
+	            update="exercise globalGrowl console"
+	            process="@this @parent console"
+	            rendered="#{exercisePlayerView.stageHasCodeTestCapability()}">
+            </p:commandButton>
+                        
+          <p:poll widgetVar="consolePoll" 
+	          	id="consolePoll#{loopStatus.index}"
+	          	interval="3"
+	          	autoStart="false"
+	          	rendered="#{exercisePlayerView.stageHasCodeTestCapability()}"
+	          	listener="#{exercisePlayerView.refreshConsole}"
+	          	update="exercise globalGrowl console" />
+	           
+          <p:commandButton
+            id="skip#{loopStatus.index}"
+            value="#{msg['exercisePlayer.skip']}"
+            action="#{exercisePlayerView.skipStage}"
+            disabled="#{not exercisePlayerView.isCurrentStage(stageSubmission) 
+            			or exercisePlayerView.submission.isCompleted()
+            			or exercisePlayerView.submission.hasInternalErrors()
+                        or (stageSubmission.hasPendingChecks())}"
+            rendered="#{exercisePlayerView.stageAllowsSkip(stageSubmission)}"
+            update="stages exercise globalGrowl currentVariablesWrapper"
+            oncomplete="updateCoursePlayerExerciseListIfNecessary()" />
+            
+          <p:commandButton
+            id="hint#{loopStatus.index}"
+            value="#{msg['exercisePlayer.hint']}"
+            action="#{exercisePlayerView.requestHint}"
+            disabled="#{not ((exercisePlayerView.isCurrentStage(stageSubmission)) 
+             			and (exercisePlayerView.hasMoreHints(stageSubmission)))
+                        or (exercisePlayerView.submission.isCompleted())
+             			or (exercisePlayerView.submission.hasInternalErrors())
+                        or (stageSubmission.hasPendingChecks())}"
+            rendered="#{exercisePlayerView.allowsHints() and exercisePlayerView.hasAnyHints(stageSubmission)}"
+            update="hintBlock#{loopStatus.index} lecturerPanel#{loopStatus.index} exercise globalGrowl @this currentVariablesWrapper"
+            oncomplete="updateCoursePlayerExerciseListIfNecessary()" />
+          <p:commandButton
+            id="eraseSubmission#{loopStatus.index}"
+            onclick="PF('eraseSubmission#{loopStatus.index}').show();"
+            icon="fas fa-redo-alt fa-sm"
+            rendered="#{not exercisePlayerView.showVariablesAndLogs
+                            and not exercisePlayerView.reviewMode 
+            				and ((not exercisePlayerView.isCurrentStage(stageSubmission)
+                            and exercisePlayerView.allowStageRestart) or exercisePlayerView.isCurrentStage(stageSubmission) and exercisePlayerView.submission.hasInternalErrors())}"
+            value="#{msg['exercisePlayer.eraseSubmission']}" />
+          <p:commandButton
+            id="eraseSubmissionQuietly#{loopStatus.index}"
+            icon="fas fa-redo-alt fa-sm"
+            rendered="#{exercisePlayerView.showVariablesAndLogs
+                            and not exercisePlayerView.reviewMode 
+                            and ((not exercisePlayerView.isCurrentStage(stageSubmission)
+                            and exercisePlayerView.allowStageRestart) or exercisePlayerView.isCurrentStage(stageSubmission) and exercisePlayerView.submission.hasInternalErrors())}"
+            action="#{exercisePlayerView.eraseSubmission(stageSubmission)}"
+            update="stages exercise globalGrowl currentVariablesWrapper"
+            value="#{msg['exercisePlayer.eraseSubmission']}" />
+          <p:ajaxStatus
+            rendered="#{exercisePlayerView.isCurrentStage(stageSubmission)}"
+            styleClass="submissionAjaxStatus">
+            <f:facet name="start">
+              <em class="fa fa-circle-o-notch fa-spin" />
+              <h:outputText
+                escape="false"
+                value="&amp;nbsp;#{msg['exercisePlayer.ajaxPending']}" />
+            </f:facet>
+          </p:ajaxStatus>
+          <p:confirmDialog
+            id="dialogEraseSubmission#{loopStatus.index}"
+            header="#{msg['exercisePlayer.eraseSubmission.header']}"
+            widgetVar="eraseSubmission#{loopStatus.index}"
+            width="600px"
+            message="#{msg['exercisePlayer.eraseSubmission.question']}">
+            <p:commandButton
+              id="buttonDialogEraseSubmission#{loopStatus.index}Ok"
+              action="#{exercisePlayerView.eraseSubmission(stageSubmission)}"
+              value="#{msg['global.ok']}"
+              update="stages exercise globalGrowl currentVariablesWrapper"
+              oncomplete="updateCoursePlayerExerciseListIfNecessary()"
+              onclick="PF('eraseSubmission#{loopStatus.index}').hide();" />
+            <p:commandButton
+              id="buttonDialogEraseSubmission#{loopStatus.index}Cancel"
+              value="#{msg['global.cancel']}"
+              onclick="PF('eraseSubmission#{loopStatus.index}').hide();" />
+          </p:confirmDialog>
+        </c:if>
+
+        <c:if test="#{stageSubmission.hasPendingChecks()}">
+          <p>
+            <h:outputText
+              styleClass="fas fa-circle-notch fa-spin"
+              style="margin-right:3px;" />
+            <h:outputText value="#{msg['exercisePlayer.checksPending']}" />
+          </p>
+        </c:if>
+        <p:poll
+          id="pageRefreshPoll_#{loopStatus.index}"
+          interval="5"
+          listener="#{exercisePlayerView.refreshContent}"
+          autoStart="#{stageSubmission.hasPendingChecks() and exercisePlayerView.isCurrentStage(stageSubmission)}"
+          stop="#{not stageSubmission.hasPendingChecks() or not exercisePlayerView.isCurrentStage(stageSubmission)}"
+          update="stages exercise globalGrowl currentVariablesWrapper" />
+        <p:poll
+          id="feedbackRefreshPoll_#{loopStatus.index}"
+          interval="5"
+          listener="#{exercisePlayerView.refreshContent}"
+          autoStart="#{stageSubmission.hasPendingChecks() and not exercisePlayerView.isCurrentStage(stageSubmission)}"
+          stop="#{not stageSubmission.hasPendingChecks() or exercisePlayerView.isCurrentStage(stageSubmission)}"
+          update="panelIDStage_#{loopStatus.index} exercise globalGrowl currentVariablesWrapper" />
+
+        <!-- Shown feedback -->
+        <h:panelGroup
+          id="resultBlock#{loopStatus.index}"
+          layout="block">
+
+          <!-- Automatic feedback for students (if no manual result) -->
+          <c:if
+            test="#{not exercisePlayerView.allowedToGiveManualFeedback 
+          				and not stageSubmission.hasManualResult 
+          				and not empty stageSubmission.results 
+          				and (exercisePlayerView.showResult or exercisePlayerView.showFeedback)
+          				and not stageSubmission.hasInternalErrors()}">
+            <h:panelGroup
+              id="resultBlock#{loopStatus.index}_studentAutomaticFeedback"
+              layout="block">
+              <hr />
+              <c:if test="#{exercisePlayerView.showResult and not stageSubmission.hasPendingChecks()}">
+                <p>
+                  <strong><h:outputText
+                      value="#{msg['global.score']}: #{exercisePlayerView.getPointsWithDeductionsForStageSubmission(stageSubmission)}% " /></strong>
+                </p>
+                <c:if test="#{exercisePlayerView.isScoreDeductedForHints(stageSubmission)}">
+                  <p style="font-size: 90%">
+                    <h:outputFormat value="#{msg['exercisePlayer.pointsReductionNotice']}">
+                      <f:param value="#{stageSubmission.getPoints()}" />
+                    </h:outputFormat>
+                  </p>
+                </c:if>
+              </c:if>
+              <c:if test="#{exercisePlayerView.showFeedback}">
+                <ui:include page="/WEB-INF/includes/feedbackList.xhtml" />
+              </c:if>
+            </h:panelGroup>
+          </c:if>
+
+          <!-- Manual feedback for students (if manual result) -->
+          <c:if
+            test="#{not exercisePlayerView.allowedToGiveManualFeedback and stageSubmission.hasManualResult and (exercisePlayerView.showResult or exercisePlayerView.showFeedback)}">
+            <h:panelGroup
+              id="resultBlock#{loopStatus.index}_studentManualFeedback"
+              layout="block">
+              <hr />
+              <c:if test="#{exercisePlayerView.showResult}">
+                <p>
+                  <strong><h:outputText
+                      value="#{msg['global.score']}: #{stageSubmission.manualResult.get().points}% " /></strong>
+                </p>
+              </c:if>
+              <c:if
+                test="#{exercisePlayerView.showFeedback and stageSubmission.manualResult.get().showAutomaticResult and not empty stageSubmission.results}">
+                <ui:include page="/WEB-INF/includes/feedbackList.xhtml" />
+              </c:if>
+              <c:if
+                test="#{exercisePlayerView.showFeedback and not empty stageSubmission.manualResult.get().publicComment}">
+                <c:if
+                  test="#{stageSubmission.manualResult.get().showAutomaticResult and not empty stageSubmission.results}">
+                  <p>
+                    <strong><h:outputText value="#{msg['exercisePlayer.manualFeedback.title']}" /></strong>
+                  </p>
+                </c:if>
+                <p>
+                  <h:outputText
+                    value="#{stageSubmission.manualResult.get().publicComment}"
+                    escape="false" />
+                </p>
+              </c:if>
+
+            </h:panelGroup>
+          </c:if>
+
+          <!-- Full feedback for lecturers (automatic and manual results) -->
+          <c:if test="#{exercisePlayerView.allowedToGiveManualFeedback}">
+            <h:panelGroup
+              id="resultBlock#{loopStatus.index}_fullFeedback"
+              layout="block">
+              <c:if test="#{not empty stageSubmission.results}">
+                <hr />
+                <p>
+                  <strong><h:outputText
+                      value="#{msg['exercisePlayer.automaticResult']}: #{exercisePlayerView.getPointsWithDeductionsForStageSubmission(stageSubmission)}% " /></strong>
+                  <h:outputText
+                    value="#{msg['exercisePlayer.automaticResultOverwritten']}"
+                    rendered="#{stageSubmission.hasManualResult}" />
+                </p>
+                <c:if test="#{exercisePlayerView.isScoreDeductedForHints(stageSubmission)}">
+                  <p style="font-size: 90%">
+                    <h:outputFormat value="#{msg['exercisePlayer.pointsReductionNotice']}">
+                      <f:param value="#{stageSubmission.getPoints()}" />
+                    </h:outputFormat>
+                  </p>
+                </c:if>
+                <ui:include page="/WEB-INF/includes/feedbackList.xhtml" />
+              </c:if>
+              <c:if test="#{stageSubmission.hasManualResult}">
+                <hr />
+                <p>
+                  <strong><h:outputFormat
+                      value="#{msg['exercisePlayer.manualResult']}: #{stageSubmission.manualResult.get().points}% " /></strong>
+                  <h:outputText
+                    value=" (#{msg['exercisePlayer.manualFeedback.createdBy']} #{exercisePlayerView.getPublicUserName(stageSubmission.manualResult.get().createdBy)})" />
+                </p>
+                <c:if test="#{not empty stageSubmission.manualResult.get().publicComment}">
+                  <p style="color: #666666; clear: both;">
+                    <h:outputText
+                      value="#{stageSubmission.manualResult.get().publicComment}"
+                      escape="false" />
+                  </p>
+                </c:if>
+                <c:if test="#{not empty stageSubmission.manualResult.get().internalComment}">
+                  <p style="color: #666666; clear: both;">
+                    <h:outputText
+                      value="#{msg['exercisePlayer.manualFeedback.internalComment']}:"
+                      style="font-size: 80%;" />
+                    <br />
+                    <h:outputText value="#{stageSubmission.manualResult.get().internalComment}" />
+                  </p>
+                </c:if>
+              </c:if>
+            </h:panelGroup>
+          </c:if>
+
+          <p:commandButton
+            id="editManualFeedback#{loopStatus.index}"
+            value="#{msg['exercisePlayer.manualFeedback.title']}"
+            update="manualFeedbackDialog"
+            action="#{exercisePlayerView.loadManualFeedbackDialog(stageSubmission)}"
+            oncomplete="PF('manualFeedbackDialog').show();"
+            rendered="#{exercisePlayerView.allowedToGiveManualFeedback}" />
+        </h:panelGroup>
+
+        <c:if test="#{exercisePlayerView.showVariablesAndLogs}">
+          <hr style="clear: both" />
+
+          <!-- Variable list -->
+          <p:panel
+            id="panelStageSubmission_#{loopStatus.index}_Vars"
+            header="#{msg['exercisePlayer.variablesAssignment']}"
+            rendered="#{not empty exercisePlayerView.getVariableValues(stageSubmission)}"
+            toggleable="true"
+            collapsed="true">
+            <p:staticMessage
+              style="margin:0px"
+              severity="info"
+              detail="#{msg['exercisePlayer.onlyForLecturers']}" />
+            <p:dataTable
+              id="variables_#{loopStatus.index}"
+              value="#{exercisePlayerView.getVariableValues(stageSubmission)}"
+              var="variableValue"
+              filteredValue="#{exercisePlayerView.filteredVariablesValues}"
+              widgetVar="variableTable_#{loopStatus.index}"
+              sortBy="#{variableValue.type.displayName}"
+              expandableRowGroups="true">
+              <p:headerRow>
+                <p:column colspan="2">
+                  <h:outputText value="#{variableValue.type.displayName}" />
+                  <j:helperTooltip
+                    id="variableHint#{loopStatus.index}"
+                    tooltip="#{msg['exercisePlayer.variableHint.' += variableValue.type.displayName]}" />
+                </p:column>
+              </p:headerRow>
+              <p:column
+                id="columnVariableName"
+                headerText="#{msg['global.name']}"
+                filterBy="#{variableValue.name}"
+                filterMatchMode="contains"
+                width="250">
+                <h:outputText value="#{variableValue.name}" />
+              </p:column>
+              <p:column
+                id="columnVariableValue"
+                headerText="#{msg['global.value']}"
+                styleClass="nopadding">
+                <h:panelGroup styleClass="panel-scroll-x">
+                  <h:outputText value="#{exercisePlayerView.getLaTeXRepresentation(variableValue.value)}" />
+                </h:panelGroup>
+
+              </p:column>
+            </p:dataTable>
+          </p:panel>
+
+          <!-- SolutionLog -->
+          <p:panel
+            id="panelStageSubmission#{loopStatus.index}Log"
+            header="Log"
+            toggleable="true"
+            collapsed="true">
+            <p:staticMessage
+              style="margin:0px"
+              severity="info"
+              detail="#{msg['exercisePlayer.onlyForLecturers']}" />
+            <p:dataTable
+              id="dtPlayerViewLogEntries"
+              value="#{exercisePlayerView.getStageSubmissionViewBean(stageSubmission).logEntries}"
+              var="protocolEntry"
+              styleClass="without-header">
+              <p:column
+                id="columnPlayerViewTimestamp"
+                style="width:240px;">
+                <j:outputTimestamp
+                  value="#{protocolEntry.timestamp}"
+                  converter="fullTimestampConverter" />
+              </p:column>
+              <p:column id="columnPlayerViewProtocolType">
+                <h:outputText value="#{protocolEntry.type}" />
+                <h:outputText
+                  value=" (#{protocolEntry.text})"
+                  rendered="#{not empty(protocolEntry.text)}" />
+                <h:outputText
+                  value=" (#{protocolEntry.result.points})"
+                  rendered="#{not empty(protocolEntry.result)}" />
+                <h:outputText
+                  value=" #{protocolEntry.result.fromKafkaTopic}"
+                  rendered="#{not empty(protocolEntry.result) and not empty(protocolEntry.result.fromKafkaTopic)}" />
+              </p:column>
+              <p:column
+                id="columnSubmissionLogDetails2"
+                style="width:40px;">
+                <p:commandButton
+                  oncomplete="PF('checkDetails#{protocolEntry.result.id}').show()"
+                  icon="fas fa-search-plus fa-sm"
+                  rendered="#{protocolEntry.type=='CHECK'}" />
+
+              </p:column>
+            </p:dataTable>
+          </p:panel>
+          <c:forEach
+            items="#{exercisePlayerView.getStageSubmissionViewBean(stageSubmission).logEntries}"
+            var="protocolEntry"
+            varStatus="loopStatus">
+            <c:if test="#{protocolEntry.type=='CHECK'}">
+              <p:dialog
+                id="checkDetailsDialog#{protocolEntry.result.id}"
+                header="#{msg['exercisePlayer.checkDetailsDialog']}"
+                widgetVar="checkDetails#{protocolEntry.result.id}"
+                resizable="false"
+                modal="true">
+                <c:set
+                  var="checkResult"
+                  value="#{protocolEntry.result}" />
+                <p:panel style="max-width:800px;max-height:600px;overflow:scroll;">
+                  <ui:include page="/WEB-INF/includes/stages/checkResultView.xhtml">
+                    <ui:param
+                      name="stageIndex"
+                      value="#{loopStatus.index}" />
+                  </ui:include>
+                </p:panel>
+              </p:dialog>
+            </c:if>
+          </c:forEach>
+        </c:if>
+
+      </p:panel>
+    </c:forEach>
+    <p:panel
+      id="exercise_fatal_error"
+      class="customErrorMessage"
+      rendered="#{exercisePlayerView.submission.hasInternalErrors()}">
+      <h:outputText value="#{msg['exercisePlayer.fatalError']}" />
+    </p:panel>
+    <p:panel
+      id="exercise_fatal_error_details"
+      rendered="#{exercisePlayerView.submission.hasInternalErrors() and exercisePlayerView.showVariablesAndLogs and not empty(exercisePlayerView.lastFailureLogEntry)}"
+      style="overflow:scroll">
+      <p:staticMessage
+        style="margin:0px"
+        severity="info"
+        detail="#{msg['exercisePlayer.onlyForLecturers']}" />
+      <pre>
+        <h:outputText
+          value="#{exercisePlayerView.lastFailureLogEntry}"
+          escape="false" />
+      </pre>
+    </p:panel>
+    <p:panel
+      id="exercise_options"
+      rendered="#{exercisePlayerView.submission.isCompleted()}">
+      <h:outputText
+        value="#{msg['exercisePlayer.completed']} "
+        rendered="#{exercisePlayerView.submission.isCompleted()}" />
+    </p:panel>
+  </h:panelGroup>
+
+  <!-- Latest variable values -->
+  <h:panelGroup id="currentVariablesWrapper">
+    <!-- Wrapper for updating the datatable -->
+    <p:panel
+      id="latestVariablesTable"
+      header="#{msg['exercisePlayer.latestVariableAssignment']}"
+      rendered="#{exercisePlayerView.showVariablesAndLogs and not empty exercisePlayerView.latestExerciseVariables}"
+      toggleable="true"
+      collapsed="true">
+      <p:staticMessage
+        style="margin:0px"
+        severity="info"
+        detail="#{msg['exercisePlayer.onlyForLecturers']}" />
+      <p:dataTable
+        id="latestVariables"
+        value="#{exercisePlayerView.latestExerciseVariables}"
+        var="variableTuple"
+        filteredValue="#{exercisePlayerView.filteredVariablesValues}"
+        widgetVar="latestVariableTable">
+        <p:column
+          id="columnVariableName"
+          headerText="#{msg['global.name']}"
+          filterBy="#{variableTuple.name}"
+          filterMatchMode="contains"
+          sortBy="#{variableTuple.name}"
+          width="200">
+          <h:outputText value="#{variableTuple.name}" />
+        </p:column>
+        <p:column
+          id="columnVariableValue"
+          headerText="#{msg['global.value']}"
+          styleClass="nopadding">
+          <h:panelGroup styleClass="panel-scroll-x">
+            <h:outputText value="#{exercisePlayerView.getLaTeXRepresentation(variableTuple.value)}" />
+          </h:panelGroup>
+        </p:column>
+      </p:dataTable>
+    </p:panel>
+  </h:panelGroup>
+
+  <f:subview
+    id="logView"
+    rendered="#{exercisePlayerView.reviewMode and exercisePlayerView.showVariablesAndLogs}">
+    <h3>#{msg['exercisePlayer.fullLog']}</h3>
+    <p:staticMessage
+      style="margin:0px"
+      severity="info"
+      detail="#{msg['exercisePlayer.onlyForLecturers']}" />
+    <p:dataTable
+      id="dtSubmissionLogEntries"
+      value="#{exercisePlayerView.submissionLog}"
+      var="submissionLogEntry"
+      styleClass="without-header">
+      <p:column
+        id="columnSubmissionLogTimestamp"
+        style="width:240px;">
+        <j:outputTimestamp
+          value="#{submissionLogEntry.timestamp}"
+          converter="fullTimestampConverter" />
+      </p:column>
+      <p:column
+        id="columnSubmissionLogStage"
+        style="width:240px;">
+        <h:outputText
+          value="#{exercisePlayerView.getStageByIdFromCache(submissionLogEntry.stageId).internalName} / #{submissionLogEntry.submission.id}"
+          rendered="#{exercisePlayerView.getStageByIdFromCache(submissionLogEntry.stageId) ne null}" />
+      </p:column>
+      <p:column id="columnSubmissionLogProtocolType">
+        <h:outputText value="#{submissionLogEntry.type}" />
+        <h:outputText
+          value=" (#{submissionLogEntry.text})"
+          rendered="#{not empty(submissionLogEntry.text)}" />
+        <h:outputText
+          value=" (#{submissionLogEntry.result.points})"
+          rendered="#{not empty(submissionLogEntry.result)}" />
+        <h:outputText
+          value=" #{submissionLogEntry.result.fromKafkaTopic}"
+          rendered="#{not empty(submissionLogEntry.result) and not empty(submissionLogEntry.result.fromKafkaTopic)}" />
+      </p:column>
+      <p:column
+        id="columnSubmissionLogDetails"
+        style="width:40px;">
+        <p:commandButton
+          oncomplete="PF('submissionDetails#{submissionLogEntry.submission.id}').show()"
+          icon="fas fa-search-plus fa-sm"
+          rendered="#{submissionLogEntry.type=='SUBMIT'}" />
+
+        <p:commandButton
+          oncomplete="PF('checkDetails#{submissionLogEntry.result.id}').show()"
+          icon="fas fa-search-plus fa-sm"
+          rendered="#{submissionLogEntry.type=='CHECK'}" />
+
+      </p:column>
+    </p:dataTable>
+    <!-- Dialog for each submit entry -->
+    <c:forEach
+      items="#{exercisePlayerView.submissionLog}"
+      var="submissionLogEntry"
+      varStatus="loopStatus">
+      <c:if test="#{submissionLogEntry.type=='SUBMIT'}">
+        <p:dialog
+          id="submissionDetailsDialog"
+          header="#{msg['exercisePlayer.submissionDetailsDialog']}"
+          widgetVar="submissionDetails#{submissionLogEntry.submission.id}"
+          resizable="false"
+          modal="true">
+          <c:set
+            var="stageSubmission"
+            value="#{submissionLogEntry.submission}" />
+          <p:panel>
+            <ui:include
+              page="/WEB-INF/includes/stages/#{stageSubmission==null?'default':
+            					exercisePlayerView.getStageSubmissionViewBean(stageSubmission).stage.type}/input.xhtml">
+              <ui:param
+                name="stageIndex"
+                value="#{loopStatus.index}" />
+              <ui:param
+                name="logView"
+                value="log_" />
+            </ui:include>
+          </p:panel>
+        </p:dialog>
+      </c:if>
+    </c:forEach>
+    <!-- Dialog for each check entry -->
+    <c:forEach
+      items="#{exercisePlayerView.submissionLog}"
+      var="submissionLogEntry"
+      varStatus="loopStatus">
+      <c:if test="#{submissionLogEntry.type=='CHECK'}">
+        <p:dialog
+          id="checkDetailsDialog#{submissionLogEntry.result.id}"
+          header="#{msg['exercisePlayer.checkDetailsDialog']}"
+          widgetVar="checkDetails#{submissionLogEntry.result.id}"
+          resizable="false"
+          modal="true">
+          <c:set
+            var="checkResult"
+            value="#{submissionLogEntry.result}" />
+          <p:panel style="max-width:800px;max-height:600px;overflow:scroll;">
+            <ui:include page="/WEB-INF/includes/stages/checkResultView.xhtml">
+              <ui:param
+                name="stageIndex"
+                value="#{loopStatus.index}" />
+            </ui:include>
+          </p:panel>
+        </p:dialog>
+      </c:if>
+    </c:forEach>
+  </f:subview>
+
+  <c:if test="#{exercisePlayerView.allowedToGiveManualFeedback}">
+    <ui:include src="/WEB-INF/includes/dialogs/manualFeedbackDialog.xhtml" />
+  </c:if>
+
+</ui:composition>

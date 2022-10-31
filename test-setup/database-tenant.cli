@@ -1,0 +1,84 @@
+embed-server
+
+# ----- Change H2 datasource configuration -----
+/subsystem=datasources/data-source=ExampleDS:undefine-attribute(name=statistics-enabled)
+/subsystem=datasources/data-source=ExampleDS:undefine-attribute(name=use-java-context)
+/subsystem=datasources/data-source=ExampleDS:write-attribute(name=jta,value=true)
+/subsystem=datasources/data-source=ExampleDS:write-attribute(name=use-ccm,value=true)
+/subsystem=datasources/data-source=ExampleDS:write-attribute(name=jndi-name,value=java:jboss/datasources/ExampleDS)
+/subsystem=ee/service=default-bindings:undefine-attribute(name=datasource)
+reload
+
+# ----- Remove welcome content handler -----
+/subsystem=undertow/server=default-server/host=default-host/location=\/:remove
+/subsystem=undertow/configuration=handler/file=welcome-content:remove
+
+# ----- Disable HTTP2 -----
+/subsystem=undertow/server=default-server/http-listener=default:write-attribute(name=enable-http2,value=false)
+
+# ----- Disable HTTPS -----
+/subsystem=undertow/server=default-server/http-listener=default:undefine-attribute(name=redirect-socket)
+/subsystem=undertow/server=default-server/https-listener=https:remove
+reload
+
+# ----- Setup HTTP headers to secure our clients -----
+
+# Deny embedding content from this server in iframes.
+/subsystem=undertow/configuration=filter/response-header=x-frame-options:add(header-name="x-frame-options",header-value="DENY")
+/subsystem=undertow/server=default-server/host=default-host/filter-ref=x-frame-options:add
+
+# Only share referrers within the same origin
+/subsystem=undertow/configuration=filter/response-header=referrer-policy:add(header-name="referrer-policy",header-value="same-origin")
+/subsystem=undertow/server=default-server/host=default-host/filter-ref=referrer-policy:add
+
+# Activate XSS protection
+/subsystem=undertow/configuration=filter/response-header=x-xss-protection:add(header-name="x-xss-protection",header-value="1; mode=block")
+/subsystem=undertow/server=default-server/host=default-host/filter-ref=x-xss-protection:add
+
+# Prevent browser from sniffing mime types
+/subsystem=undertow/configuration=filter/response-header=x-content-type-options:add(header-name="x-content-type-options",header-value="nosniff")
+/subsystem=undertow/server=default-server/host=default-host/filter-ref=x-content-type-options:add
+reload
+
+# ----- Setup security domain -----
+
+# We first create a realm mapper that extracts the tenant identifier from the principal's name
+# and maps it to a security realm. The dummy=dummy mapping is required as realm-map is mandatory.
+/subsystem=elytron/mapped-regex-realm-mapper=jack-realm-mapper:add(pattern=([a-zA-Z0-9-]+)/.+,realm-map={dummy=dummy})
+
+# We also need a principal mapper that removes the tenant identifier from the principal names.
+/subsystem=elytron/regex-principal-transformer=jack-principal-transformer:add(pattern="[a-zA-Z0-9-]+/(.+)",replace-all=false,replacement="$1")
+
+# Then we can create the security domain ...
+/subsystem=elytron/security-domain=jack-security-domain:add(permission-mapper=default-permission-mapper,realm-mapper=jack-realm-mapper,post-realm-principal-transformer=jack-principal-transformer)
+
+# ... and also a http authentication factory.
+/subsystem=elytron/http-authentication-factory=jack-http-authentication-factory:add(http-server-mechanism-factory=global,security-domain=jack-security-domain,mechanism-configurations=[{mechanism-name=FORM}])
+
+# Now we need to map the application's legacy security domain to the elytron one.
+/subsystem=ejb3/application-security-domain=jack-legacy-security-domain:add(security-domain=jack-security-domain)
+
+# We also need to tell wildfly to use the new security domain within the http authentication factory.
+/subsystem=undertow/application-security-domain=jack-legacy-security-domain:add(http-authentication-factory=jack-http-authentication-factory)
+reload
+
+# ----- Setup tenant -----
+# Create a JDBC realm with a bcrypt mapper linked to the tenant's datasource.
+/subsystem=elytron/jdbc-realm=jack-jack3-webclient-jdbc-realm:add(principal-query=[{sql="SELECT rounds,salt,hash,'authenticated' FROM usertable WHERE loginName = ?",data-source=ExampleDS,bcrypt-mapper={iteration-count-index=1,salt-index=2,password-index=3},attribute-mapping=[{to=Roles,index=4}]}])
+
+# Next we create a caching jdbc realm to speed up authentication.
+/subsystem=elytron/caching-realm=jack-jack3-webclient-caching-jdbc-realm:add(realm=jack-jack3-webclient-jdbc-realm,maximum-age=60000,maximum-entries=256)
+
+# We add the caching realm to jack's security domain ...
+/subsystem=elytron/security-domain=jack-security-domain:list-add(name=realms,value={realm=jack-jack3-webclient-caching-jdbc-realm})
+
+# ... and create a mapping in its realm mapper.
+/subsystem=elytron/mapped-regex-realm-mapper=jack-realm-mapper:map-put(name=realm-map,key=jack3-webclient,value=jack-jack3-webclient-caching-jdbc-realm)
+
+# In our global setup we added a dummy entry to the realm mappers map. If that is still present we remove it.
+if (result == dummy) of /subsystem=elytron/mapped-regex-realm-mapper=jack-realm-mapper:map-get(name=realm-map,key=dummy)
+    /subsystem=elytron/mapped-regex-realm-mapper=jack-realm-mapper:map-remove(name=realm-map,key=dummy)
+end-if
+
+reload
+stop-embedded-server

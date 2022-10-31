@@ -1,0 +1,14 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:ui="http://java.sun.com/jsf/facelets">
+
+  <!-- The formula editor's default configuration must be in the document's head. -->
+  <h:outputScript target="head"
+    name="/js/formulaEditorConfig.js"/>
+
+  <!-- The virtual formula editor script must be appended to the body so it gets loaded last. -->
+  <h:outputScript target="body"
+    name="/js/formulaeditor/org/mathdox/formulaeditor/FEConcatenation.js"/>
+
+</ui:composition>

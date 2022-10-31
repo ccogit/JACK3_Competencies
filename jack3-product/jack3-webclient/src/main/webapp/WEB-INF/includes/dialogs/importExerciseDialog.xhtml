@@ -1,0 +1,51 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+	<p:dialog id="importExerciseDialog" widgetVar="importExerciseDialog"
+		modal="true" closable="true" width="600px" resizable="false"
+		header="#{msg['start.import']}" closeOnEscape="true"
+		onHide="window.location.replace(window.location.href);">
+		<!-- TODO: call MyWorkspaceView.refreshTree, insted of location.replace -->
+		<p:outputLabel escape="false" value="#{msg['importExerciseDialog.description']}" />
+		
+		<br/>
+		<h:form id="importForm">
+            <h:outputLabel id="suffixLabel" value="#{msg['startContentTabView.import.suffix']}" for="suffix" />
+            <p:inputText id="suffix" placeholder="#{msg['startContentTabView.import.suffix.placeholder']}" value="#{importExerciseDialogView.suffix}"/>
+			<p:fileUpload id="fileUpload"
+                widgetVar="myFileUploader"
+				listener="#{importExerciseDialogView.handleFileUpload}"
+				allowTypes="/(\.|\/)(json|xml|zip)$/" update="globalGrowl" onstart="initialise([{name:'size', value:PF('myFileUploader').files.length}]);" 
+				sizeLimit="10485760" accept="application/json,.json,text/xml,.xml,application/x-zip-compressed,.zip" multiple="true" 
+        mode="advanced" label="#{msg['global.add']}" uploadLabel="#{msg['global.upload']}" cancelLabel="#{msg['global.cancel']}" />
+            <p:remoteCommand name="initialise" action="#{importExerciseDialogView.initialiseUpload()}" />
+            <p:messages id="messages" for="importDetails" />
+		</h:form>
+    <f:facet name="footer">
+      <h:form id="closeForm">
+        <p:button
+          id="closeButton"
+          value="#{msg['global.close']}"
+          onclick="PF('importExerciseDialog').hide();"
+          type="button"
+          styleClass="button-white"
+          icon="fas fa-times" />
+      </h:form>
+    </f:facet>
+  </p:dialog>
+  
+  
+
+	<p:ajaxExceptionHandler
+		type="com.thoughtworks.xstream.converters.ConversionException"
+		update="exceptionDialog" onexception="PF('exceptionDialog').show();" />
+
+	<p:dialog id="exceptionDialog" closeOnEscape="true" width="800px"
+		header="#{msg['importExerciseDialog.importFailed']}" widgetVar="exceptionDialog">
+		<pre>#{msg['importExerciseDialog.occurredError']}: #{pfExceptionHandler.message}</pre>
+	</p:dialog>
+
+</ui:composition>

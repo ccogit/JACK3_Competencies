@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/jack3-product/jack3-business/jack3-business.iml" filepath="$PROJECT_DIR$/jack3-product/jack3-business/jack3-business.iml" />
+      <module fileurl="file://$PROJECT_DIR$/jack3-product/jack3-core/jack3-core.iml" filepath="$PROJECT_DIR$/jack3-product/jack3-core/jack3-core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/jack3-core-master.iml" filepath="$PROJECT_DIR$/.idea/jack3-core-master.iml" />
+      <module fileurl="file://$PROJECT_DIR$/jack3-product/jack3-product.iml" filepath="$PROJECT_DIR$/jack3-product/jack3-product.iml" />
+      <module fileurl="file://$PROJECT_DIR$/jack3-product/jack3-tests/jack3-tests.iml" filepath="$PROJECT_DIR$/jack3-product/jack3-tests/jack3-tests.iml" />
+      <module fileurl="file://$PROJECT_DIR$/jack3-product/jack3-ui-tests/jack3-ui-tests.iml" filepath="$PROJECT_DIR$/jack3-product/jack3-ui-tests/jack3-ui-tests.iml" />
+      <module fileurl="file://$PROJECT_DIR$/jack3-product/jack3-webclient/jack3-webclient.iml" filepath="$PROJECT_DIR$/jack3-product/jack3-webclient/jack3-webclient.iml" />
+    </modules>
+  </component>
+</project>

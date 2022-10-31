@@ -1,0 +1,66 @@
+<ExportedExercise id="1">
+  <name>R: mean(c(1,4))</name>
+  <publicDescription></publicDescription>
+  <internalNotes></internalNotes>
+  <authorName>lecturer</authorName>
+  <language>de</language>
+  <difficulty>0</difficulty>
+  <resources id="2" />
+  <stages id="3">
+    <RStage id="4">
+      <internalName>#1</internalName>
+      <externalName></externalName>
+      <taskDescription></taskDescription>
+      <defaultTransition id="5">
+        <conditionExpression id="6">
+          <domain>MATH</domain>
+        </conditionExpression>
+        <stageExpression id="7">
+          <domain>MATH</domain>
+        </stageExpression>
+        <isRepeat>false</isRepeat>
+      </defaultTransition>
+      <skipTransitions id="8" />
+      <stageTransitions id="9" />
+      <hints id="10" />
+      <variableUpdatesBeforeCheck id="11" />
+      <variableUpdatesAfterCheck id="12" />
+      <variableUpdatesOnNormalExit id="13" />
+      <variableUpdatesOnRepeat id="14" />
+      <variableUpdatesOnSkip id="15" />
+      <weight>1</weight>
+      <orderIndex>0</orderIndex>
+      <allowSkip>false</allowSkip>
+      <resources id="16" />
+      <initialCode></initialCode>
+      <finalResultComputationString></finalResultComputationString>
+      <testCasetuples id="17">
+        <TestCaseTuple id="18">
+          <testCases id="19">
+            <DynamicRTestCase id="20">
+              <points>23</points>
+              <pointsMode>GAIN</pointsMode>
+              <name>Durchschnitt korrekt?</name>
+              <feedbackIfFailed></feedbackIfFailed>
+              <ruleMode>PRESENCE</ruleMode>
+              <postCode></postCode>
+              <expectedOutput>2.5</expectedOutput>
+              <tolerance>-4</tolerance>
+            </DynamicRTestCase>
+          </testCases>
+          <checkerConfiguration id="21">
+            <isActive>true</isActive>
+            <hasVisibleResult>false</hasVisibleResult>
+            <hasVisibleFeedback>false</hasVisibleFeedback>
+            <isAsync>true</isAsync>
+            <weight>1</weight>
+          </checkerConfiguration>
+        </TestCaseTuple>
+      </testCasetuples>
+    </RStage>
+  </stages>
+  <startStage class="RStage" reference="4" />
+  <variableDeclarations id="22" />
+  <jSXGraphs id="23" />
+  <resultFeedbackMappings id="24" />
+</ExportedExercise>

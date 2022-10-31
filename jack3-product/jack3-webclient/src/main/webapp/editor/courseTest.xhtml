@@ -1,0 +1,42 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:p="http://primefaces.org/ui"
+  template="/WEB-INF/templates/template.xhtml">
+
+  <ui:define name="metadata">
+    <f:metadata>
+      <f:viewParam
+        name="course"
+        value="#{courseTestView.courseId}" />
+      <f:viewParam
+        name="courseRecord"
+        value="#{courseTestView.courseRecordId}" />
+      <f:viewAction action="#{courseTestView.loadCourse()}" />
+    </f:metadata>
+  </ui:define>
+
+  <ui:define name="content">
+    <h:form id="courseTestForm">
+      <p:toolbar id="tb" styleClass="sticky-toolbar">
+        <f:facet
+          id="facetCourseTest"
+          name="left">
+          <p:linkButton
+            id="backToCourse"
+            outcome="#{viewId.courseEditor}"
+            value="#{msg['courseTest.backToCourse']}"
+            icon="fas fa-arrow-left">
+            <f:param
+              name="course"
+              value="#{courseTestView.courseId}" />
+          </p:linkButton>
+        </f:facet>
+      </p:toolbar>
+
+      <ui:include page="/WEB-INF/includes/course/coursePlayer.xhtml" />
+    </h:form>
+  </ui:define>
+</ui:composition>

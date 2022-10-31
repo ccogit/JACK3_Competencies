@@ -1,0 +1,47 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:c="http://java.sun.com/jsp/jstl/core"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:j="http://jack.s3.uni-due.de/ui-elements"
+  template="../WEB-INF/templates/template.xhtml">
+
+  <ui:define name="content">
+
+    <p style="font-size: x-large;">
+      <c:if test="#{systemHealthView.allTestsPassed}">
+        <h:outputText class="fas fa-check fa-xl" style="color: darkgreen;"/>
+        <h:outputText value=" #{msg['systemHealthView.testsPassed']}"/>
+        <!-- This text is for the PRTG server and intentionally invisible. -->
+        <h:outputText value="prtg-status:ok" style="visibility:hidden;"/>
+      </c:if>
+
+      <c:if test="#{not systemHealthView.allTestsPassed}">
+        <h:outputText class="fas fa-times fa-xl" style="color: darkred;"/>
+        <h:outputText value=" #{msg['systemHealthView.testsFailed']}"/>
+        <!-- This text is for the PRTG server and intentionally invisible. -->
+        <h:outputText value="prtg-status:error" style="visibility:hidden;"/>
+      </c:if>
+    </p>
+
+    <p:dataTable value="#{systemHealthView.testResults}" var="entry" tableStyle="table-layout: auto;">
+      <p:column headerText="#{msg['systemHealthView.test']}">
+        <h:outputText value="#{msg['systemHealthView.test.' += entry.id]}" style="white-space: nowrap;"/>
+      </p:column>
+      <p:column headerText="#{msg['systemHealthView.errors']}">
+        #{entry.errors} / #{entry.tests}
+        <h:outputText rendered="#{entry.passed}" style="color: darkgreen;" class="fas fa-check fa-m"/>
+        <h:outputText rendered="#{not entry.passed}" style="color: darkred;" class="fas fa-times fa-m"/>
+      </p:column>
+      <p:column headerText="#{msg['systemHealthView.averageLatency']}">
+        #{entry.latency} ms.
+      </p:column>
+      <p:column headerText="#{msg['systemHealthView.lastUpdate']}">
+        <j:outputTimestamp value="#{entry.timeStamp}" converter="relativeTimestampConverter" />
+      </p:column>
+    </p:dataTable>
+
+  </ui:define>
+</ui:composition>

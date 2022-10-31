@@ -1,0 +1,100 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:c="http://java.sun.com/jsp/jstl/core"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:j="http://jack.s3.uni-due.de/ui-elements"
+  template="/WEB-INF/templates/template.xhtml">
+
+  <ui:define name="content">
+    <c:set
+      var="current"
+      value="#{'admin-performance'}"
+      scope="request" />
+    
+    <h:form id="request">
+      <p:poll interval="10" update="overview requests-table"/>
+    
+      <h3>#{msg['tenantadmin.performance']}</h3>
+      <p>The data has been collected in the last #{performanceView.maximumAge}.</p>
+      
+      <p:panel id="overview">
+        <table style="width: 100%">
+          <tr>
+            <td>
+              <i class="fa fa-fw fa-server"> </i>
+              <h:outputText value="#{performanceView.systemLoad}"
+                style="font-size: x-large; font-weight: bold;">
+                <f:convertNumber pattern=" 0.00"/>
+              </h:outputText> Load on #{performanceView.processors} Processors
+            </td>
+            <td>
+              <i class="fa fa-fw fa-envelope-o"> </i>
+              <h:outputText value="#{performanceView.requestsPerMinute}"
+                style="font-size: x-large; font-weight: bold;">
+                <f:convertNumber pattern=" 0.00"/>
+              </h:outputText> Requests / Minute
+            </td>
+            <td>
+              <i class="fa fa-fw fa-clock-o"> </i>
+              <h:outputText value="#{performanceView.averageLatency}"
+                style="font-size: x-large; font-weight: bold;">
+                <f:convertNumber pattern=" 0"/>
+              </h:outputText> &#x00D8; Milliseconds / Request
+            </td>
+            <td>
+              <i class="fa fa-fw fa-bed"></i>
+              <h:outputText value="#{performanceView.slowResponseShare}"
+                style="font-size: x-large; font-weight: bold;">
+                <f:convertNumber pattern=" 0"/>
+              </h:outputText> % Slow Responses
+            </td>
+          </tr>
+        </table>
+      </p:panel>
+
+      <h3>Requests</h3>
+      <p:dataTable id="requests-table"
+        sortBy="#{entry.sequence}"
+        sortOrder="descending"
+        var="entry"
+        value="#{performanceView.entries}"
+        tableStyle="white-space: nowrap; overflow: hidden; table-layout: auto;">
+
+        <p:column headerText="#" sortBy="#{entry.sequence}">
+          <h:outputText value="#{entry.sequence}" />
+        </p:column>
+
+        <p:column headerText="Protocol" sortBy="#{entry.protocol}">
+          <h:outputText value="#{entry.protocol}" />
+        </p:column>
+        
+        <p:column headerText="Type" sortBy="#{entry.type}">
+          <h:outputText value="#{entry.type}" />
+        </p:column>
+
+        <p:column headerText="Method" sortBy="#{entry.method}">
+          <h:outputText value="#{entry.method}" />
+        </p:column>
+
+        <p:column headerText="Path" sortBy="#{entry.path}">
+          <h:outputLink value="#{request.contextPath}#{entry.path}">#{entry.path}</h:outputLink>
+        </p:column>
+
+        <p:column headerText="Status" sortBy="#{entry.status}">
+          <h:outputText value="#{entry.status}" />
+        </p:column>
+
+        <p:column headerText="Time" sortBy="#{entry.millis}">
+          <h:outputText value="#{entry.millis} ms. "/>
+          <h:outputText rendered="#{entry.slow}" 
+            styleClass="fa fa-sm fa-warning"/>
+        </p:column>
+
+      </p:dataTable>
+    </h:form>
+
+  </ui:define>
+</ui:composition>

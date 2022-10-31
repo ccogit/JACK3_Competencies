@@ -1,0 +1,6 @@
+embed-server --server-config=standalone.xml --admin-only
+
+/core-service=management/management-interface=http-interface:write-attribute(name=ssl-context,value=jack-ssl-context)
+/core-service=management/management-interface=http-interface:write-attribute(name=secure-socket-binding,value=management-https)
+
+stop-embedded-server

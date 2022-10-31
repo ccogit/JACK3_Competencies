@@ -1,0 +1,194 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>de.uni-due.s3.jack3</groupId>
+		<artifactId>jack3-product</artifactId>
+		<version>${revision}</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+	<artifactId>jack3-ui-tests</artifactId>
+	<name>jack3-ui-tests</name>
+
+	<dependencyManagement>
+		<dependencies>
+			<!-- https://mvnrepository.com/artifact/org.jboss.arquillian/arquillian-bom -->
+			<dependency>
+				<groupId>org.jboss.arquillian</groupId>
+				<artifactId>arquillian-bom</artifactId>
+				<version>1.7.0.Alpha6</version>
+				<scope>import</scope>
+				<type>pom</type>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/org.junit/junit-bom -->
+			<dependency>
+				<groupId>org.junit</groupId>
+				<artifactId>junit-bom</artifactId>
+				<version>5.7.0</version>
+				<scope>import</scope>
+				<type>pom</type>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/org.jboss.arquillian.selenium/selenium-bom -->
+			<dependency>
+				<groupId>org.jboss.arquillian.selenium</groupId>
+				<artifactId>selenium-bom</artifactId>
+				<version>3.13.0</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/org.jboss.arquillian.extension/arquillian-drone-bom -->
+			<dependency>
+				<groupId>org.jboss.arquillian.extension</groupId>
+				<artifactId>arquillian-drone-bom</artifactId>
+				<version>2.5.1</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<dependencies>
+
+		<!-- JACK3 dependencies -->
+		<dependency>
+			<groupId>de.uni-due.s3.jack3</groupId>
+			<artifactId>jack3-core</artifactId>
+			<type>ejb</type>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>de.uni-due.s3.jack3</groupId>
+			<artifactId>jack3-business</artifactId>
+			<type>jar</type>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>de.uni-due.s3.jack3</groupId>
+			<artifactId>jack3-webclient</artifactId>
+			<type>pom</type>
+			<version>${project.version}</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.jboss.arquillian.junit5/arquillian-junit5-container -->
+		<dependency>
+			<groupId>org.jboss.arquillian.junit5</groupId>
+			<artifactId>arquillian-junit5-container</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.wildfly.arquillian/wildfly-arquillian-container-managed -->
+		<dependency>
+			<groupId>org.wildfly.arquillian</groupId>
+			<artifactId>wildfly-arquillian-container-managed</artifactId>
+			<version>3.0.1.Final</version>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.picketbox</groupId>
+					<artifactId>picketbox</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<!-- Picketbox includes this library as a transitive dependency. Bexcause the repository is referenced without SSL, maven v3.8.1+ will block this request to prevent MITM attacks. Since we don't have control over the transitive dependencies, we get this explicitly using the repo with the id "jboss", i.e.:
+		https://repository.jboss.org/nexus/content/repositories/releases/org/jboss/security/jbossxacml/2.0.8.Final/ 
+		-->
+		<dependency>
+			<groupId>org.jboss.security</groupId>
+			<artifactId>jbossxacml</artifactId>
+			<version>2.0.8.Final</version>
+			<type>pom</type>
+		</dependency>
+
+		<!-- Missing dependency org.picketbox:picketbox:jar:5.0.3.Final-redhat-00006 -->
+		<!-- https://mvnrepository.com/artifact/org.picketbox/picketbox -->
+		<dependency>
+		    <groupId>org.picketbox</groupId>
+		    <artifactId>picketbox</artifactId>
+		    <version>5.1.0.Final</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.jboss.shrinkwrap.resolver/shrinkwrap-resolver-impl-maven -->
+		<!-- Downgrade needed: https://github.com/arquillian/arquillian-core/issues/260 -->
+		<dependency>
+			<groupId>org.jboss.shrinkwrap.resolver</groupId>
+			<artifactId>shrinkwrap-resolver-impl-maven</artifactId>
+			<version>2.2.7</version><!--$NO-MVN-MAN-VER$-->
+			<scope>test</scope>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter -->
+		<dependency>
+		    <groupId>org.junit.jupiter</groupId>
+		    <artifactId>junit-jupiter</artifactId>
+		    <scope>test</scope>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/org.jboss.arquillian.graphene/graphene-webdriver -->
+		<dependency>
+			<groupId>org.jboss.arquillian.graphene</groupId>
+			<artifactId>graphene-webdriver</artifactId>
+			<version>2.3.2</version>
+			<type>pom</type>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/xml-apis/xml-apis -->
+		<!-- Resolves dependency conflict (org.w3c.dom.ElementTraversal) -->
+		<dependency>
+			<groupId>xml-apis</groupId>
+			<artifactId>xml-apis</artifactId>
+			<version>1.4.01</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/net.oauth.core/oauth (for LTI message signing) -->
+		<dependency>
+			<groupId>net.oauth.core</groupId>
+			<artifactId>oauth-provider</artifactId>
+			<version>20100527</version>
+		</dependency>
+		
+	</dependencies>
+
+	<build>
+		<plugins>
+
+			<!-- Setup arquillian tests -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.22.2</version>
+				<configuration>
+					<!-- fixes "The forked VM terminated without saying properly goodbye." -->
+					<argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true ${jacoco.agent}</argLine>
+					<systemPropertyVariables>
+						<arquillian.launch>wildfly-with-test-coverage</arquillian.launch>
+						<jacoco.agent>${jacoco.agent}</jacoco.agent>
+					</systemPropertyVariables>
+					<runOrder>random</runOrder>
+				</configuration>
+			</plugin>
+
+			<!-- JaCoCo is a free code coverage library for Java. The generated coverage report is analyzed by Sonar. -->
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.7</version>
+				<executions>
+					<execution>
+						<id>prepare-tests</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+						<configuration>
+							<propertyName>jacoco.agent</propertyName>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+		</plugins>
+	</build>
+</project>

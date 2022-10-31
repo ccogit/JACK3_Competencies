@@ -1,0 +1,93 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:c="http://java.sun.com/jsp/jstl/core"
+  xmlns:p="http://primefaces.org/ui">
+  <!-- Required parameters
+        *   formId                    ID of the enclosing form
+        *	dialogTitle               Head of the dialog-window
+        *   messageOne	              first part of message
+        *	messageTwo                second part of message
+        *   inputLabel	              Label for the inputField
+        *   validatorErrorMessage     Message displayed, when the Validation failed
+        *   invokeDeletionBean        Bean which has the Method for Deletion
+        *   invokeDeletionMethodName  method NAME which deletes the Entity
+        
+        View DeletionDialogView for further requirements. -->
+  <h:form id="#{formId}">
+    <p:dialog
+      id="dialog-deletion"
+      header="#{dialogTitle}"
+      widgetVar="deleteDialog"
+      modal="true"
+      closable="false"
+      draggable="false"
+      resizable="false"
+      dynamic="true"
+      width="650">
+      <p:outputPanel deferrend="true">
+        <p>#{messageOne}</p>
+        <p>#{messageTwo}</p>
+      </p:outputPanel>
+      <table>
+        <tr>
+          <td>
+            <div>
+              <span class="ui-float-label"> <p:inputText
+                  id="deletionInput"
+                  widgetVar="deletionInput"
+                  value="#{deletionDialogView.inputTextForDeletion}"
+                  autocomplete="off"
+                  size="40"
+                  validatorMessage="#{validatorErrorMessage}"
+                  onkeypress="if (event.keyCode == 13) { return false; }">
+                  <p:ajax
+                    event="keyup"
+                    update="wrongInputText,deleteButton,cancelDeleteButton" />
+                  <f:validateRegex pattern="\\Q#{deletionDialogView.nameToCheckForDeletion}\\E" />
+                </p:inputText>
+                <p:outputLabel
+                  for="@previous"
+                  value="#{inputLabel}" />
+              </span>
+            </div>
+          </td>
+
+          <td><p:commandButton
+              id="deleteButton"
+              value="#{msg['deletionDialog.button.delete']}"
+              widgetVar="deleteButton"
+              action="#{invokeDeletionBean[invokeDeletionMethodName]}"
+              icon="fas fa-trash-alt"
+              disabled="#{facesContext.validationFailed}"
+              styleClass="button-red" /></td>
+          <td>
+            <div>
+              <p:commandButton
+                id="cancelDeleteButton"
+                value="#{msg['deletionDialog.button.cancel']}"
+                actionListener="#{deletionDialogView.followupDeletionDialog}"
+                onclick="PF('deleteDialog').hide(),PF('deleteButton').disable()"
+                immediate="true"
+                update="deletionInput"
+                icon="fas fa-times"
+                styleClass="button-white">
+              </p:commandButton>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3"><p:outputPanel
+              id="wrongInputPanel"
+              deferrend="true">
+              <p:messages
+                id="wrongInputText"
+                for="deletionInput" />
+            </p:outputPanel></td>
+        </tr>
+      </table>
+    </p:dialog>
+  </h:form>
+</ui:composition>

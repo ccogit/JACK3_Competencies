@@ -1,0 +1,56 @@
+.colored-infobox {
+	color: white;
+	text-align: center;
+}
+
+/* Infobox inside a primefaces panel */
+.infobox-pfpanel {
+	margin: -8px -17px 8px -17px;
+}
+
+.big-info {
+	padding: 16px;
+	font-size: 1.5em;
+}
+.big-info > .far,
+.big-info > .fas {
+	margin-right: 16px;
+}
+
+.small-info {
+	padding: 8px;
+}
+.small-info > .far,
+.small-info > .fas {
+	margin-right: 16px;
+}
+
+.colored-infobox.green {
+	background-color: #00994d;
+}
+
+.colored-infobox.red {
+	background-color: #d2562d;
+}
+
+.colored-infobox.orange {
+	background-color: #e68019;
+}
+
+.colored-infobox.blue {
+	background-color: #127da1;
+}
+
+.colored-infobox.grey {
+	background-color: #808080;
+}
+
+.colored-panel.yellow.ui-panel > .ui-panel-titlebar {
+	background: #ffe81a;
+}
+.colored-panel.yellow.ui-panel > .ui-panel-content {
+	background: #fff9c4;
+}
+.colored-panel.ui-panel > .ui-panel-content > p:first-child {
+	margin-top: 0;
+}

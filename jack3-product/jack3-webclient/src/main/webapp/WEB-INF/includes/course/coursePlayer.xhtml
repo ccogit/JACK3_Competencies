@@ -1,0 +1,416 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:c="http://java.sun.com/jsp/jstl/core"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:j="http://jack.s3.uni-due.de/ui-elements">
+  
+  <script>
+    function copyTextToClipboard(id) {
+        var pwdField = document.getElementById(id)
+        pwdField.select()
+        document.execCommand("copy")
+    }
+  </script>
+
+  <div
+    id="timeExpiredMessage"
+    style="display: #{coursePlayerView.deadlineExpired ? 'block' : 'none' };">
+    <p:staticMessage
+      severity="warn"
+      detail="#{msg['coursePlayer.timeExpiredDialog.title']}!" />
+  </div>
+
+  <div class="ui-g">
+    <div class="ui-g-12 ui-md-9">
+      <h:panelGroup
+        id="panelCurrentExercise"
+        rendered="#{coursePlayerView.currentExercise != null}">
+        <ui:include page="/WEB-INF/includes/stages/exercisePlayer.xhtml" />
+      </h:panelGroup>
+
+      <p:panel
+        id="panelDescription"
+        header="#{msg['global.description']}"
+        style="margin-bottom:10px"
+        rendered="#{coursePlayerView.currentExercise == null and not empty coursePlayerView.course.externalDescription}">
+        <h:outputText value="#{coursePlayerView.course.externalDescription}" escape="false" />
+      </p:panel>
+
+      <h:panelGroup
+        id="panelPlayerExercises"
+        layout="block"
+        rendered="#{coursePlayerView.currentExercise==null}">
+        <p:dataTable
+          id="dtExercises"
+          var="exercise"
+          tableStyle="table-layout:auto;"
+          value="#{coursePlayerView.exercises}"
+          rendered="#{not empty coursePlayerView.exercises}">
+
+          <f:facet name="header">#{msg['global.exercises']}</f:facet>
+          <p:column
+            id="headerTextExercise"
+            headerText="#{msg['global.exercise']}"
+            sortBy="#{exercise.name}">
+
+            <p:commandLink
+              id="linkCourseExercise"
+              action="#{coursePlayerView.setCurrentExercise(exercise.id)}"
+              value="#{exercise.name}"
+              style="font-weight:bold;"
+              ajax="false">
+            </p:commandLink>
+            <h:outputText
+              value="#{coursePlayerView.getShownExerciseWeights(exercise)}"
+              style="font-size:small;" />
+            <h:panelGroup rendered="#{coursePlayerView.getPublicDescriptionForExercise(exercise) != null}">
+              <br />
+              <h:outputText
+                value="#{coursePlayerView.getPublicDescriptionForExercise(exercise)}"
+                escape="false"
+                style="font-size:small;" />
+            </h:panelGroup>
+            <f:facet name="footer">
+              <h:outputText
+                value="#{msg['global.score.total']}"
+                rendered="#{empty coursePlayerView.courseOffer or coursePlayerView.courseOffer.courseResultDisplay.name() == 'POINTS' or coursePlayerView.courseOffer.courseResultDisplay.name() == 'BOTH'}" />
+            </f:facet>
+          </p:column>
+
+          <p:column
+            id="headerTextCoursePlayerSubmissionStatus"
+            headerText="#{msg['global.status']}"
+            style="text-align:center;width:min-content;">
+            <h:outputText
+              style="font-size:small;"
+              escape="false"
+              value="#{msg['enum.ESubmissionStatus.' += coursePlayerView.getSubmissionStatus(exercise).name()]}" />
+          </p:column>
+
+          <p:column
+            id="headerTextCoursePlayerActions"
+            headerText="#{msg['coursePlayer.actions']}"
+            width="85"
+            style="text-align:center;"
+            rendered="#{coursePlayerView.isAllowExerciseRestart()}">
+            <p:commandLink
+              id="linkCourseExerciseRestartCourse"
+              action="#{coursePlayerView.restartExercise(exercise)}"
+              value="#{msg['coursePlayer.restart']}"
+              ajax="false"
+              rendered="#{coursePlayerView.isAllowExerciseRestart(exercise)}"
+              disabled="#{not coursePlayerView.isSubmissionPresent(exercise)}">
+            </p:commandLink>
+            <h:outputFormat
+              rendered="#{coursePlayerView.isShowRestartCount() and coursePlayerView.isAllowExerciseRestart(exercise)}"
+              style="font-size:90%;color:#888"
+              value=" (#{msg['coursePlayer.remainingRestarts']})">
+              <f:param value="#{coursePlayerView.getRemainingExerciseRestartCount(exercise)}" />
+            </h:outputFormat>
+          </p:column>
+
+          <p:column
+            id="headerTextCoursePlayerLastScore"
+            style="text-align:center;width:min-content;"
+            headerText="#{coursePlayerView.course.scoringMode.name() == 'LAST' ? msg['global.score'] : msg['global.score.last']}"
+            rendered="#{coursePlayerView.showResultImmediately}">
+            <h:outputText value="#{coursePlayerView.getLastScoreForExercise(exercise)}" escape="false" />
+            <f:facet name="footer">
+              <h:outputText
+                value="#{coursePlayerView.getTotalScore()}"
+                rendered="#{(empty coursePlayerView.courseOffer or coursePlayerView.courseOffer.courseResultDisplay.name() == 'POINTS' or coursePlayerView.courseOffer.courseResultDisplay.name() == 'BOTH') and coursePlayerView.course.scoringMode.name() == 'LAST'}"
+                escape="false" />
+            </f:facet>
+          </p:column>
+          <p:column
+            id="headerTextCoursePlayerBestScore"
+            style="text-align:center;width:min-content;"
+            headerText="#{msg['global.score.best']}"
+            rendered="#{coursePlayerView.showResultImmediately and (coursePlayerView.course.scoringMode.name() == 'BEST')}">
+            <h:outputText value="#{coursePlayerView.getBestScoreForExercise(exercise)}" escape="false" />
+            <f:facet name="footer">
+              <h:outputText
+                value="#{coursePlayerView.getTotalScore()}"
+                rendered="#{empty coursePlayerView.courseOffer or coursePlayerView.courseOffer.courseResultDisplay.name() == 'POINTS' or coursePlayerView.courseOffer.courseResultDisplay.name() == 'BOTH'}"
+                escape="false" />
+            </f:facet>
+          </p:column>
+
+          <p:column
+            id="headerTextCoursePlayerDifficulty"
+            headerText="#{msg['coursePlayer.difficulty']}"
+            rendered="#{coursePlayerView.showDifficulty}"
+            width="100"
+            sortBy="#{exercise.difficulty}">
+            <p:progressBar
+              id="coursePlayerProgressBar"
+              value="#{exercise.difficulty}"
+              displayOnly="true" />
+          </p:column>
+        </p:dataTable>
+        <h:outputText
+          value="#{msg['coursePlayer.noExercises']}"
+          rendered="#{empty coursePlayerView.exercises}" />
+      </h:panelGroup>
+    </div>
+
+    <div class="ui-g-12 ui-md-3 sticky-top" style="font-size:80%">
+      <p:panel
+        id="panelCourseInfos"
+        header="#{msg['global.courseInfos']}">
+
+        <h:panelGroup
+          rendered="#{coursePlayerView.courseRecord.deadline != null}">
+            <h:outputLabel value="#{msg['coursePlayer.timeLeft']}: "
+              style="font-weight:bold;" />
+            <div id="countdown" style="height:35px;" />
+            <script>
+              $('#countdown').countdown({until: '#{coursePlayerView.countdownString}', format: 'YODHMS', significant: 2, onExpiry: onCountdownExpired});
+              function onCountdownExpired() {
+            	  PF('timeExpiredDialog').show();
+            	  document.getElementById('timeExpiredMessage').style.display = 'block';
+              }
+            </script>
+        </h:panelGroup>
+
+        <p>
+          <h:outputLabel
+            value="#{msg['global.lastSubmission']}: "
+            style="font-weight:bold;" /><br />
+          <j:outputTimestamp
+            value="#{coursePlayerView.courseRecord.deadline}"
+            converter="shortTimestampConverter"
+            rendered="#{coursePlayerView.courseRecord.deadline != null}" />
+          <h:outputText
+            value="#{msg['global.timelimitNotProvided']}"
+            rendered="#{coursePlayerView.courseRecord.deadline == null}" />
+        </p>
+        
+        <h:panelGroup
+          rendered="#{coursePlayerView.courseOffer.reviewMode.name() == 'AFTER_EXIT' or (coursePlayerView.courseOffer.reviewMode.name() == 'AFTER_END' and coursePlayerView.courseOffer.submissionDeadline != null)}">
+          <h:outputLabel
+            value="#{msg['coursePlayer.submissionReview']}: "
+            style="font-weight:bold;" /><br />
+          <h:outputText
+            value="#{msg['coursePlayer.reviewAfterExit']}"
+            rendered="#{coursePlayerView.courseOffer.reviewMode.name() == 'AFTER_EXIT'}" />
+          <j:outputTimestamp
+            value="#{coursePlayerView.courseOffer.submissionDeadline}"
+            converter="shortTimestampConverter"
+            rendered="#{coursePlayerView.courseOffer.reviewMode.name() == 'AFTER_END'}" />
+        </h:panelGroup>
+      </p:panel>
+      
+      <p:panel id="exerciseLink"
+        rendered="#{coursePlayerView.currentExercise!=null}"
+        styleClass="nopadding-panel">
+        <f:facet name="header">
+          <p:outputLabel value="#{msg['global.exerciseLink']}" />
+          <h:panelGroup
+              layout="block"
+              style="position: relative; float:right;">
+              <j:helperTooltip
+                id="dependentEnrollmentHelper"
+                tooltip="#{msg['exerciseEdit.publicLink.info']}"
+                position="left" />
+          </h:panelGroup>
+        </f:facet>
+
+        <div class="ui-inputgroup">
+                        <p:inputText
+                          id="publicLink"
+                          styleClass="small-monospace"
+                          readonly="true"
+                          value="#{coursePlayerView.hyperlinkToExercise}"
+                          style="overflow:auto; width:100%; border-top-left-radius:0;"/>
+                       <p:commandButton
+                            id="copyPublicLink"
+                            type="button"
+                            icon="fas fa-copy"
+                            onclick="copyTextToClipboard('showCourseRecordMainForm:publicLink')"
+                            style="border-top-right-radius:0;"/>
+                       <p:tooltip
+                            for="copyPublicLink"
+                            value="#{msg['global.copyToClipboard']}"
+                            position="top" />
+
+     </div>
+    </p:panel>
+
+      <p:remoteCommand id="updateCoursePlayerExerciseList" name="updateCoursePlayerExerciseList" action="#{coursePlayerView.updateCurrentSubmissionPoints()}" update="dtExercisesShortlist" />
+      <p:dataTable
+        id="dtExercisesShortlist"
+        var="exercise"
+        value="#{coursePlayerView.exercises}"
+        rendered="#{coursePlayerView.currentExercise!=null}"
+        widgetVar="coursePlayerExerciseList">
+        <f:facet name="header">
+          <h:outputText
+            value="#{msg['global.currentResults']}"
+            rendered="#{empty coursePlayerView.courseOffer or coursePlayerView.courseOffer.courseResultDisplay.name() == 'POINTS' or coursePlayerView.courseOffer.courseResultDisplay.name() == 'BOTH'}" />
+        </f:facet>
+        <p:column 
+          id="headerTextExerciseShortlist"
+          headerText="#{msg['global.exercise']}"
+          sortBy="#{exercise.name}">
+        <p:commandLink
+            id="linkCourseExerciseShortlist"
+            action="#{coursePlayerView.setCurrentExercise(exercise.id)}"
+            ajax="false"
+            value="#{exercise.name}"
+            rendered="#{exercise.id != coursePlayerView.currentExercise.id}"
+            style="overflow-wrap:normal;" />
+          <strong><h:outputText
+            value="#{exercise.name}"
+            id="linktext"
+            rendered="#{exercise.id == coursePlayerView.currentExercise.id}"
+            style="overflow-wrap:normal;" /></strong>
+         <p:tooltip id="toolTipGrow" value="#{exercise.name}" shared="true" for="linktext,linkCourseExerciseShortlist" showEffect="clip" position="top"/>
+          <f:facet name="footer">
+            <h:outputText
+              value="#{msg['global.score.total']}"
+              rendered="#{empty coursePlayerView.courseOffer or coursePlayerView.courseOffer.courseResultDisplay.name() == 'POINTS' or coursePlayerView.courseOffer.courseResultDisplay.name() == 'BOTH'}" />
+          </f:facet>
+
+        </p:column>
+
+        <p:column
+          style="width:35px; text-align: center;"
+          id="headerTextCoursePlayerScoreShortlist"
+          rendered="#{coursePlayerView.showResultImmediately}">
+          <h:outputText value="#{coursePlayerView.getShortScoreForExercise(exercise)}" escape="false" style="overflow-wrap:normal;" />
+          <f:facet name="header">
+            <h:outputText
+              id="coursePlayerScoreShortlistHeader"
+              value="#{msg['global.resultAbbreviate']}"
+              title="#{msg['global.result']}"
+              escape="false" />
+          </f:facet>
+          <f:facet name="footer">
+            <h:outputText
+              id="coursePlayerScoreShortlistFooter"
+              value="#{coursePlayerView.courseRecord.resultPoints}%"
+              rendered="#{empty coursePlayerView.courseOffer or coursePlayerView.courseOffer.courseResultDisplay.name() == 'POINTS' or coursePlayerView.courseOffer.courseResultDisplay.name() == 'BOTH'}"
+              escape="false" />
+          </f:facet>
+        </p:column>
+      </p:dataTable>
+      <p:commandButton
+        id="addComment"
+        style="margin-top:10px; width:100%;"
+        value="#{msg['coursePlayer.addComment']}"
+        rendered="#{coursePlayerView.currentExercise!=null and coursePlayerView.courseOffer.allowStudentComments}"
+        oncomplete="PF('addCommentDialog').show(); return false;" />
+
+      <p:dialog
+        id="addCommentDialog"
+        widgetVar="addCommentDialog"
+        closable="true"
+        header="#{msg['coursePlayer.addComment']}">
+        <p:inputTextarea id="inputComment" rows="5" cols="50"
+          value="#{coursePlayerView.newComment}" />
+        <p:panelGrid
+          id="eMailAddress"
+          columns="2"
+          cellpadding="5"
+          styleClass="ui-panelgrid-blank">
+          <p:selectBooleanCheckbox 
+            value="#{coursePlayerView.emailVisible}" 
+            disabled="#{empty coursePlayerView.currentUser.email}"/>
+          <h:outputLabel value="#{msg['coursePlayer.showLecturerEmail']}" rendered="#{not empty coursePlayerView.currentUser.email}"/>
+          <h:outputLabel value="#{msg['coursePlayer.showLecturerEmail']}" style="color:grey" rendered="#{empty coursePlayerView.currentUser.email}"/>
+        </p:panelGrid>
+        <h:outputText value="#{msg['coursePlayer.noEmailAddress']}" style="color:red" rendered="#{empty coursePlayerView.currentUser.email}" />
+        <hr />
+        <c:forEach
+          items="#{coursePlayerView.currentSubmission.comments}"
+          var="comment" >
+          <p style="margin-bottom:10px">
+            <j:outputTimestamp value="#{comment.timestamp}" converter="longTimestampConverter" style="font-weight:bold" />
+            <br />
+            <h:outputText value="#{comment.text}" style="margin-left:20px;display:inline-block;max-width:400px" />
+            <h:outputText value="&#160;&#160;#{coursePlayerView.currentUser.email}" rendered="#{comment.showEmail}"/>
+          </p>
+        </c:forEach>
+        <p:commandButton
+          id="buttonCloseAddCommentDialog"
+          value="#{msg['global.save']} &amp; #{msg['global.close']}"
+          style="margin-top:15px;"
+          oncomplete="PF('addCommentDialog').hide();"
+          update="addCommentDialog"
+          action="#{coursePlayerView.addComment()}" />
+      </p:dialog>
+      <p:commandButton
+        id="backToCourseOverview"
+        style="margin-top:10px; width:100%;"
+        action="#{coursePlayerView.clearCurrentExercise()}"
+        value="#{msg['coursePlayer.backToCourseOverview']}"
+        rendered="#{coursePlayerView.currentExercise!=null}"
+        ajax="false"/>
+
+    </div>
+    <div class="ui-md-12">
+      <h:panelGroup rendered="#{coursePlayerView.showStatus and coursePlayerView.currentExercise==null and (coursePlayerView.oldSubmissionsList.size() > 0)}">
+        <h3>#{msg['coursePlayerView.olderSubmissionReview']}</h3>
+        <p:dataTable
+          id="availableSubmissions"
+          var="submission"
+          value="#{coursePlayerView.oldSubmissionsList}"
+          tableStyle="table-layout:auto;">
+  
+          <p:column
+            id="headerTextExercise"
+            headerText="#{msg['global.exercise']}">
+            <h:outputText value="#{submission.exercise.name}" />
+          </p:column>
+  
+          <p:column
+            id="headerTextTimestamp"
+            headerText="#{msg['global.timestamp']}">
+            <j:outputTimestamp
+              value="#{submission.creationTimestamp}"
+              converter="shortTimestampConverter" />
+          </p:column>
+  
+          <p:column
+            id="headerTextScore"
+            headerText="#{msg['global.points']}"
+            rendered="#{coursePlayerView.showResultInCourseResults}">
+            <h:outputText value="#{submission.resultPoints}" />
+          </p:column>
+  
+          <p:column
+            id="courseRecordSubmissionsAction"
+            rendered="#{empty coursePlayerView.courseOffer or coursePlayerView.courseOffer.showExerciseAndSubmissionInCourseResults}"
+            style="width:32px;text-align: center">
+            <p:linkButton
+              id="btnViewSubmissionId"
+              icon="fas fa-search fa-sm"
+              title="#{msg['global.view']}"
+              outcome="#{viewId.submissionDetails}">
+              <f:param
+                name="submission"
+                value="#{submission.id}" />
+            </p:linkButton>
+          </p:column>
+        </p:dataTable>
+      </h:panelGroup>
+    </div>
+  </div>
+
+  <p:dialog
+    id="timeExpiredDialog"
+    header="#{msg['coursePlayer.timeExpiredDialog.title']}"
+    resizable="false"
+    modal="true"
+    closeOnEscape="true"
+    draggable="false"
+    widgetVar="timeExpiredDialog"
+    width="800px">
+    <h:outputText value="#{msg['coursePlayer.timeExpiredDialog.description']}" />
+  </p:dialog>
+
+</ui:composition>

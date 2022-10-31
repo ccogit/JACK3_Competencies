@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="#{userSession.locale}" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:p="http://primefaces.org/ui">
+<f:view locale="#{userSession.locale}">
+
+	<h:head id="page-head">
+		<title>Jack 3 | Universität Duisburg-Essen</title>
+		<meta http-equiv="Content-Type" content="text/html" />
+
+		<link rel="icon" type="image/x-icon" href="#{request.contextPath}/favicon.ico" />
+
+		<!-- Jack's default stylesheet -->
+		<h:outputStylesheet library="jack" name="/css/jack.css" />
+
+        <!-- Load Fontawesome stylesheet -->
+        <h:outputStylesheet library="webjars" name="font-awesome/5.14.0/css/all.min-jsf.css" />
+        <h:outputStylesheet library="webjars" name="font-awesome/5.14.0/css/v4-shims.min-jsf.css" />
+
+		<!-- German strings for PrimeFaces -->
+		<h:outputScript name="/js/germanLocalePF.js" />
+
+		<!-- LaTeX rendering -->
+		<c:if test="#{mathJaxView.configured}">
+		  <h:outputScript library="js" name="mathjax.js"/>
+          <script src="#{mathJaxView.url}"/>
+        </c:if>
+
+        <h:outputStylesheet library="jack" name="/css/jquery.countdown.css"/>
+        <h:outputScript name="/js/countdown/jquery.plugin.js"/> 
+        <h:outputScript name="/js/countdown/jquery.countdown.js"/>
+        <h:outputScript name="/js/countdown/jquery.countdown-de.js"/>
+        <c:if test="#{userSession.locale != 'en'}">
+          <script>
+          	$.countdown.setDefaults($.countdown.regionalOptions['#{userSession.locale}']);
+          </script>
+        </c:if>
+        <c:if test="#{userSession.locale == 'en'}">
+          <script>
+            $.countdown.setDefaults($.countdown.regionalOptions['']);
+          </script>
+        </c:if>
+
+	</h:head>
+
+	<ui:insert name="metadata" />
+
+	<h:body>
+
+		<c:if test="#{sessionKeeperView.enabled}">
+			<h:form id="session-keeper-form">
+				<p:poll listener="#{sessionKeeperView.keepAlive}"
+					interval="#{sessionKeeperView.intervalInSeconds}"
+					async="true"/>
+			</h:form>
+		</c:if>
+	
+		<!-- A progress indicator on top of the page -->
+		<h:outputScript name="/js/activity.js" target="body"/>
+		<p:outputPanel id="activity-bar-panel">      
+		  <div id="activity-bar"/>
+		</p:outputPanel>
+
+		<div id="container">
+
+			<!-- The main content area of the application -->
+			<div id="content">
+
+				<div id="banner" style="clear: both;">
+					<div id="jack-logo">
+						<h:link id="linkStart" outcome="#{viewId.home}">
+							<h:graphicImage width="220" height="80" library="jack"
+								name="images/banner/JACK_Logo_final_RGB_negativ_resized.svg" />
+						</h:link>
+					</div>
+					<div id="ude-logo">
+						<h:outputLink id="linkUde" value="https://www.uni-due.de" target="_blank">
+                          <h:graphicImage width="220"
+                            height="80"
+                            library="jack"
+                            name="images/banner/UDE_Logo_claim_RGB.svg" />
+						</h:outputLink>
+					</div>
+				</div>
+
+				<!-- If java script is not available we display an error -->
+				<noscript>
+					<div id="noscript-error">
+						<ui:include src="noscript.xhtml" />
+					</div>
+				</noscript>
+
+				<!-- An error message that is displayed if setting cookies failed. -->
+				<div id="cookie-error" style="display: none;">
+					<ui:include src="nocookies.xhtml" />
+				</div>
+
+				<!-- The actual page content. -->
+				<div id="page-content" style="display: none;">
+					<ui:include src="/WEB-INF/includes/start/navigation.xhtml" />
+					<ui:insert name="content" />
+					<ui:insert name="dialogs" />
+				</div>
+			</div>
+
+			<!-- We make the page-content section visible via javascript if
+             a cookie was successfully set. Otherwise we show an error
+             message. -->
+			<script>
+				document.cookie = "jctscript=success; path=/";
+				if (document.cookie.indexOf("jctscript=success") >= 0) {
+					document.getElementById("page-content").style.display = "block";
+				} else {
+					document.getElementById("cookie-error").style.display = "block";
+				}
+			</script>
+
+			<!-- Footer area. If undefined footer.xhtml is included. -->
+			<div id="footer">
+				<ui:insert name="footer">
+					<ui:include src="footer.xhtml" />
+				</ui:insert>
+			</div>
+
+		</div>
+    
+		<!-- Growl for showing global messages -->
+		<p:growl id="globalGrowl" widgetVar="w_globalGrowl" showDetail="true" escape="false" skipDetailIfEqualsSummary="true"/>
+
+    <!-- Spinner for blocking the UI that tells the user to wait a bit -->
+    <p:dialog
+      id="globalSpinner"
+      widgetVar="globalSpinner"
+      modal="true"
+      draggable="false"
+      closable="false"
+      resizable="false"
+      showHeader="false"
+      styleClass="dialogWithEqualPadding global-spinner">
+      <h:outputText
+        style="overflow: hidden;"
+        styleClass="fas fa-circle-notch fa-spin fa-3x" />
+    </p:dialog>
+
+	</h:body>
+</f:view>
+</html>

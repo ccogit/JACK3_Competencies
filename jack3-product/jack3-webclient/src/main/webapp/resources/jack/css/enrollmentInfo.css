@@ -1,0 +1,52 @@
+.enrollment-info {
+	color: white;
+	text-align: center;
+}
+
+.big-info {
+	padding: 16px;
+	font-size: 1.5em;
+	margin: -8px -17px 16px -17px;
+}
+.big-info > .far,
+.big-info > .fas {
+	margin-right: 16px;
+}
+
+.small-info {
+	padding: 8px;
+	margin: -8px -17px 8px -17px;
+}
+.small-info > .far,
+.small-info > .fas {
+	margin-right: 16px;
+}
+
+.enrollment-info.enrolled {
+	background-color: #00994d;
+}
+
+.enrollment-info.disenrolled {
+	background-color: #d2562d;
+}
+
+.enrollment-info.onWaitingList {
+	background-color: #127da1;
+}
+
+.enrollment-info.notInteracted{
+	background-color: #808080;
+}
+
+.enrollment-info-label {
+	padding: 5px 10px;
+	border-radius: 3px;
+}
+.enrollment-info-label > .far,
+.enrollment-info-label > .fas {
+	margin-right: 4px;
+}
+
+.small-enrollment-info {
+	font-size:small;
+}

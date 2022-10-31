@@ -1,0 +1,327 @@
+<ExportedExercise id="1">
+  <name>Demoprojekt 1 (Java)</name>
+  <publicDescription></publicDescription>
+  <internalNotes></internalNotes>
+  <language>de</language>
+  <difficulty>0</difficulty>
+  <resources id="2">
+    <de.uni__due.s3.jack3.entities.tenant.ExerciseResource id="3">
+      <content>DQpwdWJsaWMgY2xhc3MgRGVtb3Byb2pla3QxIHsNCg0KCXB1YmxpYyBzdGF0aWMgU3RyaW5nIGZsYWdnZShpbnQgZ3JvZXNzZSkgew0KCQkvLyB2aWVyIFF1YWRyYW50ZW46IG9iZW4gbGlua3MgWmVpbGVuLCB1bnRlbiByZWNodHMgU3BhbHRlbiB65GhsZW4NCgkJLy8gUmVzdCBtaXQgUHVua3RlbiBhdWZm/GxsZW4NCgkJLy8gZGVyIFBhcmFtZXRlciBncm9lc3NlIGlzdCBzdGV0cyBnZXJhZHphaGxpZywgPiAwIHVuZCA8IDEwDQoJCVN0cmluZyBtID0gIiI7DQoJCQ0KCQkvLyBoaWVyIGJpdHRlIElocmUgTPZzdW5nIGVpbmb8Z2VuDQoJCQ0KCQlyZXR1cm4gbTsNCgl9DQoNCg0KCXB1YmxpYyBzdGF0aWMgdm9pZCBtYWluKFN0cmluZ1tdIGFyZ3MpIHsNCgkJLy8gVGVzdGF1c2dhYmVuDQoNCgkJU3lzdGVtLm91dC5wcmludGxuKGZsYWdnZSgyKSk7DQoJCVN5c3RlbS5vdXQucHJpbnRsbihmbGFnZ2UoNCkpOw0KCQlTeXN0ZW0ub3V0LnByaW50bG4oZmxhZ2dlKDYpKTsNCgkJU3lzdGVtLm91dC5wcmludGxuKGZsYWdnZSg4KSk7DQoJfQ0KfQ==</content>
+      <filename>Demoprojekt1.java</filename>
+      <description></description>
+    </de.uni__due.s3.jack3.entities.tenant.ExerciseResource>
+  </resources>
+  <stages id="4">
+    <de.uni__due.s3.jack3.entities.stagetypes.java.JavaStage id="5">
+      <internalName>#1</internalName>
+      <externalName></externalName>
+      <taskDescription>Programmieren Sie &lt;u&gt;mittels verschachtelter Schleifen&lt;/u&gt; die &lt;b&gt;Methode &lt;tt&gt;flagge()&lt;/tt&gt;&lt;/b&gt; nach folgender Vorgabe:&lt;br /&gt;&#xd;
+Die erzeugten Flaggen sollen in vier Quadranten aufgeteilt werden. Alle Felder im Quadrant oben links sind mit der jeweiligen Zeilennummer zu beschriften, alle Felder im Quadrant unten rechts mit der jeweiligen Spaltennummer. Der Rest jeder Flagge wird mit Punkten gef&amp;uuml;llt.&lt;br /&gt;&#xd;
+Die Methode erwartet als Parameter die Gr&amp;ouml;&amp;szlig;e der Flagge und soll die erzeugte Flagge als String zur&amp;uuml;ckliefern. Ihre L&amp;ouml;sung muss f&amp;uuml;r alle Flaggen der Gr&amp;ouml;&amp;szlig;en 2, 4, 6 und 8 funktionieren und beispielsweise f&amp;uuml;r den Programmaufruf &lt;tt&gt;flagge(6)&lt;/tt&gt; folgende Ausgabe erzeugen:&lt;br /&gt;&#xd;
+&lt;br /&gt;&#xd;
+&lt;tt&gt;111...&lt;/tt&gt;&lt;br /&gt;&#xd;
+&lt;tt&gt;222...&lt;/tt&gt;&lt;br /&gt;&#xd;
+&lt;tt&gt;333...&lt;/tt&gt;&lt;br /&gt;&#xd;
+&lt;tt&gt;...456&lt;/tt&gt;&lt;br /&gt;&#xd;
+&lt;tt&gt;...456&lt;/tt&gt;&lt;br /&gt;&#xd;
+&lt;tt&gt;...456&lt;/tt&gt;</taskDescription>
+      <defaultTransition id="6">
+        <conditionExpression id="7">
+          <domain>MATH</domain>
+        </conditionExpression>
+        <stageExpression id="8">
+          <domain>MATH</domain>
+        </stageExpression>
+        <isRepeat>false</isRepeat>
+      </defaultTransition>
+      <skipTransitions id="9"/>
+      <stageTransitions id="10"/>
+      <hints id="11"/>
+      <variableUpdatesBeforeCheck id="12"/>
+      <variableUpdatesAfterCheck id="13"/>
+      <variableUpdatesOnNormalExit id="14"/>
+      <variableUpdatesOnRepeat id="15"/>
+      <variableUpdatesOnSkip id="16"/>
+      <weight>1</weight>
+      <orderIndex>0</orderIndex>
+      <allowSkip>false</allowSkip>
+      <resources id="17">
+        <de.uni__due.s3.jack3.entities.tenant.StageResource id="18">
+          <resources__order>0</resources__order>
+          <exerciseResource id="19">
+            <content>DQpwdWJsaWMgY2xhc3MgRGVtb3Byb2pla3QxIHsNCg0KCXB1YmxpYyBzdGF0aWMgU3RyaW5nIGZsYWdnZShpbnQgZ3JvZXNzZSkgew0KCQkvLyB2aWVyIFF1YWRyYW50ZW46IG9iZW4gbGlua3MgWmVpbGVuLCB1bnRlbiByZWNodHMgU3BhbHRlbiB65GhsZW4NCgkJLy8gUmVzdCBtaXQgUHVua3RlbiBhdWZm/GxsZW4NCgkJLy8gZGVyIFBhcmFtZXRlciBncm9lc3NlIGlzdCBzdGV0cyBnZXJhZHphaGxpZywgPiAwIHVuZCA8IDEwDQoJCVN0cmluZyBtID0gIiI7DQoJCQ0KCQkvLyBoaWVyIGJpdHRlIElocmUgTPZzdW5nIGVpbmb8Z2VuDQoJCQ0KCQlyZXR1cm4gbTsNCgl9DQoNCg0KCXB1YmxpYyBzdGF0aWMgdm9pZCBtYWluKFN0cmluZ1tdIGFyZ3MpIHsNCgkJLy8gVGVzdGF1c2dhYmVuDQoNCgkJU3lzdGVtLm91dC5wcmludGxuKGZsYWdnZSgyKSk7DQoJCVN5c3RlbS5vdXQucHJpbnRsbihmbGFnZ2UoNCkpOw0KCQlTeXN0ZW0ub3V0LnByaW50bG4oZmxhZ2dlKDYpKTsNCgkJU3lzdGVtLm91dC5wcmludGxuKGZsYWdnZSg4KSk7DQoJfQ0KfQ==</content>
+            <filename>Demoprojekt1.java</filename>
+            <description></description>
+          </exerciseResource>
+          <description></description>
+          <stage class="de.uni_due.s3.jack3.entities.stagetypes.java.JavaStage" reference="5"/>
+        </de.uni__due.s3.jack3.entities.tenant.StageResource>
+      </resources>
+      <mandatoryFileNames id="20">
+        <string>Demoprojekt1.java</string>
+      </mandatoryFileNames>
+      <allowedFileNames id="21">
+        <string></string>
+      </allowedFileNames>
+      <minimumFileCount>1</minimumFileCount>
+      <maximumFileCount>1</maximumFileCount>
+      <ignorePendingJobs>false</ignorePendingJobs>
+      <repeatOnMissingUpload>true</repeatOnMissingUpload>
+      <propagateInternalErrors>true</propagateInternalErrors>
+      <gradingSteps class="linked-list" id="22">
+        <de.uni__due.s3.jack3.entities.stagetypes.java.GreqlGradingConfig id="23">
+          <isActive>false</isActive>
+          <hasVisibleResult>false</hasVisibleResult>
+          <hasVisibleFeedback>false</hasVisibleFeedback>
+          <isAsync>false</isAsync>
+          <weight>1</weight>
+          <fileNames id="24">
+            <string>Demoprojekt1.java</string>
+          </fileNames>
+          <sourceFiles id="25"/>
+          <libraryFiles id="26"/>
+          <greqlRules>&lt;checkerrules&gt;
+	&lt;!-- #### Stil-Regeln #### --&gt;
+	&lt;rule type=&quot;absence&quot; points=&quot;0&quot;&gt;
+		&lt;query&gt;from x : V{CompilationUnit}, y : V{PackageDeclaration} with x --&gt; y report x.name, y.name end&lt;/query&gt;
+		&lt;feedback prefix=&quot;Hinweis (ohne Punktabzug)&quot;&gt;Du verwendest eine Package-Deklaration, anstatt die Datei im &quot;default package&quot; ohne Deklaration abzulegen.&lt;/feedback&gt;
+	&lt;/rule&gt;
+	&lt;rule type=&quot;absence&quot; points=&quot;0&quot;&gt;
+		&lt;query&gt;from x : V{VariableDeclarationFragment} with x.name=capitalizeFirst(x.name) report x.name as &quot;name&quot; end&lt;/query&gt;
+		&lt;feedback prefix=&quot;Hinweis (ohne Punktabzug)&quot;&gt;Du verwendest Variablennamen, die mit einem Großbuchstaben beginnen. Das ist möglich, aber es entspricht nicht dem üblichen Programmierstil für Java.&lt;/feedback&gt;
+	&lt;/rule&gt;
+	&lt;rule type=&quot;absence&quot; points=&quot;0&quot;&gt;
+		&lt;query&gt;from x : V{MethodDeclaration} with
+				x.name=capitalizeFirst(x.name) and
+				not(x.constructor)
+			report x.name as &quot;name&quot; end&lt;/query&gt;
+		&lt;feedback prefix=&quot;Hinweis (ohne Punktabzug)&quot;&gt;Du verwendest Methodennamen, die mit einem Großbuchstaben beginnen. Das ist möglich, aber es entspricht nicht dem üblichen Programmierstil für Java.&lt;/feedback&gt;
+	&lt;/rule&gt;
+	&lt;rule type=&quot;absence&quot; points=&quot;0&quot;&gt;
+		&lt;query&gt;from x : V{TypeDeclaration} with not (x.name=capitalizeFirst(x.name)) report x.name as &quot;name&quot; end&lt;/query&gt;
+		&lt;feedback prefix=&quot;Hinweis (ohne Punktabzug)&quot;&gt;Du verwendest Klassennamen, die nicht mit einem Großbuchstaben beginnen. Das ist möglich, aber es entspricht nicht dem üblichen Programmierstil für Java.&lt;/feedback&gt;
+	&lt;/rule&gt;
+
+
+	&lt;!-- #### Verbotene Statements #### --&gt;
+	&lt;rule type=&quot;absence&quot; points=&quot;1&quot;&gt;
+		&lt;query&gt;from u : V{CompilationUnit}, x : V{MethodInvocation}, y : V{SimpleName} with u --&gt;* x --&gt;{ElementExpression} y and x.name=&quot;exit&quot; and y.name=&quot;System&quot; report u.name as &quot;name&quot;, x.line as &quot;line&quot; end&lt;/query&gt;
+		&lt;feedback&gt;Der Aufruf von &quot;System.exit()&quot; in der Datei {name} in Zeile {line} ist nicht gestattet.&lt;/feedback&gt;
+	&lt;/rule&gt;
+
+	&lt;!-- #### Leere Blöcke #### --&gt;
+	&lt;rule type=&quot;absence&quot; points=&quot;2&quot;&gt;
+		&lt;query&gt;from u : V{CompilationUnit}, x : V{IfStatement} with
+				(	not isEmpty(u --&gt;* x --&gt;{IfStatementThenStatement}&amp;amp;{EmptyStatement}) or
+					(not isEmpty(u --&gt;* x --&gt;{IfStatementThenStatement}&amp;amp;{Block}) and isEmpty(u --&gt;* x --&gt;{IfStatementThenStatement}&amp;amp;{Block} --&gt;{Child}))
+				)	 and
+				(	not isEmpty(u --&gt;* x --&gt;{IfStatementElseStatement}&amp;amp;{EmptyStatement}) or
+					(not isEmpty(u --&gt;* x --&gt;{IfStatementElseStatement}&amp;amp;{Block}) and isEmpty(u --&gt;* x --&gt;{IfStatementElseStatement}&amp;amp;{Block} --&gt;{Child}))
+				)
+			report u.name as &quot;name&quot;, x.line as &quot;line&quot; end&lt;/query&gt;
+		&lt;feedback&gt;In der Datei {name} enthält das if-Statement in Zeile {line} in beiden Zweigen keinen Code und ist dadurch sinnlos.&lt;/feedback&gt;
+	&lt;/rule&gt;
+	&lt;rule type=&quot;absence&quot; points=&quot;2&quot;&gt;
+		&lt;query&gt;from u : V{CompilationUnit}, x : V{IfStatement} with not isEmpty(u --&gt;* x --&gt;{IfStatementThenStatement}&amp;amp;{EmptyStatement}) and isEmpty(x --&gt;{IfStatementElseStatement}&amp;amp;{Statement}) report u.name as &quot;name&quot;, x.line as &quot;line&quot; end&lt;/query&gt;
+		&lt;feedback&gt;In der Datei {name} endet das if-Statement in Zeile {line} hinter der Bedingung sofort mit einem Semikolon. Die Bedingung ist dadurch wirkungslos und die folgende Anweisung wird immer ausgeführt.&lt;/feedback&gt;
+	&lt;/rule&gt;
+	&lt;rule type=&quot;absence&quot; points=&quot;2&quot;&gt;
+		&lt;query&gt;from u : V{CompilationUnit}, x : V{WhileStatement} with
+				not isEmpty(u --&gt;* x --&gt;{WhileStatementBody}&amp;amp;{EmptyStatement}) or
+				(not isEmpty(u --&gt;* x --&gt;{WhileStatementBody}&amp;amp;{Block}) and isEmpty(u --&gt;* x --&gt;{WhileStatementBody}&amp;amp;{Block} --&gt;{Child}))
+			report u.name as &quot;name&quot;, x.line as &quot;line&quot; end&lt;/query&gt;
+		&lt;feedback&gt;In der Datei {name} besteht die while-Schleife in Zeile {line} nur aus einer Abbruchbedingung und ist dadurch sinnlos.&lt;/feedback&gt;
+	&lt;/rule&gt;
+
+	&lt;!-- #### Aufgabenspezifische Regeln #### --&gt;
+	&lt;rule type=&quot;presence&quot; points=&quot;4&quot;&gt;
+		&lt;query&gt;from t : V{TypeDeclaration}, m : V{MethodDeclaration} with
+				t.name=&quot;Demoprojekt1&quot; and
+				m.name=&quot;flagge&quot; and
+				t --&gt;{TypeDeclarationBodyDeclarations1} m and
+				hasSignature(m, &quot;public static String flagge(int)&quot;)
+			report 0 end&lt;/query&gt;
+		&lt;feedback prefix=&quot;Signaturcheck&quot;&gt;Die Methode &quot;public static String flagge(int groesse)&quot; in der Klasse &quot;DemoProjekt1&quot; fehlt. Hast du die vorgegebene Methodensignatur verändert?&lt;/feedback&gt;
+	&lt;/rule&gt;
+	&lt;rule type=&quot;absence&quot; points=&quot;4&quot;&gt;
+		&lt;query&gt;from m : V{MethodDeclaration} with
+				m.name=&quot;flagge&quot; and
+				isEmpty(m --&gt;{Child}*&amp;amp;{WhileStatement}) and
+				isEmpty(m --&gt;{Child}*&amp;amp;{DoStatement}) and
+				isEmpty(m --&gt;{Child}*&amp;amp;{ForStatement}) and
+				isEmpty(m --&gt;{Child}*&amp;amp;{EnhancedForStatement})
+			report 0 end&lt;/query&gt;
+		&lt;feedback&gt;In der Methode &quot;flagge()&quot; wird kein Schleifenkonstrukt verwendet.&lt;/feedback&gt;
+	&lt;/rule&gt;
+	&lt;rule type=&quot;absence&quot; points=&quot;2&quot;&gt;
+		&lt;query&gt;from m : V{MethodDeclaration}, s : V{StringLiteral} with
+				m.name=&quot;flagge&quot; and
+				m --&gt;{Child}* s and
+				stringLength(s.content) &gt; 4
+			report s.line as &quot;line&quot; end&lt;/query&gt;
+		&lt;feedback&gt;Du verwendest in Zeile {line} ein festes String-Literal. Ist deine Lösung allgemeingültig?&lt;/feedback&gt;
+	&lt;/rule&gt;
+
+&lt;/checkerrules&gt;</greqlRules>
+        </de.uni__due.s3.jack3.entities.stagetypes.java.GreqlGradingConfig>
+        <de.uni__due.s3.jack3.entities.stagetypes.java.TracingGradingConfig id="27">
+          <isActive>false</isActive>
+          <hasVisibleResult>false</hasVisibleResult>
+          <hasVisibleFeedback>false</hasVisibleFeedback>
+          <isAsync>false</isAsync>
+          <weight>4</weight>
+          <fileNames id="28">
+            <string>Demoprojekt1.java</string>
+          </fileNames>
+          <sourceFiles id="29"/>
+          <libraryFiles id="30"/>
+          <testDriver>import de.uni_due.s3.jack2.backend.checkers.tracingchecker.framework.TracingFramework;
+import de.uni_due.s3.jack2.backend.checkers.tracingchecker.framework.TracingFramework.Test;
+
+public class DemoProjekt1Dynamisch {
+
+	private String[] musterflaggen1 = new String[4];
+	private String[] musterflaggen2 = new String[4];
+	private int[] results = new int[4]; // 0=nicht durchgeführt,1=alles falsch, 2=nur Muster OK, 3=alles OK
+	
+	public int getResult() {
+		int punkte1 = 20;
+		if (results[0] == 0 || results[0] == 1)
+			punkte1 = 0;
+		else if (results[0] == 2 &amp;&amp; punkte1 &gt; 10)
+			punkte1 = 10;
+
+		int punkte2 = 20;
+		if (results[1] == 0 || results[1] == 1)
+			punkte2 = 0;
+		else if (results[1] == 2 &amp;&amp; punkte2 &gt; 10)
+			punkte2 = 10;
+
+		int punkte3 = 20;
+		if (results[2] == 0 || results[2] == 1)
+			punkte3 = 0;
+		else if (results[2] == 2 &amp;&amp; punkte3 &gt; 10)
+			punkte3 = 10;
+
+		int punkte4 = 20;
+		if (results[3] == 0 || results[3] == 1)
+			punkte4 = 0;
+		else if (results[3] == 2 &amp;&amp; punkte4 &gt; 10)
+			punkte4 = 10;
+
+		return punkte1 + punkte2 + punkte3 + punkte4 + 20;
+	}
+
+	private boolean checkDependence(int index, String blocked, String dependence) {
+		if (results[index] == 0) {
+			TracingFramework.printWarning(&quot;Testfall übersprungen&quot;, &quot;Bevor &quot; + blocked + &quot; ausgeführt wird, muss &quot; + dependence + &quot; zumindest ein Ergebnis liefern.&quot;);
+			return false;
+		} else {
+			return true;
+		}
+	}
+
+	private void evaluate(int index, String method, String result, String expected, String expectedPattern) {
+		if (result.startsWith(&quot;\n&quot;))
+			result = result.substring(1);
+		if (result.endsWith(&quot;\n&quot;))
+			result = result.substring(0,result.length()-1);
+		if (expected.startsWith(&quot;\n&quot;))
+			expected = expected.substring(1);
+		if (expected.endsWith(&quot;\n&quot;))
+			expected = expected.substring(0,expected.length()-1);
+		if (expectedPattern.startsWith(&quot;\\n&quot;))
+			expectedPattern = expectedPattern.substring(2);
+		if (expectedPattern.endsWith(&quot;\\n&quot;))
+			expectedPattern = expectedPattern.substring(0,expectedPattern.length()-2);
+		
+		if (!result.matches(expectedPattern)) {
+			TracingFramework.printError(&quot;Die Methode &apos;&quot; + method + &quot;&apos; erzeugt weder das richtige Muster noch die richtigen Zahlen. &lt;table border=\&quot;1\&quot; style=\&quot;width:100%;border:1px dotted;border-collapse:collapse;\&quot;&gt;&lt;tr&gt;&lt;td&gt;Deine Ausgabe&lt;/td&gt;&lt;td&gt;Erwartete Ausgabe&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;pre&gt;&quot; + result + &quot;&lt;/pre&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&quot; + expected + &quot;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&quot;);
+			results[index] = 1;
+		} else if (!result.equals(expected)) {
+			TracingFramework.printError(&quot;Die Methode &apos;&quot; + method + &quot;&apos; erzeugt zwar das richtige Muster, aber es werden nicht die richtigen Zahlen verwendet. &lt;table border=\&quot;1\&quot; style=\&quot;width:100%;border:1px dotted;border-collapse:collapse;\&quot;&gt;&lt;tr&gt;&lt;td&gt;Deine Ausgabe&lt;/td&gt;&lt;td&gt;Erwartete Ausgabe&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;pre&gt;&quot; + result + &quot;&lt;/pre&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&quot; + expected + &quot;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&quot;);
+			results[index] = 2;
+		} else {
+			results[index] = 3;
+		}
+	}
+
+	@Test(name=&quot;Test 1&quot;)
+	public void test1() {
+		String result = Demoprojekt1.flagge(2);
+
+		evaluate(0, &quot;flagge(2)&quot;, result, flagge1(2, false), flagge1(2, true));
+	}
+
+	@Test(name=&quot;Test 2&quot;)
+	public void test2() {
+		if (!checkDependence(0, &quot;Test 2&quot;, &quot;Test 1&quot;)) return;
+
+		String result = Demoprojekt1.flagge(4);
+
+		evaluate(1, &quot;flagge(4)&quot;, result, flagge1(4, false), flagge1(4, true));
+	}
+
+	@Test(name=&quot;Test 3&quot;)
+	public void test3() {
+		if (!checkDependence(1, &quot;Test 3&quot;, &quot;Test 2&quot;)) return;
+
+		String result = Demoprojekt1.flagge(6);
+
+		evaluate(2, &quot;flagge(6)&quot;, result, flagge1(6, false), flagge1(6, true));
+	}
+
+	@Test(name=&quot;Test 4&quot;)
+	public void test4() {
+		if (!checkDependence(2, &quot;Test 4&quot;, &quot;Test 3&quot;)) return;
+
+		String result = Demoprojekt1.flagge(8);
+
+		evaluate(3, &quot;flagge(8)&quot;, result, flagge1(8, false), flagge1(8, true));
+	}
+
+	private String flagge1(int groesse, boolean regex) {
+		String m = &quot;&quot;;
+
+		for (int i = 1; i &lt;= groesse; i++) {
+			for (int j = 1; j &lt;= groesse; j++) {
+				if (i &lt;= groesse/2 &amp;&amp; j &lt;= groesse/2) {
+					if (regex)
+						m += &quot;\\d&quot;;
+					else 
+						m += i;
+				}
+				else if (i &gt; groesse/2 &amp;&amp; j &gt; groesse/2) {
+					if (regex)
+						m += &quot;\\d&quot;;
+					else
+						m += j;
+				}
+				else {
+					if (regex)
+						m += &quot;\\.&quot;;
+					else
+						m += &quot;.&quot;;
+				}
+			}
+			if (regex)
+				m += &quot;\\n&quot;;
+			else
+				m += &quot;\n&quot;;
+		}
+		
+		return m;
+	}
+}
+</testDriver>
+          <classesToTrace id="31"/>
+          <timeoutSeconds>900</timeoutSeconds>
+        </de.uni__due.s3.jack3.entities.stagetypes.java.TracingGradingConfig>
+      </gradingSteps>
+    </de.uni__due.s3.jack3.entities.stagetypes.java.JavaStage>
+  </stages>
+  <startStage class="de.uni_due.s3.jack3.entities.stagetypes.java.JavaStage" reference="5"/>
+  <variableDeclarations id="32"/>
+  <jSXGraphs id="33"/>
+  <resultFeedbackMappings id="34"/>
+</ExportedExercise>

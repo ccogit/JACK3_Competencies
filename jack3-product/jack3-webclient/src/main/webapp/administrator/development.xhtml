@@ -1,0 +1,79 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/template.xhtml">
+	<ui:define name="content">
+		<h:form id="developmentForm">
+
+			<h3>Development View</h3>
+
+			<p:panelGrid id="pgDevelopmentView" columns="2"
+				styleClass="ui-panelgrid-blank">
+
+				<h:outputText for="createTestContent"
+					value="Erzeugt eine fertige Testumgebung mit Beispielaufgaben, -kurs und -kursangebot inkl. 
+					Accounts" />
+				<p:commandButton update="globalGrowl"
+					id="setupReadyToPlayEnvironment" value="Umgebung erzeugen"
+					action="#{developmentView.setupReadyToPlayEnvironment()}"
+					onstart="PF('globalSpinner').show()"
+					oncomplete="PF('globalSpinner').hide()"
+					style="background-color:#a8ffa8; border-color:green; color:black;" />
+
+				<h:outputLabel for="deleteDatabase"
+					value="Leert die Mandantendatenbank und führt das FirstTimeSetup aus (Der in der DB hinterlegte
+					 Benutzer 'jack' benötigt Superuser-Rechte)" />
+				<p:commandButton update="globalGrowl" id="deleteDatabase"
+					value="Datenbank leeren" action="#{developmentView.deleteDatabase}"
+					style="background-color:#ffaaaa; border-color:red; color:black;" />
+
+				<h:outputLabel for="rightFixForPersonalFolders"
+					value="Nach dem Hinzufügen eines neuen Rechts fehlen möglicherweise Rechte für den persönlichen
+					 Ordner. Per Klick auf diesen Button erhalten Benutzer mit persönlichem Ordner alle Rechte auf 
+					 diesem." />
+				<p:commandButton update="globalGrowl"
+					id="rightFixForPersonalFolders"
+					value="Rechtefix für persönliche Ordner"
+					action="#{developmentView.fixPersonalFolderRights}"
+					onstart="PF('globalSpinner').show()"
+					oncomplete="PF('globalSpinner').hide()" />
+
+				<h:outputLabel for="createTestContent"
+					value="Erzeugt Nutzer 'Lecturer' und legt Ordner mit Aufgaben, Kursen und Kursangeboten an." />
+				<p:commandButton update="globalGrowl" id="createTestContent"
+					value="Testinhalte erzeugen"
+					action="#{developmentView.createTestContent()}"
+					onstart="PF('globalSpinner').show()"
+					oncomplete="PF('globalSpinner').hide()" />
+
+				<h:outputLabel for="createCourseRecords"
+					value="Schreibt 'Dummy Student' in jedem Kurs ein." />
+				<p:commandButton update="globalGrowl" id="createCourseRecords"
+					value="Dummy Student einschreiben"
+					action="#{developmentView.createTestCourseRecords}"
+					onstart="PF('globalSpinner').show()"
+					oncomplete="PF('globalSpinner').hide()" />
+
+				<h:outputLabel for="createUsers"
+					value="Erzeugt folgende Test-Accounts: 'lecturer', 'student', 'testuser1-10', 'testlecturer1-10'" />
+				<p:commandButton update="globalGrowl" id="createUsers"
+					value="Accounts erzeugen"
+					action="#{developmentView.createDummyUsers()}"
+					onstart="PF('globalSpinner').show()"
+					oncomplete="PF('globalSpinner').hide()" />
+
+				<h:outputLabel for="testMethod" value="Führt eine Testmethode aus" />
+				<p:commandButton update="globalGrowl" id="testMethod"
+					value="Testmethode" action="#{developmentView.testMethod}" />
+			</p:panelGrid>
+			
+			<ui:include src="developmentStressTest.xhtml"/>
+
+			<ui:include src="developmentIndividualExercises.xhtml" />
+
+		</h:form>
+	</ui:define>
+</ui:composition>
+

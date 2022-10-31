@@ -1,0 +1,30 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core">
+
+  <c:if test="#{not aceView.rendered}">
+
+    <c:choose>
+      <c:when test="#{aceView.configured}">
+        <script src="#{aceView.url}ace.js"/>
+        <script src="#{aceView.url}ext-language_tools.js"/>
+        <script>
+          ace.config.set('basePath', '#{aceView.url}')
+        </script>
+      </c:when>
+      <c:otherwise>
+        <p:staticMessage severity="error"
+          summary="#{msg['missingConfiguration.ace.summary']}"
+          detail="#{aceView.configurationHint}"/>
+      </c:otherwise>
+    </c:choose>
+
+    <c:set target="#{aceView}" property="rendered" value="#{true}"/>
+
+  </c:if>
+  
+
+</ui:composition>

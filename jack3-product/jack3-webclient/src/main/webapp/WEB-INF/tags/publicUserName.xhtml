@@ -1,0 +1,23 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:c="http://java.sun.com/jsp/jstl/core"
+  xmlns:p="http://primefaces.org/ui">
+  <h:outputText
+    styleClass="fas fa-mask"
+    id="#{id}_Mask"
+    title="#{msg['global.pseudonymShown']}"
+    style="margin-right:3px;"
+    rendered="#{publicUserName.pseudonym}" />
+  <p:tooltip
+    id="#{id}_ToolTip"
+    for="#{id}_Mask"
+    showDelay="1000"
+    style="max-width:450px;"
+    position="top" />
+  <h:outputText
+    id="#{id}"
+    value="#{publicUserName.name}" />
+</ui:composition>

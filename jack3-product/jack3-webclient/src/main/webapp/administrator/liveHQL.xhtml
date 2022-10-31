@@ -1,0 +1,52 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/template.xhtml">
+	<ui:define name="content">
+		<h3>Live HQL</h3>
+
+		<h:form>
+			<p:panel header="Query Settings">
+				<p:panelGrid columns="2" cellpadding="5"
+					styleClass="ui-panelgrid-blank" style="width:100%;">
+
+					<p:outputLabel for="query" value="Query: " />
+					<p:inputText style="width:100%" id="query"
+						value="#{liveHqlBean.query}" />
+
+					<p:outputLabel for="singleResult" value="Result type: " />
+					<p:selectOneRadio id="singleResult"
+						value="#{liveHqlBean.singleResult}">
+						<f:selectItem itemLabel="Single Result" itemValue="true" />
+						<f:selectItem itemLabel="Result List" itemValue="false" />
+					</p:selectOneRadio>
+				</p:panelGrid>
+				<p:commandButton value="Execute query"
+					action="#{liveHqlBean.executeQuery}" update="results globalGrowl" />
+			</p:panel>
+
+			<p:outputPanel id="results">
+				<p:panel header="Results"
+					rendered="#{not empty liveHqlBean.results}">
+					<h:outputText
+						value="#{liveHqlBean.results.size()} result(s) for query '#{liveHqlBean.query}'"
+						style="font-weight: bold;" /><br/>
+					<h:outputText value="Duration: #{liveHqlBean.duration}" />
+					<p:dataTable value="#{liveHqlBean.results}" var="item">
+						<p:column width="30%" headerText="Type">
+							<h:outputText value="#{item.class.simpleName}" />
+						</p:column>
+						<p:column headerText="Value">
+							<h:outputText value="#{item}" />
+						</p:column>
+					</p:dataTable>
+				</p:panel>
+				<h:outputText value="No results for query '#{liveHqlBean.query}'"
+					style="font-weight: bold;"
+					rendered="#{empty liveHqlBean.results and not empty liveHqlBean.query}" />
+			</p:outputPanel>
+		</h:form>
+	</ui:define>
+</ui:composition>

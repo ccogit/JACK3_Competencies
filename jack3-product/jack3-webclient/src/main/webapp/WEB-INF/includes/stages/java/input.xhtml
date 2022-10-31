@@ -1,0 +1,76 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:j="http://jack.s3.uni-due.de/ui-elements">
+
+  <p>
+    <p:outputLabel
+      style="vertical-align:middle"
+      value="#{exercisePlayerView.getStageSubmissionViewBean(stageSubmission).taskDescription}"
+      escape="false" />
+  </p>
+
+  <p:fileUpload
+    id="stage_#{stageIndex}_uploadForm"
+    mode="advanced"
+    skinSimple="true"
+    auto="true"
+    dragDropSupport="true"
+    multiple="true"
+    disabled="#{not (exercisePlayerView.isCurrentStage(stageSubmission)) 
+                      or (exercisePlayerView.submission.isCompleted())
+                      or (exercisePlayerView.submission.hasInternalErrors())
+                            or (stageSubmission.hasPendingChecks())}"
+    listener="#{exercisePlayerView.getStageSubmissionViewBean(stageSubmission).handleFileUpload}"
+    update="stage_#{stageIndex}_submissionResources"
+    sequential="true"
+    label="#{msg['global.upload']}"
+    rendered="#{!exercisePlayerView.reviewMode}" />
+  <p:dataTable
+    id="stage_#{stageIndex}_submissionResources"
+    widgetVar="submissionResources"
+    value="#{exercisePlayerView.getStageSubmissionViewBean(stageSubmission).submissionResources}"
+    var="file">
+    <p:column
+      id="columnFilename"
+      headerText="#{msg['global.file']}"
+      width="300">
+      <h:outputText value="#{file.filename}" />
+    </p:column>
+    <p:column
+      id="columnUploadDate"
+      headerText="#{msg['global.uploadTimestamp']}"
+      width="200">
+      <j:outputTimestamp
+        value="#{file.uploadTimestamp}"
+        converter="shortTimestampConverter" />
+    </p:column>
+    <p:column
+      id="columnActions"
+      style="width:80px;text-align:center">
+      <p:commandButton
+        id="cbRemoveResource"
+        update="stage_#{stageIndex}_submissionResources"
+        icon="fa fa-trash-o"
+        actionListener="#{exercisePlayerView.getStageSubmissionViewBean(stageSubmission).removeSubmissionResource(file)}"
+        title="#{msg['global.remove']}"
+        disabled="#{not (exercisePlayerView.isCurrentStage(stageSubmission)) 
+                      or (exercisePlayerView.submission.isCompleted())
+                      or (exercisePlayerView.submission.hasInternalErrors())
+                            or (stageSubmission.hasPendingChecks())}"
+        rendered="#{!exercisePlayerView.reviewMode}" />
+      <p:commandButton
+        id="cbDownloadResource"
+        icon="fa fa-download"
+        ajax="false"
+        title="#{msg['global.download']}">
+        <p:fileDownload value="#{exercisePlayerView.getStageSubmissionViewBean(stageSubmission).getSubmissionResource(file)}" />
+      </p:commandButton>
+    </p:column>
+  </p:dataTable>
+  <h:outputText value="#{exercisePlayerView.getStageSubmissionViewBean(stageSubmission).fileUploadHint}" />
+
+</ui:composition>

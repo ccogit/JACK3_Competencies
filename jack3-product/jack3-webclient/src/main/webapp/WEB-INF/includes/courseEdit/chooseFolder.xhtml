@@ -1,0 +1,190 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:j="http://jack.s3.uni-due.de/ui-elements">
+
+  <p:panelGrid style="width:100%;border:0px;">
+    <p:row style="border-width:0px; display:flex;">
+
+      <!-- Available Exercises, shown in a tree -->
+      <p:column
+        id="chooseFolder_availableExercises"
+        style="width:calc(50% - 5px); vertical-align:top; padding:0px;">
+        <h4 class="shadow-header">#{msg['courseEditExerciseTree.availableExercises']}</h4>
+        <ui:include src="/WEB-INF/includes/courseEdit/tree.xhtml">
+          <ui:param
+            name="id"
+            value="chooseFolder_tree" />
+          <ui:param
+            name="updateComponents"
+            value="@parent:chooseFolder_selectedExercisesTable" />
+        </ui:include>
+      </p:column>
+
+      <p:column style="width:10px; border:0px; padding:0;" />
+
+      <!-- Selected Exercises, shown in a Datatable -->
+      <p:column
+        id="chooseFolder_selectedExercises"
+        style="width:calc(50% - 5px); vertical-align:top; padding:0px;">
+        <h4 class="shadow-header">#{msg['courseEditExerciseTree.selectedExercises']}</h4>
+
+        <p:remoteCommand
+          name="chooseFolder_refreshExerciseCount"
+          update="chooseFolder_selectedExercisesTable:numOfExercises" />
+        <p:dataTable
+          id="chooseFolder_selectedExercisesTable"
+          var="exercise"
+          value="#{courseEditView.chooseFolderView.getAllExercisesSorted()}"
+          sortBy="#{courseEditView.chooseFolderView.getGroupingKeyForExercise(exercise)}"
+          styleClass="without-header"
+          expandableRowGroups="true"
+          style="margin:-1px;"
+          rowStyleClass="#{courseEditView.isFolderMissing(exercise.folder) ? 'background-orange' : ''}">
+
+          <p:columnGroup
+            id="cgFolder"
+            type="header">
+            <p:row>
+              <p:column
+                id="columnCourseExercises"
+                colspan="1"
+                headerText="#{msg['courseEdit.courseExercises']}" />
+            </p:row>
+          </p:columnGroup>
+
+          <p:headerRow>
+            <p:column styleClass="#{courseEditView.isFolderMissing(exercise.folder) ? 'background-orange' : ''}">
+              <h:panelGroup
+                id="settings"
+                layout="block"
+                style="float:right; font-weight:normal;">
+                <p:commandButton
+                  id="editExerciseCount"
+                  icon="fas fa-cog fa-sm"
+                  type="button"
+                  title="#{msg['courseEditProvider.chooseFolder.changeNumberOfExercises']}"
+                  value="#{courseEditView.chooseFolderView.getChangeNumberOfExercisesButtonText(exercise)}"
+                  disabled="#{!courseEditView.newestRevision or courseEditView.readOnly}" />
+                <p:overlayPanel
+                  for="editExerciseCount"
+                  hideEffect="fade"
+                  showEffect="fade"
+                  my="right top">
+                  <h:panelGroup id="switchAllExercises">
+                    <p:selectBooleanCheckbox
+                      value="#{courseEditView.chooseFolderView.contentFoldersUsingAllChildExercises[courseEditView.chooseFolderView.getFolderFromProviderContainingExercise(exercise)]}"
+                      itemLabel="#{msg['courseEdit.allExercises']}"
+                      onchange="processChange()"
+                      disabled="#{!courseEditView.newestRevision or courseEditView.readOnly}">
+                      <p:ajax
+                        listener="#{courseEditView.chooseFolderView.switchAllExerciseSetting(exercise)}"
+                        immediate="true"
+                        process="@parent:@parent:@parent:chooseFolder_selectedExercisesTable @this"
+                        update="switchAllExercises editExerciseCount"
+                        oncomplete="chooseFolder_refreshExerciseCount()" />
+                    </p:selectBooleanCheckbox>
+                    <p:spinner
+                      value="#{courseEditView.chooseFolderView.contentProvider.foldersMap[courseEditView.chooseFolderView.getFolderFromProviderContainingExercise(exercise)]}"
+                      converter="javax.faces.Integer"
+                      disabled="#{!courseEditView.newestRevision or courseEditView.readOnly}"
+                      min="1"
+                      max="#{courseEditView.chooseFolderView.getMaxExercises(exercise)}"
+                      required="true"
+                      size="2"
+                      onchange="processChange()"
+                      rendered="#{courseEditView.chooseFolderView.isSpinnerRendered(exercise)}">
+                      <p:ajax
+                        event="change"
+                        update="editExerciseCount"
+                        oncomplete="chooseFolder_refreshExerciseCount()" />
+                    </p:spinner>
+                  </h:panelGroup>
+                </p:overlayPanel>
+                <p:commandButton
+                  id="deleteSelectedFolder"
+                  icon="fas fa-minus fa-sm"
+                  oncomplete="processChange()"
+                  title="#{msg['courseEdit.removeFromFolderList']}"
+                  disabled="#{!courseEditView.newestRevision or courseEditView.readOnly}"
+                  actionListener="#{courseEditView.chooseFolderView.removeFolder(exercise)}"
+                  update="courseEditMainForm:chooseFolder_selectedExercisesTable courseEditMainForm:chooseFolder_tree">
+                  <p:confirm
+                    disabled="#{not courseEditView.chooseFolderView.isMissingRightForExercise(exercise)}"
+                    message="#{msg['courseEditProvider.noRights.folder']} #{msg['courseEditProvider.noRights.confirmRemove']}" />
+                </p:commandButton>
+              </h:panelGroup>
+              <h:outputText
+                value="#{courseEditView.chooseFolderView.getFolderName(exercise)}" />
+              <h:outputText
+                styleClass="fas fa-trash fa-sm"
+                rendered="#{courseEditView.isFolderMissing(exercise.folder)}"
+                title="#{msg['courseEditProvider.symbols.meanwhileDeleted']}"
+                style="margin-left: 5px;" />
+              <h:outputText
+                styleClass="fas fa-times-circle fa-sm"
+                rendered="#{courseEditView.newestRevision and not courseEditView.readOnly and courseEditView.chooseFolderView.isMissingRightForExercise(exercise)}"
+                title="#{msg['courseEditProvider.noRights.folder']}"
+                style="margin-left: 5px; color: red;" />
+              <h:panelGroup>
+                <br />
+                <p style="font-size: x-small; color: grey; font-weight: normal; margin-top: 1.5em; margin-bottom: 0;">
+                  <h:outputText value="#{courseEditView.getUserSpecificPathForChooseFolder(exercise)}" />
+                </p>
+              </h:panelGroup>
+            </p:column>
+          </p:headerRow>
+
+          <p:column id="columnExercises">
+            <h:outputText
+              value="#{exercise.name}"
+              style="font-size:small" />
+            <br />
+            <h:outputText
+              value="#{courseEditView.chooseFolderView.getShownExerciseBreadcrumb(exercise)}"
+              style="font-size:x-small;color:grey" />
+          </p:column>
+
+          <!-- Summary -->
+          <f:facet name="footer">
+            <h:panelGroup
+              id="summary"
+              rendered="#{courseEditView.chooseFolderView.folderCount > 0}"
+              layout="block">
+              <h:outputText value="#{msg['global.summary']}" />
+              <h:panelGroup style="float: right;">
+                <j:helperTooltip
+                  id="summaryTooltip"
+                  tooltip="#{msg['courseEditProvider.chooseFolder.mutableValue']}"
+                  rendered="#{courseEditView.newestRevision}" />
+              </h:panelGroup>
+              <p:panelGrid
+                id="summaryTable"
+                columns="2"
+                style="font-weight:normal; font-size:small; text-align:left; width:auto; margin:auto;"
+                styleClass="ui-panelgrid-blank">
+                <p:outputLabel
+                  id="labelNumberOfFolders"
+                  value="#{msg['courseEditProvider.numberOfFolders']}:" />
+                <h:outputText
+                  value="#{courseEditView.chooseFolderView.folderCount}"
+                  id="numOfFolders" />
+                <p:outputLabel
+                  id="labelNumberOfExercises"
+                  value="#{msg['courseEditProvider.numberOfExercises']}:" />
+                <h:outputText
+                  value="#{courseEditView.chooseFolderView.exerciseCount}"
+                  id="numOfExercises" />
+              </p:panelGrid>
+            </h:panelGroup>
+          </f:facet>
+
+        </p:dataTable>
+      </p:column>
+    </p:row>
+  </p:panelGrid>
+
+</ui:composition>

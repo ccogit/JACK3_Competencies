@@ -1,0 +1,164 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core">
+
+	<br />
+
+	<ui:include
+		src="/WEB-INF/includes/stages/r/addStaticTestCaseOverlay.xhtml">
+		<ui:param name="newStaticRTestCase"
+			value="#{stageBean.currentStaticRTestcase}" />
+	</ui:include>
+
+	<ui:include
+		src="/WEB-INF/includes/stages/r/editStaticTestCaseOverlay.xhtml">
+		<ui:param name="staticRTestCaseToUpdate"
+			value="#{stageBean.currentStaticRTestcaseToUpdate}" />
+	</ui:include>
+
+	<ui:include
+		src="/WEB-INF/includes/stages/r/addDynamicTestCaseOverlay.xhtml">
+		<ui:param name="testCaseParam"
+			value="#{stageBean.currentDynamicTestcase}" />
+	</ui:include>
+
+	<ui:include
+		src="/WEB-INF/includes/stages/r/editDynamicTestCaseOverlay.xhtml">
+		<ui:param name="testCaseParam"
+			value="#{stageBean.currentDynamicTestcase}" />
+	</ui:include>
+
+	<ui:include
+		src="/WEB-INF/includes/stages/r/editCheckerConfigOverlay.xhtml">
+		<ui:param name="checkerConfig"
+			value="#{stageBean.currentCheckerConfiguration}" />
+	</ui:include>
+
+	<!-- TestCase tuple  -->
+	<p:panel id="testCaseGroupsPanel"
+		header="#{msg['rStage.checker.testcaseGroups']}">
+
+		<c:forEach items="#{stageBean.stage.testCasetuples}"
+			var="testCasetuples" varStatus="testCasetuplesStatus">
+
+			<p:panel
+				header="#{msg['rStage.checker.testcaseGroup']} #{testCasetuplesStatus.count}"
+				toggleable="true" collapsed="false" id="testCaseGroupPanel#{testCasetuplesStatus.index}">
+				<!-- Delete Button -->
+				<f:facet name="actions">
+					<h:commandLink
+                        id="deleteTestCase#{testCasetuplesStatus.index}"
+						action="#{stageBean.removeTestCasetuple(testCasetuples)}"
+						onclick="processChange()"
+						update="@parent:@parent:@parent:testCaseGroupsPanel"
+						oncomplete="processChange()"
+						styleClass="ui-panel-titlebar-icon ui-corner-all ui-state-default">
+						<h:outputText styleClass="ui-icon ui-icon-trash" />
+						<f:ajax execute="@parent:@parent:@parent:testCaseGroupsPanel"
+							render="@parent:@parent:@parent:testCaseGroupsPanel" />
+					</h:commandLink>
+
+				</f:facet>
+
+				<!-- TestCases -->
+				<p:dataTable id="testCasesDataTable#{testCasetuplesStatus.count}"
+					var="testCase" value="#{testCasetuples.testCases}" editable="true">
+
+					<p:column headerText="#{msg['global.name']}" style="width:150px">
+						<p:cellEditor>
+							<f:facet name="output">
+								<h:outputText value="#{testCase.name}" />
+							</f:facet>
+							<f:facet name="input">
+								<p:inputText value="#{testCase.name}" style="width:96%"
+									label="#{msg['global.name']}" />
+							</f:facet>
+						</p:cellEditor>
+					</p:column>
+
+					<p:column headerText="Type" style="width:50px">
+						<p:outputLabel value="DYNAMISCH" rendered="#{testCase.dynamic}" />
+						<p:outputLabel value="STATISCH" rendered="#{testCase.static}" />
+
+					</p:column>
+
+					<p:column headerText="#{msg['global.points']}" style="width:35px">
+						<p:cellEditor>
+							<f:facet name="output">
+								<h:outputText value="#{testCase.points}" />
+							</f:facet>
+							<f:facet name="input">
+								<p:inputText value="#{testCase.points}" style="width:96%"
+									label="#{msg['global.points']}" />
+							</f:facet>
+						</p:cellEditor>
+					</p:column>
+
+					<p:column headerText="#{msg['rStage.pointsMode']}"
+						style="width:100px">
+						<p:cellEditor>
+							<f:facet name="output">
+								<h:outputText value="#{testCase.pointsMode.toString()}" />
+							</f:facet>
+							<f:facet name="input">
+								<h:selectOneMenu value="#{testCase.pointsMode}">
+									<f:selectItems value="#{stageBean.pointModes}" var="mode"
+										itemLabel="#{mode}" itemValue="#{mode}" />
+								</h:selectOneMenu>
+							</f:facet>
+						</p:cellEditor>
+					</p:column>
+
+					<p:column style="width:15px">
+						<p:commandButton icon="fas fa-wrench fa-sm"
+							update="@parent:@parent:@parent:testCaseGroupsPanel"
+							action="#{stageBean.editDynamicTestcaseCopy(testCase, testCasetuples)}"
+							rendered="#{testCase.dynamic}">
+						</p:commandButton>
+
+						<p:commandButton icon="fas fa-wrench fa-sm"
+							update="@parent:@parent:@parent:testCaseGroupsPanel"
+							action="#{stageBean.editStaticTestCaseCopy(testCase, testCasetuples)}"
+							rendered="#{testCase.static}">
+						</p:commandButton>
+
+					</p:column>
+
+					<p:column id="removeTestcase" style="width:15px;text-align:center;">
+						<p:commandButton id="removeTestcaseButton"
+							disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+							icon="fas fa-trash-alt fa-sm"
+							action="#{stageBean.removeTestCase(testCasetuples, testCase)}"
+							update="@parent:@parent:@parent:testCaseGroupsPanel"
+							oncomplete="processChange()">
+						</p:commandButton>
+					</p:column>
+				</p:dataTable>
+
+				<p:commandButton id="addDynamicTestCaseBtn#{testCasetuplesStatus.index}" icon="fa fa-plus fa-sm"
+					disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+					value="#{msg['rStage.checker.dynamicTestcase']}"
+					action="#{stageBean.addDynamicTestCase(testCasetuples)}" />
+
+				<p:commandButton id="addStaticTestCaseBtn#{testCasetuplesStatus.index}" icon="fa fa-plus fa-sm"
+					disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+					value="#{msg['rStage.checker.staticTestcase']}"
+					action="#{stageBean.addStaticTestCase(testCasetuples)}" />
+
+				<p:commandButton icon="fas fa-user-cog fa-sm"
+					value="#{msg['rStage.checker.editCheckerConfig']}"
+					action="#{stageBean.editCheckerConfig(testCasetuples)}" />
+			</p:panel>
+
+		</c:forEach>
+	</p:panel>
+
+	<p:commandButton value="#{msg['rStage.checker.addNewTestCaseGroup']}"
+        id="addNewTestCaseGroup"
+		disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+		icon="fas fa-new fa-sm" action="#{stageBean.addNewTestCasetuple()}"
+		update="testCaseGroupsPanel" oncomplete="processChange()" />
+</ui:composition>

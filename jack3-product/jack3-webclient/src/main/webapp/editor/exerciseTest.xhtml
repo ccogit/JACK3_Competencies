@@ -1,0 +1,74 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:c="http://java.sun.com/jsp/jstl/core"
+  xmlns:p="http://primefaces.org/ui"
+  template="/WEB-INF/templates/template.xhtml">
+
+  <ui:define name="metadata">
+    <f:metadata>
+      <f:viewParam
+        name="exercise"
+        value="#{exerciseTestView.exerciseId}" />
+      <f:viewParam
+        name="submission"
+        value="#{exerciseTestView.submissionId}" />
+      <f:viewAction action="#{exerciseTestView.initTest}" />
+    </f:metadata>
+  </ui:define>
+
+  <ui:define name="content">
+    <h:form id="exerciseTest">
+      <f:passThroughAttribute
+        name="autocomplete"
+        value="off" />
+      <p:toolbar id="tb" styleClass="sticky-toolbar">
+        <f:facet
+          id="facetExerciseTest"
+          name="left">
+          <p:linkButton
+            id="backToExercise"
+            outcome="#{viewId.exerciseEditor}"
+            value="#{msg['exerciseTest.backToExercise']}"
+            icon="fas fa-arrow-left">
+            <f:param
+              name="exercise"
+              value="#{exerciseTestView.exerciseId}" />
+          </p:linkButton>
+        </f:facet>
+        <f:facet
+          id="facetVariablesAndLogsToggle"
+          name="right">
+          <p:selectBooleanButton
+            id="variablesAndLogsToggle"
+            value="#{exercisePlayerView.showVariablesAndLogs}"
+            onLabel="#{msg['exerciseTest.lecturerView']}"
+            offLabel="#{msg['exerciseTest.lecturerView']}"
+            onIcon="fas fa-eye fa-sm"
+            offIcon="fas fa-eye-slash fa-sm">
+            <p:ajax update="stages currentVariablesWrapper courseInfoSkeleton" />
+          </p:selectBooleanButton>
+        </f:facet>
+      </p:toolbar>
+
+      <div class="ui-g">
+        <div class="ui-g-12 ui-md-9" style="flex-grow: 1;">
+          <h:panelGroup id="panelExercise">
+            <ui:include page="/WEB-INF/includes/stages/exercisePlayer.xhtml" />
+          </h:panelGroup>
+        </div>
+
+        <h:panelGroup id="courseInfoSkeleton"
+          class="ui-g-12 ui-md-3 sticky-top"
+          style="font-size: 80%; display: #{exercisePlayerView.showVariablesAndLogs ? 'none' : 'initial'}">
+          <div style="border: 5px dashed #c1c1c1; color: grey; background-color: #f2f2f2; height: 200px; text-align:center; padding: 5px" class="ui-corner-all">
+            <h:outputText value="#{msg['global.courseInfos']}" />
+          </div>
+        </h:panelGroup>
+      </div>
+    </h:form>
+  </ui:define>
+
+</ui:composition>

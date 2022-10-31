@@ -1,0 +1,17 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+	<ui:include page="../taskDescriptionEditor.xhtml" />
+	<p:spacer width="5" height="30" />
+	<h4></h4>
+	<p:panel header="#{msg['rStage.contentConfig.initialCode']}">
+		<div class="ui-fluid">
+			<p:inputTextarea rows="5" autoResize="true" id="rStageInitialCode"
+				onchange="processChange()" value="#{stageBean.stage.initialCode}" />
+		</div>
+	</p:panel>
+
+</ui:composition>

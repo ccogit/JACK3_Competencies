@@ -1,0 +1,33 @@
+<!-- Displays a hint with some links if a user is logged in. Used in registration and login view. -->
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:c="http://java.sun.com/jsp/jstl/core"
+  xmlns:p="http://primefaces.org/ui">
+
+  <c:if test="#{not empty userSession.currentUser}">
+    <p:panel id="logoutPanel" header="Abmelden">
+      <p>
+        <h:outputFormat value="#{msg['loginView.alreadyLoggedIn']}">
+          <f:param value="#{userSession.currentUser.loginName}"/>
+        </h:outputFormat>
+      </p>
+      <ul>
+        <li>
+          <h:form id="logoutForm">
+            <p:commandLink value="#{msg['global.logout']}" action="#{loginView.logout()}"/>
+          </h:form>
+        </li>
+        <li>
+          <h:link outcome="#{viewId.myAccount}" value="#{msg['global.myAccount']}"/>
+        </li>
+        <li>
+          <h:link outcome="#{viewId.home}" value="#{msg['global.home']}"/>
+        </li>
+      </ul>
+      </p:panel>
+  </c:if>
+
+</ui:composition>

@@ -1,0 +1,44 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:p="http://primefaces.org/ui">
+
+	<h:outputScript
+    library="js"
+    name="ckEditorEditStage.js" />
+  <h4>
+    <h:outputText value="#{msg['exerciseEdit.taskDescription']}" />
+  </h4>
+  <pe:ckEditor
+    id="editor_#{stageBean.stage.orderIndex}"
+    value="#{stageBean.stage.taskDescription}"
+    readonly="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+    interfaceColor="#{editorController.color}"
+    widgetVar="taskDescriptionCkEditor_#{stageBean.stage.orderIndex}"
+    width="100%"
+    height="400px"
+    skin="office2013"
+    language="#{msg['ckEditor.language']}"
+    advancedContentFilter="false"
+    toolbar="[['Source','-','Bold','Italic','Underline','Superscript','Subscript','-','NumberedList','BulletedList','-','Outdent','Indent','Blockquote','-','Undo','-','JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock', '-','Table','Image','Link','-','Font','FontSize','TextColor','BGColor','-','Maximize','Find']]"
+    customConfig="#{resource['js/ckEditorConfig.js']}">
+    <p:ajax 
+      event="blur"
+      oncomplete="CopyToFeedbackEditor(#{stageBean.stage.orderIndex});"></p:ajax> <!-- due to blur event the server side gets the current content when HTML is inserted by api call -->
+    <p:ajax
+      event="initialize"
+      oncomplete="RegisterToolbarListener(#{stageBean.stage.orderIndex});"></p:ajax>
+    <p:ajax
+      event="dirty"
+      oncomplete="processChange()" />
+  </pe:ckEditor>
+  <br />
+  
+  <ui:include page="insertImageToEditor.xhtml" >
+  	<ui:param name="imageButtonId" value="AddImageToTaskDescription" />
+  	<ui:param name="editorWidgetVarId" value="taskDescriptionCkEditor" />
+  </ui:include>
+  
+</ui:composition>

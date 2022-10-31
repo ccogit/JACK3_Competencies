@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<facelet-taglib
+	xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-facelettaglibrary_2_2.xsd"
+	version="2.2">
+
+	<namespace>http://jack.s3.uni-due.de/ui-elements</namespace>
+
+	<!-- Output for a timestamp with a formatter. Basically a wrapper to show the text "never" if the value is not present -->
+	<tag>
+		<description><![CDATA[This custom element shows a formatted timestamp.]]></description>
+		<tag-name>outputTimestamp</tag-name>
+		<source>tags/outputTimestamp.xhtml</source>
+		<attribute>
+			<description><![CDATA[A unique ID of the element.]]></description>
+			<name>id</name>
+			<required>false</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<description><![CDATA[Datasource of the component.]]></description>
+			<name>value</name>
+			<required>true</required>
+			<type>java.lang.Object</type>
+		</attribute>
+		<attribute>
+			<description><![CDATA[The converter which will be used.]]></description>
+			<name>converter</name>
+			<required>true</required>
+			<type>javax.faces.convert.Converter</type>
+		</attribute>
+		<attribute>
+			<description><![CDATA[Specifies wether "never" is shown if the value is null. Default is false.]]></description>
+			<name>showNever</name>
+			<required>false</required>
+			<type>java.lang.Boolean</type>
+		</attribute>
+		<attribute>
+			<description><![CDATA[Flag indicating whether or not this component should be rendered. Default is true.]]></description>
+			<name>rendered</name>
+			<required>false</required>
+			<type>java.lang.Boolean</type>
+		</attribute>
+		<attribute>
+			<description><![CDATA[Additional CSS style.]]></description>
+			<name>style</name>
+			<required>false</required>
+			<type>java.lang.String</type>
+		</attribute>
+	</tag>
+
+	<!-- Exporter for datatable -->
+	<tag>
+		<description>Shows export buttons for PrimeFaces datatable. (CSV and XLSX)</description>
+		<tag-name>exportButtons</tag-name>
+		<source>tags/dataTableExportButtons.xhtml</source>
+		<attribute>
+			<description><![CDATA[Server side id of the datatable whose data would be exported.]]></description>
+			<name>target</name>
+			<required>true</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<description><![CDATA[Filename of the generated export file.]]></description>
+			<name>fileName</name>
+			<required>true</required>
+			<type>java.lang.String</type>
+		</attribute>
+	</tag>
+
+	<!-- Questionmark icon with a tooltip to show the user a small hint -->
+	<tag>
+		<description><![CDATA[Questionmark icon with a tooltip]]></description>
+		<tag-name>helperTooltip</tag-name>
+		<source>tags/helperTooltip.xhtml</source>
+		<attribute>
+			<description><![CDATA[The ID of the component, must be unique within a naming container.]]></description>
+			<name>id</name>
+			<required>true</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<description><![CDATA[The text that is shown next to the questionmark icon. Default: no text]]></description>
+			<name>text</name>
+			<required>false</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<description><![CDATA[The text that is shown on the tooltip on hover.]]></description>
+			<name>tooltip</name>
+			<required>true</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<description><![CDATA[The position of the tooltip relative to the questionmark icon. Must be one of the following values: top, bottom, left, right. Default: top]]></description>
+			<name>position</name>
+			<required>false</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<description><![CDATA[Flag indicating whether or not this component should be rendered. Default is true.]]></description>
+			<name>rendered</name>
+			<required>false</required>
+			<type>java.lang.Boolean</type>
+		</attribute>
+		<attribute>
+			<description><![CDATA[Additional CSS style for the shown text.]]></description>
+			<name>style</name>
+			<required>false</required>
+			<type>java.lang.String</type>
+		</attribute>
+	</tag>
+	
+	<!-- Multiline evaluator expression input field with domain selector -->
+	<tag>
+		<description><![CDATA[Multiline evaluator expression input field with domain selector]]></description>
+		<tag-name>evaluatorInputField</tag-name>
+		<source>tags/evaluatorInputField.xhtml</source>
+		<attribute>
+			<description><![CDATA[The ID of the component, must be unique within a naming container.]]></description>
+			<name>id</name>
+			<required>true</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<description><![CDATA[Boolean which indicates if the field is disabled.]]></description>
+			<name>disabled</name>
+			<required>false</required>
+			<type>java.lang.Boolean</type>
+		</attribute>
+		<attribute>
+			<description><![CDATA[To which Evaluator expression the field is bound.]]></description>
+			<name>evaluatorExpression</name>
+			<required>true</required>
+			<type>de.uni_due.s3.jack3.entities.tenant.EvaluatorExpression</type>
+		</attribute>
+		<attribute>
+			<description><![CDATA[Additional code to execute whenever a key is pressed while the Input-Area is active]]></description>
+			<name>onKeyDown</name>
+			<required>false</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<description><![CDATA[Additional code to execute whenever one of the values is changed.]]></description>
+			<name>onChange</name>
+			<required>false</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<description><![CDATA[The width (row count) of the expression field.]]></description>
+			<name>width</name>
+			<required>true</required>
+			<type>java.lang.Integer</type>
+		</attribute>
+		<attribute>
+			<description><![CDATA[Placeholder that is shown if the field is empty.]]></description>
+			<name>placeholder</name>
+			<required>false</required>
+			<type>java.lang.String</type>
+		</attribute>
+	</tag>
+	
+	<!-- Multiline evaluator expression input field with domain selector -->
+	<tag>
+		<description><![CDATA[Public username for a user]]></description>
+		<tag-name>publicUserName</tag-name>
+		<source>tags/publicUserName.xhtml</source>
+		<attribute>
+			<description><![CDATA[The ID of the component, must be unique within a naming container.]]></description>
+			<name>id</name>
+			<required>true</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<description><![CDATA[The PublicUserName of the user.]]></description>
+			<name>publicUserName</name>
+			<required>true</required>
+			<type>de.uni_due.s3.jack3.business.helpers.PublicUserName</type>
+		</attribute>
+	</tag>
+	
+	<!-- Label-like indicator for Enrollment status -->
+	<tag>
+		<description><![CDATA[Label-like indicator for Enrollment status]]></description>
+		<tag-name>enrollmentStatusIndicator</tag-name>
+		<source>tags/enrollmentStatusIndicator.xhtml</source>
+		<attribute>
+			<description><![CDATA[The ID of the component, must be unique within a naming container.]]></description>
+			<name>id</name>
+			<required>true</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<description><![CDATA[Enrollment status object which is to be shown.]]></description>
+			<name>status</name>
+			<required>true</required>
+			<type>de.uni_due.s3.jack3.entities.enums.EEnrollmentStatus</type>
+		</attribute>
+		<attribute>
+			<description><![CDATA[Show the alternative text 'disenrolled / not yet enrolled' for disenrolled status.]]></description>
+			<name>showNotYetEnrolled</name>
+			<required>false</required>
+			<type>java.lang.Boolean</type>
+		</attribute>
+	</tag>
+
+</facelet-taglib>

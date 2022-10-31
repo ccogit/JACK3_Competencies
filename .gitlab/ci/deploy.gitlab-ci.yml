@@ -1,0 +1,14 @@
+# Deploy WAR file on CI server
+Deployment (jack-ci):
+  stage: deploy
+  script:
+    - cd jack3-product
+# Imports our self signed cert into the java cert truststore
+    - keytool -import -noprompt -alias jack3 -file setup/jack.pem -keystore $CACERTS -storepass changeit
+    - mvn $MAVEN_CLI_OPTS -f jack3-webclient/pom.xml -Dwildfly.deployment.filename=jack3-webclient-0.0.1-SNAPSHOT.war wildfly:deploy
+# We only need artifacts from the first "Build" job.
+  dependencies:
+    - Build
+  needs: ["Build", "Selenium Tests", "Tests", "JavaDoc", "Security", "SonarQube analysis"]
+  only:
+    - master

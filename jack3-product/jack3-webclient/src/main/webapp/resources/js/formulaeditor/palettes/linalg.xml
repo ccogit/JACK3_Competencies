@@ -1,0 +1,459 @@
+<OMOBJ version='2.0' xmlns='http://www.openmath.org/OpenMath'>
+  <OMA>
+    <OMS cd='editor1' name='palette'/>
+    <!-- basic palette tab -->
+    <OMA>
+      <OMS cd='editor1' name='palette_tab'/>
+      <OMA>
+        <OMS cd='editor1' name='palette_row'/>
+		<OMA>
+          <OMS cd='linalg2' name='vector'/>
+          <OMS cd='editor1' name='input_box'/>
+          <OMS cd='editor1' name='input_box'/>
+        </OMA>
+        <OMA>
+          <OMS cd='linalg2' name='matrix'/>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+        </OMA>
+        <OMA>
+          <OMS cd='linalg2' name='matrix'/>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+        </OMA>
+        <OMA>
+          <OMS cd='linalg2' name='matrix'/>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+        </OMA>
+         <OMA>
+          <OMS cd='linalg2' name='matrix'/>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+        </OMA>
+      </OMA>
+      <OMA>
+        <OMS cd='editor1' name='palette_row'/>
+        <OMA>
+          <OMS cd='linalg2' name='vector'/>
+           <OMS cd='editor1' name='input_box'/>
+           <OMS cd='editor1' name='input_box'/>
+           <OMS cd='editor1' name='input_box'/>
+        </OMA>
+        <OMA>
+          <OMS cd='linalg2' name='matrix'/>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+        </OMA>
+        <OMA>
+          <OMS cd='linalg2' name='matrix'/>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+        </OMA>
+        <OMA>
+          <OMS cd='linalg2' name='matrix'/>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+        </OMA>
+         <OMA>
+          <OMS cd='linalg2' name='matrix'/>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+        </OMA>
+      </OMA>
+      <OMA>
+        <OMS cd='editor1' name='palette_row'/>
+        <OMA>
+          <OMS cd='linalg2' name='vector'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+        </OMA>
+        <OMA>
+          <OMS cd='linalg2' name='matrix'/>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+           <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+        </OMA>
+        <OMA>
+          <OMS cd='linalg2' name='matrix'/>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+        </OMA>
+        <OMA>
+          <OMS cd='linalg2' name='matrix'/>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+        </OMA>
+        <OMA>
+          <OMS cd='linalg2' name='matrix'/>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+        </OMA>
+      </OMA>
+      <OMA>
+        <OMS cd='editor1' name='palette_row'/>
+        <OMA>
+          <OMS cd='linalg2' name='vector'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+        </OMA>
+        <OMA>
+          <OMS cd='linalg2' name='matrix'/>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+        </OMA>
+        <OMA>
+          <OMS cd='linalg2' name='matrix'/>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+        </OMA>
+        <OMA>
+          <OMS cd='linalg2' name='matrix'/>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+        </OMA>
+        <OMA>
+          <OMS cd='linalg2' name='matrix'/>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+          <OMA>
+            <OMS cd='linalg2' name='matrixrow'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+            <OMS cd='editor1' name='input_box'/>
+          </OMA>
+        </OMA>
+      </OMA>
+    </OMA>
+  </OMA>
+</OMOBJ>

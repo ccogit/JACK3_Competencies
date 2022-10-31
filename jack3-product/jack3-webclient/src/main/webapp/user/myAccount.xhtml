@@ -1,0 +1,143 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:c="http://java.sun.com/jsp/jstl/core"
+  xmlns:p="http://primefaces.org/ui"
+  template="/WEB-INF/templates/template.xhtml">
+
+  <ui:define name="metadata">
+    <f:metadata>
+      <f:viewAction
+        id="metaLoadMyAccount"
+        action="#{myAccountView.loadMyAccount()}" />
+    </f:metadata>
+  </ui:define>
+
+  <ui:define name="content">
+    <c:set
+      var="current"
+      value="#{'myAccount'}"
+      scope="request" />
+
+    <h3>
+      <h:outputText
+        id="msgWelcomeMessage"
+        value="#{msg['myaccount.title']} - #{userSession.currentUser.loginName}" />
+    </h3>
+    <p:panel
+      id="panelMyAccountChangeEmail"
+      header="#{msg['global.email']}">
+      <h:form id="myAccountMail">
+        <p:message
+          id="msgEmailMsg"
+          for="newEmail"
+          display="tooltip" />
+
+        <h:panelGrid
+          columns="2"
+          cellpadding="5"
+          id="myaccountMailSettings">
+
+          <p:inputText
+            id="newEmail"
+            value="#{myAccountView.newEmail}"
+            feedback="true"
+            size="40"
+            disabled="#{myAccountView.currentUser.external}">           
+          <f:validator
+            id="myAccountEmailValidator"
+            validatorId="custom.emailValidator" />
+            <p:ajax id="eventMyAccountEmailValidator" />
+          </p:inputText>
+            
+          <p:commandButton
+            id="cbUpdateMailSettingsSave"
+            update="myaccountMailSettings globalGrowl"
+            value="#{msg['global.save']}"  
+            icon="fas fa-check fa-sm"
+            action="#{myAccountView.changeEmail}"
+            disabled="#{myAccountView.currentUser.external}"/>
+        </h:panelGrid>
+      </h:form>
+    </p:panel>
+
+    <p:panel
+      id="panelProfileFields"
+      header="#{msg['global.profileFields']}">
+      <p:dataTable value="#{myAccountView.profileFields}" var="field">
+      
+        <p:column headerText="#{msg['global.profileField']}">#{field.key.name}</p:column>
+        <p:column headerText="#{msg['global.value']}">#{field.value}</p:column>
+      
+      </p:dataTable>
+
+    </p:panel>
+
+    <p:panel
+      id="panelMyAccountChangePassword"
+      header="#{msg['global.password']}"
+      rendered="#{not empty myAccountView.currentUser.password}">
+      <h:form id="myAccountChangePassword">
+        <p:message
+          id="msgPasswordMsg"
+          for="newPassword"
+          display="tooltip" />
+        <h:panelGrid
+          id="myaccountPasswordSettings"
+          columns="2"
+          cellpadding="5">
+          <!-- Current Password -->
+          <p:outputLabel
+            id="LabelCurrentPassword"
+            for="currentPassword"
+            value="#{msg['myaccount.oldPassword']}:" />
+          <p:password
+            id="currentPassword"
+            value="#{myAccountView.oldPassword}"
+            required="true" />
+
+
+          <!-- New password field -->
+          <p:outputLabel
+            id="labelNewPassword"
+            for="newPassword"
+            value="#{msg['myaccount.newPassword']}:" />
+          <p:password
+            id="newPassword"
+            value="#{myAccountView.newPassword}"
+            match="confirmPassword"
+            feedback="true"
+            required="true">
+            <f:validator
+              id="validatorPasswordValidator"
+              validatorId="passwordValidator" />
+            <f:attribute
+              name="confirmPassword"
+              value="#{confirmPassword}" />
+          </p:password>
+
+          <!-- Confirm password field -->
+          <p:outputLabel
+            id="labelConfirmPassword"
+            for="confirmPassword"
+            value="#{msg['myaccount.repeatPassword']}: " />
+          <p:password
+            id="confirmPassword"
+            value="#{myAccountView.newPassword}"
+            binding="#{confirmPassword}"
+            required="true" />
+          <p:commandButton
+            id="cbMyAccountChangePasswordOk"
+            update="myaccountPasswordSettings globalGrowl"
+            value="#{msg['global.save']}"
+            icon="fas fa-check fa-sm"
+            action="#{myAccountView.changePassword}" />
+        </h:panelGrid>
+
+      </h:form>
+    </p:panel>
+  </ui:define>
+
+</ui:composition>

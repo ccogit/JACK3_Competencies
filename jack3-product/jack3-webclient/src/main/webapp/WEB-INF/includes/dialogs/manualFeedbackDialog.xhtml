@@ -1,0 +1,141 @@
+<!-- Dialog for giving a manual feedback and score to a stage submission -->
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:pe="http://primefaces.org/ui/extensions"
+  xmlns:j="http://jack.s3.uni-due.de/ui-elements">
+
+  <p:dialog
+    id="manualFeedbackDialog"
+    widgetVar="manualFeedbackDialog"
+    modal="true"
+    closable="true"
+    width="700px"
+    resizable="false"
+    header="#{msg['exercisePlayer.manualFeedback.title']}"
+    closeOnEscape="false"
+    position="center,top">
+
+    <h:outputText value="#{msg['exercisePlayer.manualFeedback.description']}" />
+
+    <p:selectBooleanCheckbox
+      id="enableManualFeedback"
+      itemLabel="#{msg['exercisePlayer.manualFeedback.enable']}"
+      value="#{manualFeedbackDialogView.enableManualResult}"
+      style="margin-top: 15px;">
+      <p:ajax
+        update="manualFeedbackWrapper"
+        process="@this manualFeedbackWrapper" />
+    </p:selectBooleanCheckbox>
+
+    <h:panelGroup
+      id="manualFeedbackWrapper"
+      layout="block">
+      <h:panelGroup
+        id="manualFeedbackContent"
+        layout="block"
+        rendered="#{manualFeedbackDialogView.enableManualResult}">
+
+        <!-- Show automatic result -->
+        <h:panelGroup
+          layout="block"
+          style="margin-top: 15px;">
+          <p:selectBooleanCheckbox
+            id="showAutomaticResult"
+            itemLabel="#{msg['exercisePlayer.manualFeedback.showAutomaticResult']}"
+            value="#{manualFeedbackDialogView.manualResult.showAutomaticResult}" />
+        </h:panelGroup>
+
+        <!-- Created by -->
+        <h:panelGroup
+          layout="block"
+          style="margin-top: 15px;">
+          <p:outputLabel
+            for="@next"
+            value="#{msg['exercisePlayer.manualFeedback.createdBy']}"
+            style="margin-top: 10px;" />: 
+          <j:publicUserName
+            id="createdBy"
+            publicUserName="#{manualFeedbackDialogView.getPublicUserName(manualFeedbackDialogView.manualResult.createdBy)}" />
+        </h:panelGroup>
+
+        <!-- Points -->
+        <h:panelGroup
+          layout="block"
+          style="margin-top: 15px;">
+          <p:outputLabel
+            for="@next"
+            value="#{msg['exercisePlayer.manualFeedback.points']}"
+            style="margin-top: 10px;" />: 
+          <p:spinner
+            id="points"
+            value="#{manualFeedbackDialogView.manualResult.points}"
+            size="3"
+            min="0"
+            max="100"
+            suffix="%" />
+        </h:panelGroup>
+
+        <!-- Internal comment -->
+        <h:panelGroup
+          layout="block"
+          style="margin-top: 15px; padding-right: 8px;">
+          <p:outputLabel
+            for="@next"
+            value="#{msg['exercisePlayer.manualFeedback.internalComment']}"
+            style="margin-top: 10px;" />
+          <br />
+          <p:inputTextarea
+            id="internalComment"
+            value="#{manualFeedbackDialogView.manualResult.internalComment}"
+            rows="4"
+            style="width:100%;" />
+        </h:panelGroup>
+
+        <!-- Public comment -->
+        <h:panelGroup
+          layout="block"
+          style="margin-top: 15px;">
+          <p:outputLabel
+            for="@next"
+            value="#{msg['exercisePlayer.manualFeedback.publicComment']}"
+            style="margin-top: 10px;" />
+          <br />
+          <pe:ckEditor
+            id="publicComment"
+            value="#{manualFeedbackDialogView.manualResult.publicComment}"
+            width="100%"
+            height="150px"
+            language="#{msg['ckEditor.language']}"
+            advancedContentFilter="false"
+            toolbar="[['Bold','Italic','Underline','-','NumberedList','BulletedList','JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock','-','Table','Link','Unlink','HorizontalRule','-','TextColor','BGColor','RemoveFormat']]"
+            customConfig="#{resource[js/ckEditorConfig.js]}" />
+        </h:panelGroup>
+
+      </h:panelGroup>
+    </h:panelGroup>
+
+    <!-- Action buttons -->
+    <p:commandButton
+      id="save"
+      style="margin-top:15px"
+      value="#{msg['global.ok']}"
+      icon="fas fa-check fa-sm"
+      onstart="PF('globalSpinner').show()"
+      oncomplete="PF('manualFeedbackDialog').hide(); updatePlayerViewManually()"
+      actionListener="#{manualFeedbackDialogView.saveAndClose()}"
+      update="globalGrowl manualFeedbackDialog"
+      process="manualFeedbackDialog" />
+    <p:commandButton
+      id="close"
+      style="margin-top:15px"
+      value="#{msg['global.cancel']}"
+      icon="fas fa-times fa-sm"
+      oncomplete="PF('manualFeedbackDialog').hide();" />
+
+  </p:dialog>
+
+</ui:composition>

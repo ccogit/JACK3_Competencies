@@ -1,0 +1,167 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:c="http://java.sun.com/jstl/core"
+  template="/WEB-INF/templates/template.xhtml">
+
+  <ui:define name="metadata">
+    <f:metadata>
+      <f:viewParam
+        name="courseRecord"
+        value="#{showCourseRecordView.courseRecordId}" />
+      <f:viewParam
+        name="exerciseId"
+        value="#{showCourseRecordView.maybeExerciseId}" />
+      <f:viewAction action="#{showCourseRecordView.initView()}" />
+      <f:event type="preRenderView" listener="#{showCourseRecordView.updateBreadCrumb()}"/>
+    </f:metadata>
+  </ui:define>
+
+  <ui:define name="content">
+    <h:form id="showCourseRecordMainForm">
+      <f:passThroughAttribute
+        name="autocomplete"
+        value="off" />
+      <p:breadCrumb model="#{userSession.model}" 
+      id="breadCrumbCourseRecordView"/>
+
+      <p:panel
+        header="#{msg['showCourseRecord.redirectHeader']}"
+        rendered="#{param.redirected and not showCourseRecordView.courseOffer.allowPauses}">
+        <h:outputText id="redirectInfo" value="#{msg['showCourseRecord.redirectInfo']}" />
+      </p:panel>
+
+      <h:panelGroup id="wrapperPanel">
+        <div class="ui-g">
+          <div class="ui-g-12">
+            <p:menubar
+              id="menubarWrapperPanel"
+              style="background: #ebedf0;">
+              <p:menuitem
+                id="miShowCourseOfferName"
+                value="#{showCourseRecordView.courseOffer.name}"
+                style="font-weight: bold;font-size: larger;" />
+              <f:facet
+                id="facetOptions"
+                name="options">
+                <p:linkButton
+                  id="cbToCourseOffer"
+                  value="#{msg['courseMainMenu']}"
+                  icon="fas fa-bars fa-sm"
+                  rendered="#{showCourseRecordView.courseOffer.allowPauses}"
+                  outcome="#{viewId.courseMainMenu}">
+                  <f:param
+                    name="courseOffer"
+                    value="#{showCourseRecordView.courseOfferId}" />
+                  <f:param
+                    name="redirect"
+                    value="false" />
+                </p:linkButton>
+
+                <!-- Restart course with custom dialog to ask for password -->
+                <p:commandButton
+                  id="cbRestartCourse"
+                  value="#{msg['showCourseRecord.restartSubmission']}"
+                  icon="fas fa-sync fa-sm"
+                  rendered="#{showCourseRecordView.showRecord and showCourseRecordView.allowSubmissionRestart}"
+                  onclick="PF('restartConfirmDialog').show()"/>
+                <p:confirmDialog
+                  id="restartConfirmDialog"
+                  widgetVar="restartConfirmDialog"
+                  width="500px"
+                  header="#{msg['showCourseRecord.restartSubmission']}"
+                  message="#{msg['showCourseRecord.restartSubmissionDialog.info']}">
+                  <p:password
+                    id="restartConfirmPersonalPasswordInput"
+                    rendered="#{showCourseRecordView.personalPasswordRequired}"
+                    value="#{showCourseRecordView.personalPassword}"
+                    placeholder="#{msg['courseMainMenu.submissionAction.password']}"
+                    style="width: 200px; margin: .5em .4em .5em 0;" />
+                  <p:commandButton
+                    id="restartConfirmOk"
+                    value="#{msg['global.ok']}"
+                    icon="fas fa-check"
+                    update="globalGrowl :showCourseRecordMainForm:menubarWrapperPanel"
+                    action="#{showCourseRecordView.restartSubmission}"
+                    onclick="PF('restartConfirmDialog').hide()" />
+                  <p:commandButton
+                    id="restartConfirmCancel"
+                    value="#{msg['global.cancel']}"
+                    styleClass="ui-confirmdialog-no button-white"
+                    icon="fas fa-times"
+                    onclick="PF('restartConfirmDialog').hide()" />
+                </p:confirmDialog>
+
+                <!-- Exit submission -->
+                <p:commandButton
+                  id="cbExitSubmission"
+                  value="#{msg['showCourseRecord.exitSubmission']}"
+                  icon="fas fa-external-link-alt fa-sm"
+                  rendered="#{showCourseRecordView.showRecord}"
+                  action="#{showCourseRecordView.exitSubmission}">
+                  <p:confirm
+                    header="#{msg['showCourseRecord.exitSubmission']}"
+                    message="#{showCourseRecordView.exitConfirmMessage}" />
+                </p:commandButton>
+              </f:facet>
+            </p:menubar>
+          </div>
+          <div class="ui-g-12" style="padding:0;">
+            <h:panelGroup
+              id="coursePlayerRenderPanel"
+              rendered="#{showCourseRecordView.showRecord}">
+              <ui:include page="/WEB-INF/includes/course/coursePlayer.xhtml" />
+            </h:panelGroup>
+            <h:outputText
+              value="#{msg['showCourseRecord.recordClosed']}"
+              rendered="#{showCourseRecordView.recordClosed}" />
+
+            <!-- Authentication needed -->
+            <h:panelGroup
+              id="authenticationPanel"
+              rendered="#{not showCourseRecordView.authenticated and not showCourseRecordView.recordClosed}"
+              layout="block">
+              <p>#{msg['showCourseRecord.passwordRequired']}</p>
+              <p:password
+                id="authenticationPasswordInput"
+                value="#{showCourseRecordView.personalPassword}"
+                placeholder="#{msg['courseMainMenu.submissionAction.password']}"
+                style="margin-right: 16px; width: 300px" />
+              <p:commandButton
+                id="authenticationContinueButton"
+                value="#{msg['global.continue']}"
+                icon="fas fa-arrow-right fa-sm"
+                iconPos="right"
+                update="@form globalGrowl"
+                action="#{showCourseRecordView.confirmPersonalPassword}"
+                style="margin-right: 16px;" />
+            </h:panelGroup>
+
+          </div>
+        </div>
+      </h:panelGroup>
+
+      <!-- Generic confirm dialog with Ok and Cancel button -->
+      <p:confirmDialog
+        id="globalConfirmDialog"
+        widgetVar="globalConfirmDialog"
+        global="true"
+        width="400px">
+        <p:commandButton
+          id="confirmOk"
+          value="#{msg['global.ok']}"
+          styleClass="ui-confirmdialog-yes"
+          icon="fas fa-check" />
+        <p:commandButton
+          id="confirmCancel"
+          value="#{msg['global.cancel']}"
+          styleClass="ui-confirmdialog-no button-white"
+          icon="fas fa-times" />
+      </p:confirmDialog>
+
+    </h:form>
+  </ui:define>
+</ui:composition>

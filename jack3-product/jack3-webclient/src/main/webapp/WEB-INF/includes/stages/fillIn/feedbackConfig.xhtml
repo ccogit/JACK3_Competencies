@@ -1,0 +1,246 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:j="http://jack.s3.uni-due.de/ui-elements">
+	<h:head />
+	<h:outputStylesheet library="jack" name="css/feedbackRule.css" />
+	<h:outputStylesheet library="jack" name="css/ckEditorOutputPanel.css" />
+
+	<h4>
+		<h:outputText value="#{msg['exerciseEdit.taskDescription']}" />
+	</h4>
+	<pe:ckEditor id="view_editor_#{stageBean.stage.orderIndex}"
+		interfaceColor="#{editorController.color}"
+		widgetVar="view_editorWidgetVar_#{stageBean.stage.orderIndex}"
+		width="width:100%" height="200px;" toolbar="[['Find']]"
+		skin="office2013" language="#{msg['ckEditor.language']}"
+		advancedContentFilter="false" readonly="true"
+		customConfig="#{request.contextPath}/resources/js/ckEditorViewOnly.js">
+		<p:ajax event="initialize"
+			oncomplete="CopyToFeedbackEditor(#{stageBean.stage.orderIndex});"></p:ajax>
+	</pe:ckEditor>
+	<br />
+
+
+    <h4>
+    <h:outputText value="#{msg['exerciseEdit.mc.correctAnswerFeedback']}" />
+  </h4>
+  <p>
+  <p:commandButton id="cbAddCorrectAnswerRule"
+    value="#{msg['exerciseEdit.fillIn.addCorrectAnswerRule']}"
+    action="#{stageBean.addCorrectAnswerRule(msg['exerciseEdit.stageFeedback'])}"
+    oncomplete="processChange()" update="@this @parent:correctAnswerRules"
+    disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}" />
+  </p>
+   <p:dataTable 
+    id="correctAnswerRules"
+    value="#{stageBean.stage.getCorrectAnswerRulesAsList()}" 
+    var="correctAnswerRule"
+    style="width:100%;"
+    rowIndexVar="correctAnswerRulesRowIndex">
+
+    <p:column headerText="#{msg['evaluator.expressionAndDomain']}">
+      <j:evaluatorInputField
+        id="correctAnswerRuleExpression"
+        width="78"
+        evaluatorExpression="#{correctAnswerRule.validationExpression}"
+        onKeyDown="checkUserInputForActivationOfSaveButtonNoReturnSurpession()"
+        onChange="processChange()"
+        disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}" />
+    </p:column>
+    <p:column  headerText="" style="width:40px;">
+      <p:commandButton id="cbRemoveCorrectAnswerRule" icon="fas fa-trash-alt fa-sm"
+        action="#{stageBean.removeCorrectAnswerRule(correctAnswerRule.orderIndex)}"
+        style="align:right;"
+        update="@parent:correctAnswerRules" oncomplete="processChange()"
+        disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}" />
+	</p:column>
+            
+  </p:dataTable>
+  <h:outputText value="#{msg['exerciseEdit.fillIn.correctAnswerText']}" style="font-weight: bold"/>
+  <p:panelGrid columns="2" columnClasses="ckEdtiorOutputPanelcolumn1,ckEdtiorOutputPanelcolumn2"    
+    style="width:100%;">
+  <p:column>
+  <h:outputText id="correctAnswerFeedbackText"
+    value="#{stageBean.stage.correctAnswerFeedback}" 
+    style="width:100%;align:left;"
+    escape="false" />
+  </p:column>
+  <p:column>
+  <ui:include page="../editorOverlay.xhtml" >
+    <ui:param name="textSource" value="correctAnswerFeedbackText" />
+    <ui:param name="readOnlyParam" value="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}" />
+    <ui:param name="valueParam" value="#{stageBean.stage.correctAnswerFeedback}" />
+    <ui:param name="editorWidgetVarId" value="correctFeedbackFillInWidgetVar" /> 
+  </ui:include>
+  </p:column>
+  </p:panelGrid>
+  
+    <h4>
+    <h:outputText value="#{msg['exerciseEdit.mc.defaultFeedback']}" />
+  </h4>
+    
+ 
+    
+  <p:panelGrid columns="3" columnClasses="ckEdtiorOutputPanelcolumn1,ckEdtiorOutputPanelcolumn2"    
+    style="width:100%;">
+  <p:column>
+  <h:outputText id="defaultAnswerFeedbackText"
+    value="#{stageBean.stage.defaultFeedback}" 
+    style="width:100%;align:left;"
+    escape="false" />
+  </p:column>
+  <p:column>
+  <ui:include page="../editorOverlay.xhtml" >
+    <ui:param name="textSource" value="defaultAnswerFeedbackText" />
+    <ui:param name="readOnlyParam" value="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}" />
+    <ui:param name="valueParam" value="#{stageBean.stage.defaultFeedback}" />
+    <ui:param name="editorWidgetVarId" value="defaultFeedbackFillInWidgetVar" /> 
+  </ui:include>
+  </p:column>
+  <p:column>
+  <h:outputLabel
+    for="defaultResult"
+    value="#{msg['exerciseEdit.gradePoints']}: " />
+  <p:spinner
+    id="defaultResult"
+    disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+    value="#{stageBean.stage.defaultResult}"
+    min="0"
+    max="100"
+    size="1"
+    required="true"
+    onchange="processChange()"
+    onkeydown="checkUserInputForActivationOfSaveButton()" />
+  </p:column>
+  </p:panelGrid>
+  
+  
+  
+	<h4>
+		<h:outputText value="#{msg['exerciseEdit.mc.extraFeedbacks']}" />
+	</h4>
+  
+	<!-- https://www.primefaces.org/showcase/ui/data/datatable/group.xhtml -->
+	<p:dataTable id="feedbackRules"
+		value="#{stageBean.stage.getFeedbackRulesAsList()}" var="feedbackRule"
+		emptyMessage="#{msg['exerciseEdit.fillIn.noFillInFields']}"
+		draggableRows="#{exerciseEditView.newestRevision}" style="width:100%;"
+		styleClass="borderless" rowStyleClass="borderless"
+		rowIndexVar="feedbackRulesRowIndex">
+		<p:ajax event="rowReorder" listener="#{stageBean.feedbackRuleReorder}"
+			update="@this" oncomplete="processChange()" />
+		<p:column>
+			<p:panelGrid style="width:100%;" styleClass="feedbackRule">
+				<f:facet name="header" style="hight:100px;">
+					<p:row>
+						<p:column id="headerFeedbackRuleName" colspan="5">
+							<p:inplace id="editorFeedbackRuleName" editor="true"
+								widgetVar="headerFeedbackRuleName_#{feedbackRulesRowIndex}"
+								disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+                                class="inplaceIcon">
+								<p:ajax event="save" oncomplete="processChange()" update="@this" />
+								<p:ajax event="cancel" oncomplete="processChange()" update="@this" resetValues="true" />
+								<p:inputText id="inputFeedbackRuleName"
+									value="#{feedbackRule.name}"
+									onkeyup="if (event.keyCode == 27) { PF('headerFeedbackRuleName_#{feedbackRulesRowIndex}').cancel(); return false;}"
+									onkeydown="if (event.keyCode == 13) { PF('headerFeedbackRuleName_#{feedbackRulesRowIndex}').save(); return false; } checkUserInputForActivationOfSaveButton();"
+									onchange="processChange()"				
+                                    disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+									validator="requiredValidator">
+								</p:inputText>
+							</p:inplace>
+						</p:column>
+						<p:column id="headerRemoveFeedbackRule" colspan="1"
+							style="text-align: right;">
+							<p:commandButton id="cbRemoveFeedbackRule" icon="fas fa-trash-alt fa-sm"
+								action="#{stageBean.removeFeedbackRule(feedbackRule.orderIndex)}"
+								update="@parent:feedbackRules" oncomplete="processChange()"
+								disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}" />
+						</p:column>
+					</p:row>
+				</f:facet>
+
+				<p:row>
+					<p:column colspan="1">
+						<p:outputLabel for="inputValidationExpression_initCodeInput"
+							value="#{msg['exerciseEdit.fillIn.evaluatorRule']}: " />
+					</p:column>
+					<p:column colspan="5">
+						<j:evaluatorInputField
+							id="inputValidationExpression"
+							evaluatorExpression="#{feedbackRule.validationExpression}"
+							width="60"
+							disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+							onChange="processChange()"
+							onKeyDown="checkUserInputForActivationOfSaveButtonNoReturnSurpession()" />
+					</p:column>
+				</p:row>
+				<p:row>
+					<p:column colspan="1">
+						<h:outputText value="#{msg['global.points']}: " />
+					</p:column>
+					<p:column colspan="4">
+						<p:spinner id="inputFeedbackRulePoints"
+							value="#{feedbackRule.points}"
+							disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}" required="true"
+							min="-100" max="100" size="1" onchange="processChange()" 
+							onkeydown="checkUserInputForActivationOfSaveButton()"/>
+					</p:column>
+				</p:row>
+				<p:row>
+					<p:column colspan="1">
+						<p:outputLabel for="inputFeedbackText"
+							value="#{msg['exerciseEdit.stageFeedback']}: "
+							style="text-align: left;" />
+					</p:column>
+					<p:column colspan="4">
+						<p:panelGrid columnClasses="ckEdtiorOutputPanelcolumn1" styleClass="panel-scroll-x"
+							columns="1" style="border: 1px solid lightgrey">
+							<h:outputText id="inputFeedbackText"
+								value="#{feedbackRule.feedbackText}"
+								style="width:100%;align:left" escape="false" />
+						</p:panelGrid>
+					</p:column>
+					<p:column colspan="1" style="text-align: right;vertical-align:top">
+						<ui:include page="../editorOverlay.xhtml">
+							<ui:param name="textSource" value="inputFeedbackText" />
+							<ui:param name="readOnlyParam"
+								value="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}" />
+							<ui:param name="valueParam" value="#{feedbackRule.feedbackText}" />
+							<ui:param name="editorWidgetVarId" value="feedbackCkEditor+#{feedbackRulesRowIndex}" />
+						</ui:include>
+					</p:column>
+				</p:row>
+				<p:row>
+					<p:column colspan="1">
+						<h:outputLabel value="#{msg['exerciseEdit.fillIn.terminal']}:"
+							for="inputFeedbackRuleTerminal"/>
+					</p:column>
+					<p:column colspan="4">
+						<p:selectBooleanCheckbox id="inputFeedbackRuleTerminal"
+							value="#{feedbackRule.terminal}"
+							disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+							onchange="processChange()" 
+							onkeydown="checkUserInputForActivationOfSaveButton()"
+							itemLabel="#{msg['exerciseEdit.fillIn.terminalLabel']}">
+						</p:selectBooleanCheckbox>
+					</p:column>
+				</p:row>
+
+			</p:panelGrid>
+		</p:column>
+
+	</p:dataTable>
+
+	<p:commandButton id="cbAddFeedbackRule"
+		value="#{msg['exerciseEdit.fillIn.addFeedbackRule']}"
+		style="width:250px;height:30px;"
+		action="#{stageBean.addFeedbackRule(msg['exerciseEdit.stageFeedback'])}"
+		oncomplete="processChange()" update="@this @parent:feedbackRules"
+		disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}" />
+
+</ui:composition>

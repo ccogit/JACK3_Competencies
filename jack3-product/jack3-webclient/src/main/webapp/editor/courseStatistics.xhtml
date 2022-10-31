@@ -1,0 +1,328 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:c="http://java.sun.com/jsp/jstl/core"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:j="http://jack.s3.uni-due.de/ui-elements"
+  template="/WEB-INF/templates/template.xhtml">
+
+  <ui:define name="metadata">
+    <f:metadata>
+      <f:viewParam
+        name="course"
+        value="#{courseStatisticsView.courseId}" />
+      <f:viewAction action="#{courseStatisticsView.loadFullPage()}" />
+      <f:event type="preRenderView" listener="#{courseStatisticsView.updateBreadCrumb()}" />
+    </f:metadata>
+  </ui:define>
+
+  <ui:define name="content">
+    <h:form id="courseStatisticsMainForm">
+      <p:breadCrumb
+        id="breadCrumbCourseStatistics"
+        model="#{userSession.model}" />
+
+<script type="text/javascript">
+function onReloadData() {
+  var icon = document.getElementById('courseStatisticsMainForm:reloadData').getElementsByClassName("ui-icon")[0]
+  icon.classList.remove("fa-sync")
+  icon.classList.add("fa-spinner")
+  icon.classList.add("fa-spin")
+  PF('reloadDataButton').disable()
+}
+function afterReloadData() {
+  PF('reloadDataButton').enable()
+  var icon = document.getElementById('courseStatisticsMainForm:reloadData').getElementsByClassName("ui-icon")[0]
+  icon.classList.remove("fa-spinner")
+  icon.classList.remove("fa-spin")
+  icon.classList.add("fa-sync")
+}
+</script>
+
+      <p:commandButton
+        id="reloadData"
+        value="#{msg['global.update']}"
+        icon="fas fa-sync"
+        onclick="onReloadData()"
+        oncomplete="afterReloadData()"
+        style="float:right; margin-top:1em;"
+        styleClass="weaker-button"
+        widgetVar="reloadDataButton"
+        update="headerPart mainPart"
+        action="#{courseStatisticsView.update()}" />
+      <h3>#{msg['statistics.submissionOverview']}</h3>
+
+      <h:panelGroup
+        id="headerPart"
+        layout="block">
+
+        <!-- Table with key figures -->
+        <c:choose>
+          <c:when test="#{courseStatisticsView.dataAvailable}">
+            <p:panel
+              header="#{msg['statistics']}"
+              style="margin-bottom:.5em;"
+              collapsed="#{userSession.statisticsStateHolder.toggleKeyFigures}"
+              toggleable="true">
+              <p:ajax
+                event="toggle"
+                listener="#{userSession.statisticsStateHolder.toggleKeyFigures}" />
+              <ui:include src="/WEB-INF/includes/course/statisticsTable.xhtml" />
+              <h:outputFormat
+                id="testSubmissionsHint"
+                value="#{msg['statistics.testSubmissionsPresent']}"
+                rendered="#{courseStatisticsView.numberOfTestCourseRecords > 0}"
+                style="margin: 0 14px;">
+                <f:param value="#{courseStatisticsView.numberOfTestCourseRecords}" />
+              </h:outputFormat>
+            </p:panel>
+          </c:when>
+          <c:otherwise>
+            <p>#{msg['courseStatistics.noDataAvailable']}</p>
+          </c:otherwise>
+        </c:choose>
+
+
+        <p:panel
+          header="#{msg['statistics.displaySettings']}"
+          style="margin-bottom:.5em;"
+          collapsed="#{userSession.statisticsStateHolder.toggleDisplaySettings}"
+          toggleable="true"
+          rendered="#{courseStatisticsView.dataAvailable}">
+          <p:ajax
+            event="toggle"
+            listener="#{userSession.statisticsStateHolder.toggleDisplaySettings}" />
+
+          <!-- Shown profile fields -->
+          <p:panelGrid
+            columns="2"
+            styleClass="ui-panelgrid-blank">
+            <p:outputLabel
+              value="#{msg['statistics.shownProfileFields']}:"
+              for="@next"
+              rendered="#{courseStatisticsView.extendedRead}" />
+            <p:selectCheckboxMenu
+              id="profileFieldSelector"
+              value="#{userSession.statisticsStateHolder.selectedProfileFields}"
+              label="#{msg['global.select']}"
+              updateLabel="true"
+              rendered="#{courseStatisticsView.extendedRead}">
+              <f:selectItems value="#{courseStatisticsView.availableProfileFields}" />
+              <p:ajax
+                update="details:courseRecordTable details:participantsTable"
+                process="@form" />
+              <p:ajax
+                event="toggleSelect"
+                update="details:courseRecordTable details:participantsTable"
+                process="@form" />
+            </p:selectCheckboxMenu>
+          </p:panelGrid>
+
+          <!-- Group by course version -->
+          <p:panelGrid
+            columns="1"
+            styleClass="ui-panelgrid-blank">
+            <p:selectBooleanCheckbox
+              id="groupSwitch"
+              value="#{userSession.statisticsStateHolder.groupSubmissionsByVersion}"
+              itemLabel="#{msg['statistics.groupByCourse']}">
+              <p:ajax update="details:courseRecordTable" />
+            </p:selectBooleanCheckbox>
+          </p:panelGrid>
+        </p:panel>
+      </h:panelGroup>
+
+      <h:panelGroup
+        id="mainPart"
+        layout="block">
+        <p:tabView
+          id="details"
+          styleClass="no-padding"
+          rendered="#{courseStatisticsView.dataAvailable}">
+
+          <!-- Submission data -->
+          <p:tab
+            id="submissionTab"
+            title="#{msg['statistics.submissions']}#{courseStatisticsView.getShownCounter('submissions')}">
+            <ui:decorate template="/WEB-INF/includes/course/courseRecordDatatable.xhtml">
+              <ui:param
+                name="id"
+                value="courseRecordTable" />
+              <ui:param
+                name="value"
+                value="#{courseStatisticsView.courseRecordList}" />
+              <ui:param
+                name="exportFilename"
+                value="#{courseStatisticsView.generateDownloadFilename('submissions')}" />
+              <ui:param
+                name="extendedRead"
+                value="#{courseStatisticsView.extendedRead}" />
+              <ui:define name="additionalHeader">
+                <!-- Button for deletion of every TestCourseRecord -->
+                <p:commandButton
+                  id="deleteTestSubmissions"
+                  rendered="#{courseStatisticsView.read}"
+                  value="#{msg['courseStatistics.buttonDeleteTestSubmission']}"
+                  action="#{courseStatisticsView.deleteAllTestSubmissionsInCourse()}"
+                  update="globalGrowl :courseStatisticsMainForm">
+                </p:commandButton>
+              </ui:define>
+              <ui:define name="headerRow">
+                <!-- Header for grouped course records -->
+                <p:headerRow
+                  id="headerRowCourseRecordsForRevisionId"
+                  rendered="#{userSession.statisticsStateHolder.groupSubmissionsByVersion}">
+                  <p:column
+                    id="courseRecordsForRevisionId"
+                    colspan="20">
+                    <h:outputText
+                      value="#{msg['exerciseSubmissions.forRevision']}: #{courseStatisticsView.getRevisionNumber(courseRecord)}" />
+                    <h:outputText
+                      styleClass="fas fa-star fa-sm"
+                      rendered="#{courseRecord.course.frozen}"
+                      title="#{msg['exerciseEdit.frozenVersion']}"
+                      style="margin-left:5px; display:inline-block;" />
+                  </p:column>
+                </p:headerRow>
+              </ui:define>
+              <ui:define name="additionalColumns">
+              
+                <!-- Score -->
+                <p:column
+                  headerText="#{msg['global.score']}"
+                  filterBy="#{courseRecord.resultPoints}"
+                  width="60">
+                  <h:outputText value="#{courseRecord.resultPoints} %" />
+                </p:column>
+              
+              
+                <!-- Actions -->
+                <p:column
+                  headerText="#{msg['global.actions']}"
+                  exportable="false"
+                  width="85"
+                  style="text-align:center;"
+                  toggleable="false">
+                  <p:linkButton
+                    id="btnCourseStatisticsSearch"
+                    icon="fas fa-search fa-sm"
+                    title="#{msg['global.view']}"
+                    outcome="#{viewId.courseRecordSubmissions}">
+                    <f:param
+                      name="courseRecord"
+                      value="#{courseRecord.id}" />
+                    <f:param
+                      name="course"
+                      value="#{courseStatisticsView.courseId}" />
+                  </p:linkButton>
+                  <h:panelGroup id="recordDeleteGroup">
+                    <p:commandButton
+                      id="cbRecordDelete"
+                      icon="fas fa-trash-alt fa-sm"
+                      title="#{msg['courseOfferParticipants.courseRecordDeletion']}"
+                      disabled="#{not courseStatisticsView.isAllowedToDeleteCourseRecord(courseRecord)}"
+                      action="#{courseStatisticsView.deleteTestSubmission(courseRecord)}"
+                      update="globalGrowl :courseStatisticsMainForm" />
+                  </h:panelGroup>
+                  <p:tooltip
+                    for="recordDeleteGroup"
+                    value="#{msg['global.deletionInfoStudentSubmission']}"
+                    escape="false"
+                    rendered="#{not courseRecord.testSubmission and not courseStatisticsView.isAllowedToDeleteCourseRecord(courseRecord)}" />
+                  <p:tooltip
+                    for="recordDeleteGroup"
+                    value="#{msg['global.deletionInfoNoRights']}"
+                    escape="false"
+                    rendered="#{courseRecord.testSubmission and not courseStatisticsView.isAllowedToDeleteCourseRecord(courseRecord)}" />
+                </p:column>
+              </ui:define>
+            </ui:decorate>
+          </p:tab>
+
+          <!-- Participants data -->
+          <p:tab
+            id="participantsTab"
+            title="#{msg['statistics.participants']}#{courseStatisticsView.getShownCounter('participants')}">
+            <p:dataTable
+              id="participantsTable"
+              var="user"
+              value="#{courseStatisticsView.allParticipants}"
+              paginator="true"
+              rows="10"
+              rowsPerPageTemplate="10,50,500"
+              paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+              currentPageReportTemplate="{startRecord}-{endRecord} #{msg['paginator.of']} {totalRecords} #{msg['paginator.entries']}"
+              paginatorAlwaysVisible="false"
+              tableStyle="table-layout:auto;"
+              widgetVar="participantsTable"
+              sortBy="#{courseStatisticsView.getPublicUserName(user)}"
+              sortOrder="ascending">
+
+              <!-- Header -->
+              <f:facet name="header">
+                <j:exportButtons
+                  target="participantsTable"
+                  fileName="#{courseStatisticsView.generateDownloadFilename('participants')}" />
+                <p:commandButton
+                  id="columnToggler"
+                  type="button"
+                  icon="fas fa-align-justify"
+                  style="float: right;" />
+                <p:columnToggler
+                  datasource="participantsTable"
+                  trigger="columnToggler" />
+              </f:facet>
+
+              <!-- Username -->
+              <p:column
+                headerText="#{msg['global.username']}"
+                sortBy="#{courseStatisticsView.getPublicUserName(user)}"
+                filterBy="#{courseStatisticsView.getPublicUserName(user)}"
+                toggleable="false">
+                <j:publicUserName
+                  id="publicUserName"
+                  publicUserName="#{courseStatisticsView.getPublicUserName(user)}" />
+              </p:column>
+
+              <!-- Email -->
+              <p:column
+                headerText="#{msg['global.email']}"
+                filterBy="#{user.email}"
+                sortBy="#{user.email}"
+                exportable="false"
+                rendered="#{courseStatisticsView.extendedRead}">
+                <h:outputLink value="mailto:#{user.email}">
+                  <h:outputText value="#{user.email}" />
+                </h:outputLink>
+              </p:column>
+              <p:column
+                headerText="#{msg['global.email']}"
+                exportable="true"
+                rendered="#{courseStatisticsView.extendedRead}"
+                styleClass="export-hidden-column"
+                toggleable="false">
+                <h:outputText value="#{user.email}" />
+              </p:column>
+
+              <!-- Profile fields -->
+              <c:forEach
+                items="#{userSession.statisticsStateHolder.selectedProfileFields}"
+                var="field">
+                <p:column
+                  headerText="#{field}"
+                  filterBy="#{user.profileData.get(field)}"
+                  filterMatchMode="contains"
+                  rendered="#{courseStatisticsView.extendedRead}">
+                  <h:outputText value="#{user.profileData.get(field)}" />
+                </p:column>
+              </c:forEach>
+            </p:dataTable>
+          </p:tab>
+        </p:tabView>
+      </h:panelGroup>
+
+    </h:form>
+  </ui:define>
+</ui:composition>

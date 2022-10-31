@@ -1,0 +1,33 @@
+# Deploys the dependency security report generated in the "Security"-stage to 10.168.68.78 via sftp. 
+# That server runs a cronjob that checks every minute if there is a security_report.zip in ftpuser's 
+# home. If yes, it will be extracted and served statically via nginx.
+Deploy Dependency Security Report:
+  stage: deploy
+  script:
+    - apt-get -qq update && apt-get -qq install sshpass zip > /dev/null
+    - cd jack3-product
+    - mkdir ~/.ssh
+    # To avoid host verification errors, we need to add a known_hosts file. Using the output
+    # of "ssh-keyscan 10.168.68.78"
+    - | 
+      tee ~/.ssh/known_hosts <<EOF
+      10.168.68.78 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCgx36/Hhrg5LbiEpYGy2MUi4QMZtaKkApa/BPXorplu+YMlZTIExgrKlNN/11Xx7k9LILccgc9EhI+Yxd93ks7AM/3n6tU0nlwCmt38Qu9DFbObh9oXKwyzA8SLFPUwdjwfQsVAvN5lSj7WF/A7cYJZca6P3gNO1JtAA0P/jRvhMiiK9OC59tC1Y3i6anXSQS2wvBSH3FmHcviaOK2IFLL9yqjDQsNlu67Qk9S2j+ghWysZYhZjqvJCSc2Zdvl8HkxpE2/+q192UtQjKaEhlVMPTklosLE7ZfnxABcWDlfS4zGsKrAqlfiBoYNSm305XbeUWpsBVi5ke1jP3RmOb83
+      10.168.68.78 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBDV17oTonek5efexSQunj92gNXkhx1B9rhcVb3fDaA3+zmhTkkbDZNPlTS4NUyWhGj7Adj3zBdv1HN4GRwU5gjk=
+      10.168.68.78 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBCDVE0lspHc3b35LG7WIb0z5iQrZ6oiFwBwFzAywsWr
+      EOF
+    - chmod -R 600 ~/.ssh
+    - cd /builds/JACK/jack3-core/jack3-product/target/site
+    - zip -r security_report_partial *
+    # We upload to our webserver and rename the file after we are done to avoid the cronjob
+    # extracting a file still in the process of uploading.
+    - |
+      sshpass -p $FTPUSERPASSWD sftp ftpuser@10.168.68.78 <<EOF
+      put security_report_partial.zip
+      rename security_report_partial.zip security_report.zip
+      bye
+      EOF
+  dependencies:
+    - Security
+  needs: ["Build", "JavaDoc", "Security", "SonarQube analysis", "Selenium Tests", "Tests"]
+  only:
+    - master

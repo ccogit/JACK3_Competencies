@@ -1,0 +1,88 @@
+<ExportedExercise id="1">
+  <name>seq</name>
+  <publicDescription></publicDescription>
+  <internalNotes>Sequenz aus Aufgabe 6 mit seq()-Befehl oder &quot;:&quot;-Operator erstellen</internalNotes>
+  <authorName>lecturer</authorName>
+  <language>de</language>
+  <difficulty>0</difficulty>
+  <resources id="2"/>
+  <stages id="3">
+    <RStage id="4">
+      <internalName>#1</internalName>
+      <externalName></externalName>
+      <taskDescription>Versuchen Sie nun die gleiche Zahlenfolge aus der vorherigen Aufgabe (Zahlen von 1 bis 10) schneller und damit effizienter zu erzeugen. Schreiben Sie die L&amp;ouml;sung daher diesmal $NICHT$ manuell in einen Vektor. Speichern Sie das Ergebnis in der Variablen $\verb|zahlen|$ ab. (Bevor Sie den Code abschicken, k&amp;ouml;nnen Sie &amp;uuml;ber den Button &amp;quot;Auswerten&amp;quot; ihren geschriebenen R-Code ausf&amp;uuml;hren und in der R-Konsole anzeigen lassen.)</taskDescription>
+      <defaultTransition id="5">
+        <conditionExpression id="6">
+          <domain>MATH</domain>
+        </conditionExpression>
+        <stageExpression id="7">
+          <domain>MATH</domain>
+        </stageExpression>
+        <isRepeat>false</isRepeat>
+      </defaultTransition>
+      <skipTransitions id="8"/>
+      <stageTransitions id="9"/>
+      <hints id="10">
+        <StageHint id="11">
+          <stagehint__order>0</stagehint__order>
+          <text>Sie können Sequenzen in R mit dem $\verb|:|$-Operator oder der $\verb|seq()|$-Funktion erzeugen. (Es ist ein weiterer Hinweis vorhanden.)</text>
+          <malus>0</malus>
+          <stage class="RStage" reference="4"/>
+        </StageHint>
+        <StageHint id="12">
+          <stagehint__order>1</stagehint__order>
+          <text>Legen Sie bei beiden Möglichkeiten jeweils den Start- und Endpunkt fest (Sie können beim $\verb|seq()|$-Befehl zusätzlich noch die Abstände zwischen den jeweiligen Zahlen festlegen, müssen Sie aber nicht, da die Default-Einstellung hier bereits 1 ist, also $\verb|by=1|$).</text>
+          <malus>0</malus>
+          <stage class="RStage" reference="4"/>
+        </StageHint>
+      </hints>
+      <variableUpdatesBeforeCheck id="13"/>
+      <variableUpdatesAfterCheck id="14"/>
+      <variableUpdatesOnNormalExit id="15"/>
+      <variableUpdatesOnRepeat id="16"/>
+      <variableUpdatesOnSkip id="17"/>
+      <weight>1</weight>
+      <orderIndex>0</orderIndex>
+      <allowSkip>false</allowSkip>
+      <resources id="18"/>
+      <initialCode></initialCode>
+      <finalResultComputationString></finalResultComputationString>
+      <testCasetuples id="19">
+        <TestCaseTuple id="20">
+          <testCases id="21">
+            <DynamicRTestCase id="22">
+              <points>42</points>
+              <pointsMode>GAIN</pointsMode>
+              <name>imported testcase</name>
+              <feedbackIfFailed>Leider nicht richtig! Ihre Eingabe liefert den Wert [var=testcaseOutput] zurück, sollte aber 1 2 3 4 5 6 7 8 9 10 liefern! -[var=penalty] Punkte&quot;</feedbackIfFailed>
+              <ruleMode>PRESENCE</ruleMode>
+              <postCode>testFunc &lt;- function(){}</postCode>
+              <expectedOutput>1:10</expectedOutput>
+              <postprocessingFunction></postprocessingFunction>
+              <tolerance>-4</tolerance>
+            </DynamicRTestCase>
+          </testCases>
+          <checkerConfiguration id="23">
+            <isActive>false</isActive>
+            <hasVisibleResult>false</hasVisibleResult>
+            <hasVisibleFeedback>false</hasVisibleFeedback>
+            <isAsync>false</isAsync>
+            <weight>1</weight>
+          </checkerConfiguration>
+        </TestCaseTuple>
+      </testCasetuples>
+    </RStage>
+  </stages>
+  <startStage class="RStage" reference="4"/>
+  <variableDeclarations id="24">
+    <VariableDeclaration id="25">
+      <name>num</name>
+      <initializationCode id="26">
+        <code>randomIntegerBetween(5,15)</code>
+        <domain>MATH</domain>
+      </initializationCode>
+    </VariableDeclaration>
+  </variableDeclarations>
+  <jSXGraphs id="27"/>
+  <resultFeedbackMappings id="28"/>
+</ExportedExercise>

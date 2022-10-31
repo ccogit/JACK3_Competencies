@@ -1,0 +1,59 @@
+<!-- Parameters: 
+  {id} - The unique identifier of the dialog
+  {title} - Headline
+  {message} - Detail message
+  {reasonRequired} (Boolean) - If the field "reason" is required
+  {reasonValue} - Backing Bean value that stores the reason
+  {update} - Additional update
+  {invokeActionBean} - Bean that is invoked on confirm
+  {invokeActionMethodName} - Method that is invoked  on confirm
+-->
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:c="http://java.sun.com/jsp/jstl/core">
+  <h:form id="#{id}Form">
+    <p:confirmDialog
+      id="#{id}"
+      widgetVar="#{id}"
+      closable="true"
+      resizable="false"
+      header="#{title}"
+      closeOnEscape="true"
+      global="false">
+      <f:facet name="message">
+        <h:outputText value="#{message}" />
+        <br />
+        <h:outputLabel
+          for="#{id}Reason"
+          value="#{msg[reasonRequired ? 'confirmDialog.reason' : 'confirmDialog.optionalReason']}: " />
+        <p:inputText
+          id="#{id}Reason"
+          value="#{reasonValue}"
+          required="#{reasonRequired}"
+          requiredMessage="#{msg['global.required']}"
+          size="40" />
+        <p:message
+          id="#{id}ReasonRequiredError"
+          for="#{id}Reason" />
+      </f:facet>
+      <p:commandButton
+        id="#{id}YesButton"
+        value="#{msg['global.yes']}"
+        oncomplete="if (args &amp;&amp; !args.validationFailed) PF('#{id}').hide();"
+        update="globalGrowl #{id}ReasonRequiredError #{update}"
+        action="#{invokeActionBean[invokeActionMethodName]}"
+        icon="fas fa-check" />
+      <p:commandButton
+        id="#{id}NoButton"
+        value="#{msg['global.no']}"
+        onclick="PF('#{id}').hide();"
+        type="button"
+        styleClass="button-white"
+        icon="fas fa-times" />
+    </p:confirmDialog>
+  </h:form>
+</ui:composition>

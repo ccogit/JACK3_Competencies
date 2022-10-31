@@ -1,0 +1,155 @@
+<!--
+NOTE: This fragment is only intended for use in "courseOfferParticipants.xhtml"
+Parameters: 
+  {id} - The unique identifier of the datatable
+  {value} - List value
+  {exportFilename} - Filename for exporting the table
+  {dateTitle} - Title of the date column
+  {defaultSortBy} - Default order property
+Placeholders:
+  "additionalActions" - Should be replaced with a list of p:menuItems that should be shown additional to "Enrollment Log"
+-->
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:c="http://java.sun.com/jsp/jstl/core"
+  xmlns:j="http://jack.s3.uni-due.de/ui-elements">
+  <p:dataTable
+    id="#{id}"
+    var="enrollment"
+    value="#{value}"
+    paginator="true"
+    rows="10"
+    rowsPerPageTemplate="10,50,500"
+    paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+    currentPageReportTemplate="{startRecord}-{endRecord} #{msg['paginator.of']} {totalRecords} #{msg['paginator.entries']}"
+    paginatorAlwaysVisible="false"
+    tableStyle="table-layout:auto;"
+    widgetVar="#{id}"
+    sortBy="#{defaultSortBy}"
+    sortOrder="ascending">
+
+    <!-- Header -->
+    <f:facet name="header">
+      <j:exportButtons
+        target="#{id}"
+        fileName="#{exportFilename}" />
+      <p:commandButton
+        id="columnToggler"
+        type="button"
+        icon="fas fa-align-justify"
+        style="float: right;" />
+      <p:columnToggler
+        datasource="#{id}"
+        trigger="columnToggler" />
+    </f:facet>
+
+    <!-- Username -->
+    <p:column
+      headerText="#{msg['global.username']}"
+      filterBy="#{courseOfferParticipantsView.getPublicUserName(enrollment.user)}"
+      sortBy="#{courseOfferParticipantsView.getPublicUserName(enrollment.user)}"
+      toggleable="false">
+      <j:publicUserName
+        id="publicUserName"
+        publicUserName="#{courseOfferParticipantsView.getPublicUserName(enrollment.user)}" />
+    </p:column>
+
+    <!-- Email -->
+    <p:column
+      headerText="#{msg['global.email']}"
+      filterBy="#{enrollment.user.email}"
+      sortBy="#{enrollment.user.email}"
+      exportable="false"
+      rendered="#{courseOfferParticipantsView.extendedRead}"
+      width="#{empty userSession.statisticsStateHolder.selectedProfileFields ? null : 140}"
+      style="text-overflow:ellipsis; overflow:hidden; white-space:nowrap; #{empty userSession.statisticsStateHolder.selectedProfileFields ? '' : 'max-width:130px;'}">
+      <h:outputLink value="mailto:#{enrollment.user.email}">
+        <h:outputText value="#{enrollment.user.email}" />
+      </h:outputLink>
+    </p:column>
+    <p:column
+      headerText="#{msg['global.email']}"
+      exportable="true"
+      rendered="#{courseOfferParticipantsView.extendedRead}"
+      styleClass="export-hidden-column"
+      toggleable="false">
+      <h:outputText value="#{enrollment.user.email}" />
+    </p:column>
+
+    <!-- Profile fields -->
+    <c:forEach
+      items="#{userSession.statisticsStateHolder.selectedProfileFields}"
+      var="field">
+      <p:column
+        headerText="#{field}"
+        filterBy="#{enrollment.user.profileData.get(field)}"
+        filterMatchMode="contains"
+        rendered="#{courseOfferParticipantsView.extendedRead}">
+        <h:outputText value="#{enrollment.user.profileData.get(field)}" />
+      </p:column>
+    </c:forEach>
+
+    <!-- Timestamp (last change) -->
+    <p:column
+      headerText="#{dateTitle}"
+      sortBy="#{enrollment.lastChange}">
+      <h:outputText
+        value="#{enrollment.lastChange}"
+        converter="shortTimestampConverter" />
+    </p:column>
+
+    <!-- Course Offer -->
+    <p:column
+      headerText="#{msg['global.courseOffer']}"
+      rendered="#{courseOfferParticipantsView.folderMode}"
+      filterBy="#{enrollment.courseOffer}"
+      sortBy="#{enrollment.courseOffer.name}"
+      width="150"
+      filterMatchMode="equals">
+      <f:facet name="filter">
+        <p:selectOneMenu
+          onchange="PF('#{id}').filter()"
+          converter="jackEntityConverter">
+          <f:selectItem
+            itemLabel="#{msg['global.all']}"
+            itemValue="#{null}"
+            noSelectionOption="true" />
+          <f:selectItems
+            value="#{courseOfferParticipantsView.courseOffers}"
+            var="courseOffer"
+            itemLabel="#{courseOffer.name}" />
+        </p:selectOneMenu>
+      </f:facet>
+      <h:outputText value="#{enrollment.courseOffer.name}" />
+    </p:column>
+
+    <!-- Actions -->
+    <p:column
+      headerText="#{msg['global.actions']}"
+      exportable="false"
+      width="65"
+      style="text-align:center;"
+      toggleable="false">
+      <p:menuButton
+        id="actions"
+        icon="fas fa-ellipsis-h"
+        styleClass="flat-button"
+        menuStyleClass="ui-menu-nolinebreakfix">
+        <p:menuitem
+          id="showLogAction"
+          value="#{msg['statistics.actions.showLog']}"
+          icon="fas fa-list fa-xs"
+          oncomplete="PF('enrollmentLogDialog').show()"
+          update=":enrollmentLogForm"
+          styleClass="icon-middle-align"
+          action="#{courseOfferParticipantsView.loadEnrollmentLog(enrollment)}" />
+        <ui:insert name="additionalActions" />
+      </p:menuButton>
+    </p:column>
+
+  </p:dataTable>
+</ui:composition>

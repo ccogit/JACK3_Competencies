@@ -1,0 +1,75 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:p="http://primefaces.org/ui">
+	<p:commandButton 
+		id="load_#{textSource}_InCkEditor" 
+		icon="fas fa-key fa-sm"
+		disabled="#{readOnlyParam}" 
+		type="button" />
+	<p:overlayPanel 
+		id="overlayPanel_#{textSource}_TextEditor"
+		for="load_#{textSource}_InCkEditor"
+		hideEffect="fade" 
+		style="width:650px;"
+		my="right bottom" 
+		at="left top"
+        modal="true">
+		<pe:ckEditor 
+			id="ckEditor_#{textSource}" 
+			value="#{valueParam}"
+			readonly="#{readOnlyParam}"
+			widgetVar="#{editorWidgetVarId}_#{stageBean.stage.orderIndex}"
+			width="width:100%"
+			height="200px;" 
+			skin="office2013"
+			language="#{msg['ckEditor.language']}" 
+			advancedContentFilter="false"
+			toolbar="[['Source','-','Bold','Italic','Underline','Superscript','-','NumberedList','BulletedList','-','Outdent','Indent','Blockquote','-','Undo','-','JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock', '-','Table','Image','Link','-','Font','FontSize','TextColor','BGColor','-','Maximize','Find']]"
+			customConfig="#{resource['js/ckEditorConfig.js']}">
+			<p:ajax event="blur"
+				update="@parent:#{textSource} @parent:overlayPanel_#{textSource}_RawEditor:rawEditor_#{textSource}"
+				oncomplete="processChange()"></p:ajax>
+			<p:ajax
+				event="focus"
+				oncomplete="processChange()" />
+		</pe:ckEditor>
+		<br />
+		 
+		  <ui:include page="insertImageToEditor.xhtml">
+            <ui:param name="imageButtonId"
+                  value="AddImageToCkEditorFor_#{textSource}" />
+      </ui:include>
+
+  
+	</p:overlayPanel>
+
+
+	<p:commandButton 
+		id="load_#{textSource}_InRawEditor"
+		icon="fas fa-pencil-alt fa-sm"
+		type="button" 
+		disabled="#{readOnlyParam}" />
+	<p:overlayPanel 
+		id="overlayPanel_#{textSource}_RawEditor"
+		for="load_#{textSource}_InRawEditor"
+		hideEffect="fade"
+		style="width:620px;" 
+		my="right bottom" 
+		at="left top"
+        modal="true">
+		<p:inputTextarea id="rawEditor_#{textSource}"
+			value="#{valueParam}"
+			disabled="#{readOnlyParam}"
+			onkeypress="processChange()" 
+			rows="2" 
+			style="width:99%;align:left;">
+			<p:ajax event="blur"
+				update="@parent:#{textSource} @parent:overlayPanel_#{textSource}_TextEditor:ckEditor_#{textSource}"
+				oncomplete="processChange()"></p:ajax>
+		</p:inputTextarea>
+	</p:overlayPanel>
+
+</ui:composition>

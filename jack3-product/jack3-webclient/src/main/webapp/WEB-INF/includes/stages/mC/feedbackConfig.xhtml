@@ -1,0 +1,200 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:pe="http://primefaces.org/ui/extensions"
+  xmlns:j="http://jack.s3.uni-due.de/ui-elements">
+  <h:head />
+  <h:outputStylesheet library="jack" name="css/ckEditorOutputPanel.css" />
+  <h4>
+    <h:outputText value="#{msg['exerciseEdit.taskDescription']}" />
+  </h4>
+  <pe:ckEditor
+    id="view_editor_#{stageBean.stage.orderIndex}"
+    interfaceColor="#{editorController.color}"
+    widgetVar="view_editorWidgetVar_#{stageBean.stage.orderIndex}"
+    width="width:100%"
+    height="200px;"
+    toolbar="[['Find']]"
+    skin="office2013"
+    language="#{msg['ckEditor.language']}"
+    advancedContentFilter="false"
+    readonly="true"
+    customConfig="#{request.contextPath}/resources/js/ckEditorViewOnly.js">
+    <p:ajax
+      event="initialize"
+      oncomplete="CopyToFeedbackEditor(#{stageBean.stage.orderIndex});"></p:ajax>
+  </pe:ckEditor>
+  <br />
+  
+  <h4>
+    <h:outputText value="#{msg['exerciseEdit.mc.correctAnswerFeedback']}" />
+  </h4>
+  
+	<p:panelGrid columns="2" columnClasses="ckEdtiorOutputPanelcolumn1,ckEdtiorOutputPanelcolumn2"    
+    style="width:100%;">
+	<p:column>
+	<h:outputText id="correctAnswerFeedbackText"
+		value="#{stageBean.stage.correctAnswerFeedback}" 
+		style="width:100%;align:left;"
+		escape="false" />
+	</p:column>
+	<p:column colspan="1" style="text-align: right;">
+	<ui:include page="../editorOverlay.xhtml" >
+		<ui:param name="textSource" value="correctAnswerFeedbackText" />
+	 	<ui:param name="readOnlyParam" value="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}" />
+	 	<ui:param name="valueParam" value="#{stageBean.stage.correctAnswerFeedback}" />
+	 	<ui:param name="editorWidgetVarId" value="correctFeedbackWidgetVar" /> 
+	</ui:include>
+	</p:column>
+	</p:panelGrid>
+
+  <h4>
+    <h:outputText value="#{msg['exerciseEdit.mc.defaultFeedback']}" />
+  </h4>
+  
+  <p:panelGrid columns="3" columnClasses="ckEdtiorOutputPanelcolumn1,ckEdtiorOutputPanelcolumn2"    
+    style="width:100%;">
+	<p:column>
+	<h:outputText id="defaultAnswerFeedbackText"
+		value="#{stageBean.stage.defaultFeedback}" 
+		style="width:100%;align:left;"
+		escape="false" />
+	</p:column>
+	<p:column>
+	<ui:include page="../editorOverlay.xhtml" >
+		<ui:param name="textSource" value="defaultAnswerFeedbackText" />
+	 	<ui:param name="readOnlyParam" value="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}" />
+	 	<ui:param name="valueParam" value="#{stageBean.stage.defaultFeedback}" />
+	 	<ui:param name="editorWidgetVarId" value="defaultFeedbackWidgetVar" /> 
+	</ui:include>
+	</p:column>
+  <p:column>
+  <h:outputLabel
+    for="defaultResult"
+    value="#{msg['exerciseEdit.gradePoints']}: " />
+  <p:spinner
+    id="defaultResult"
+    disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+    value="#{stageBean.stage.defaultResult}"
+    min="0"
+    max="100"
+    size="1"
+    required="true"
+    onchange="processChange()"
+    onkeydown="checkUserInputForActivationOfSaveButton()" />
+    </p:column>  
+</p:panelGrid>
+
+  <h4>
+    <h:outputText value="#{msg['exerciseEdit.mc.extraFeedbacks']}" />
+  </h4>
+  <p:dataTable
+    id="feedbacks"
+    value="#{stageBean.stage.extraFeedbacks}"
+    var="feedback"
+    emptyMessage="#{msg['exerciseEdit.mc.noExtraFeedbacks']}"
+    style="width:100%;"
+    rowIndexVar="rowNumber">
+    <p:column
+      id="headerTextMcPattern"
+      headerText="#{msg['exerciseEdit.mc.pattern']}"
+      style="width:120px;text-align:center;">
+      <ui:include src="stagePattern.xhtml">
+        <ui:param
+          name="patternList"
+          value="#{stageBean.getRulesList(feedback)}" />
+      </ui:include>
+    </p:column>
+    <p:column
+      id="headerTextMcStageFeedback"
+      headerText="#{msg['exerciseEdit.stageFeedback']}">
+
+      <p:panelGrid
+        id="feedbackcolumn"
+        columns="3"
+        layout="grid"
+        columnClasses="ui-grid-col-3,ui-grid-col-6,ui-grid-col-3"
+        styleClass="ui-panelgrid-blank">
+
+        <!-- First column: Feedback text -->
+        <h:outputLabel
+          value="#{msg['global.feedback']}:"
+          for="extraFeedbackText" />
+        <h:panelGroup
+          id="extraFeedbackTextWrapper"
+          layout="block"
+          styleClass="ui-corner-all ui-widget-content panel-scroll-x">
+          <h:outputText
+            id="extraFeedbackText"
+            value="#{feedback.feedbackText}"
+            escape="false" />
+        </h:panelGroup>
+        <h:panelGroup
+          id="extraFeedbackTextEditor"
+          layout="block">
+          <ui:include page="../editorOverlay.xhtml">
+            <ui:param name="textSource" value="extraFeedbackText" />
+            <ui:param name="readOnlyParam" value="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}" />
+            <ui:param name="valueParam" value="#{feedback.feedbackText}" />
+            <ui:param name="editorWidgetVarId" value="extraFeedbackTextWidgetVar+#{rowNumber}" />
+          </ui:include>
+        </h:panelGroup>
+      </p:panelGrid>
+
+      <!-- Second column: Optional Evaluator expression -->
+      <j:evaluatorInputField
+        id="extraFeedbackCondition"
+        evaluatorExpression="#{feedback.condition}"
+        width="50"
+        disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+        onChange="processChange()"
+        onKeyDown="checkUserInputForActivationOfSaveButtonNoReturnSurpession()"
+        placeholder="#{msg['evaluator.optionalExpression']}" />
+
+    </p:column>
+    <p:column
+      id="headerTextMcGradePoints"
+      headerText="#{msg['exerciseEdit.gradePoints']}"
+      style="width:60px;text-align:center;">
+      <p:spinner
+        id="editorGradePoints"
+        disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+        value="#{feedback.result}"
+        min="-100"
+        max="100"
+        size="2"
+        required="true"
+        onchange="processChange()"
+        onkeydown="checkUserInputForActivationOfSaveButton()" />
+    </p:column>
+    <p:column
+      id="columnMcRemoveFeedback"
+      style="width:43px;text-align:center;">
+      <p:commandButton
+        id="cbMcRemoveFeedback"
+        disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+        icon="fas fa-trash-alt fa-sm"
+        action="#{stageBean.removeFeedbackOption(feedback)}"
+        update="@parent:@parent:feedbacks"
+        oncomplete="processChange()" />
+    </p:column>
+  </p:dataTable>
+
+  <ui:include src="patternConfig.xhtml">
+    <ui:param
+      name="id"
+      value="feedback" />
+    <ui:param
+      name="header"
+      value="#{msg['exerciseEdit.mc.addFeedbackOption']}" />
+    <ui:param
+      name="action"
+      value="addNewFeedbackOption" />
+    <ui:param
+      name="update"
+      value="feedbacks globalGrowl" />
+  </ui:include>
+</ui:composition>

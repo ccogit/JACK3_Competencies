@@ -1,0 +1,26 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:p="http://primefaces.org/ui"
+  template="/WEB-INF/templates/template.xhtml">
+
+  <ui:define name="content">
+
+    <h3>#{msg['privacy.caption0']}</h3>
+
+    <h4>#{msg['privacy.caption1']}</h4>
+    <h:outputText value="#{msg['privacy.section1']}" escape="false" />
+
+    <h4>#{msg['privacy.caption2']}</h4>
+    <h:outputText value="#{msg['privacy.section2']}" escape="false" />
+
+    <h4>#{msg['privacy.caption3']}</h4>
+    <h:outputText value="#{msg['privacy.section3']}" escape="false" />
+
+    <h4>#{msg['privacy.caption4']}</h4>
+    <h:outputText value="#{msg['privacy.section4']}" escape="false" />
+
+  </ui:define>
+</ui:composition>

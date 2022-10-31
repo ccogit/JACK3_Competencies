@@ -1,0 +1,325 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:p="http://primefaces.org/ui">
+
+  <h:form id="editRightsDialogForm">
+    <p:dialog
+      id="editRightsDialog"
+      widgetVar="editRightsDialog"
+      modal="true"
+      closable="true"
+      width="800px"
+      resizable="false"
+      header="#{msg['start.editRights']}"
+      closeOnEscape="true"
+      styleClass="dialog-like-confirmdialog">
+
+      <!-- Breadcrumb -->
+      <h:outputText value="#{msg['global.folder']}: #{userRightsDialogView.breadcrumb}" />
+
+      <!-- User rights -->
+      <h4>#{msg['tenantadmin.users']}</h4>
+      <p:dataTable
+        id="userRightsTable"
+        var="userRightsData"
+        value="#{userRightsDialogView.userRightsData}"
+        scrollable="true"
+        scrollHeight="150"
+        emptyMessage="#{msg['tenantadmin.users.emptyListForRights']}"
+        widgetVar="userRightsTable">
+        <p:column
+          id="userNameColumn"
+          headerText="#{msg['global.name']}"
+          width="250">
+          <h:outputText value="#{userRightsData.user.loginName}" />
+        </p:column>
+
+        <!-- Read -->
+        <p:column
+          id="readRightsColumn"
+          headerText="#{msg['AccessRight.short.READ']}">
+          <p:selectBooleanCheckbox
+            id="inheritedReadRights"
+            value="#{userRightsData.readRights}"
+            styleClass="inheritedRight"
+            disabled="#{userRightsData.readRightImmutable}"
+            rendered="#{userRightsData.inheritedReadRights}">
+            <p:ajax update="userRightsTable" />
+          </p:selectBooleanCheckbox>
+          <p:selectBooleanCheckbox
+            id="notInheritedReadRights"
+            value="#{userRightsData.readRights}"
+            disabled="#{userRightsData.readRightImmutable}"
+            rendered="#{not userRightsData.inheritedReadRights}">
+            <p:ajax update="userRightsTable" />
+          </p:selectBooleanCheckbox>
+        </p:column>
+
+        <!-- Extended read -->
+        <p:column
+          id="extReadRightsColumn"
+          headerText="#{msg['AccessRight.short.EXTENDED_READ']}">
+          <p:selectBooleanCheckbox
+            id="inheritedExtReadRights"
+            value="#{userRightsData.extendedReadRights}"
+            styleClass="inheritedRight"
+            disabled="#{userRightsData.extendedReadRightImmutable}"
+            rendered="#{userRightsData.inheritedExtendedReadRights}">
+            <p:ajax
+              update="userRightsTable"
+              listener="#{userRightsDialogView.updateUserRights(userRightsData)}" />
+          </p:selectBooleanCheckbox>
+          <p:selectBooleanCheckbox
+            id="notInheritedExtReadRights"
+            value="#{userRightsData.extendedReadRights}"
+            disabled="#{userRightsData.extendedReadRightImmutable}"
+            rendered="#{not userRightsData.inheritedExtendedReadRights}">
+            <p:ajax
+              update="userRightsTable"
+              listener="#{userRightsDialogView.updateUserRights(userRightsData)}" />
+          </p:selectBooleanCheckbox>
+        </p:column>
+
+        <!-- Write -->
+        <p:column
+          id="writeRightsColumn"
+          headerText="#{msg['AccessRight.short.WRITE']}">
+          <p:selectBooleanCheckbox
+            id="inheritedWriteRights"
+            value="#{userRightsData.writeRights}"
+            styleClass="inheritedRight"
+            disabled="#{userRightsData.writeRightImmutable}"
+            rendered="#{userRightsData.inheritedWriteRights}">
+            <p:ajax
+              update="userRightsTable"
+              listener="#{userRightsDialogView.updateUserRights(userRightsData)}" />
+          </p:selectBooleanCheckbox>
+          <p:selectBooleanCheckbox
+            id="notInheritedWriteRights"
+            value="#{userRightsData.writeRights}"
+            disabled="#{userRightsData.writeRightImmutable}"
+            rendered="#{not userRightsData.inheritedWriteRights}">
+            <p:ajax
+              update="userRightsTable"
+              listener="#{userRightsDialogView.updateUserRights(userRightsData)}" />
+          </p:selectBooleanCheckbox>
+        </p:column>
+
+        <!-- Grade -->
+        <p:column
+          id="gradeRightsColumn"
+          headerText="#{msg['AccessRight.short.GRADE']}">
+          <p:selectBooleanCheckbox
+            id="inheritedGradeRights"
+            value="#{userRightsData.gradeRights}"
+            styleClass="inheritedRight"
+            disabled="#{userRightsData.gradeRightImmutable}"
+            rendered="#{userRightsData.inheritedGradeRights}">
+            <p:ajax
+              update="userRightsTable"
+              listener="#{userRightsDialogView.updateUserRights(userRightsData)}" />
+          </p:selectBooleanCheckbox>
+          <p:selectBooleanCheckbox
+            id="notInheritedGradeRights"
+            value="#{userRightsData.gradeRights}"
+            disabled="#{userRightsData.gradeRightImmutable}"
+            rendered="#{not userRightsData.inheritedGradeRights}">
+            <p:ajax
+              update="userRightsTable"
+              listener="#{userRightsDialogView.updateUserRights(userRightsData)}" />
+          </p:selectBooleanCheckbox>
+        </p:column>
+
+        <!-- Manage -->
+        <p:column
+          id="manageRightsColumn"
+          headerText="#{msg['AccessRight.short.MANAGE']}">
+          <p:selectBooleanCheckbox
+            id="inheritedManageRights"
+            value="#{userRightsData.manageRights}"
+            styleClass="inheritedRight"
+            rendered="#{userRightsData.inheritedManageRights}">
+            <p:ajax
+              update="userRightsTable"
+              listener="#{userRightsDialogView.updateUserRights(userRightsData)}" />
+          </p:selectBooleanCheckbox>
+          <p:selectBooleanCheckbox
+            id="notInheritedManageRights"
+            value="#{userRightsData.manageRights}"
+            rendered="#{not userRightsData.inheritedManageRights}">
+            <p:ajax
+              update="userRightsTable"
+              listener="#{userRightsDialogView.updateUserRights(userRightsData)}" />
+          </p:selectBooleanCheckbox>
+        </p:column>
+      </p:dataTable>
+
+      <!-- User group rights -->
+      <h4>#{msg['tenantadmin.userGroups']}</h4>
+      <p:dataTable
+        id="userGroupRightsTable"
+        var="userGroupRightsData"
+        value="#{userRightsDialogView.userGroupRightsData}"
+        scrollable="true"
+        scrollHeight="150"
+        emptyMessage="#{msg['tenantadmin.userGroups.emptyListForRights']}"
+        widgetVar="userGroupRightsTable">
+        <p:column
+          id="usergroupNameColumn"
+          headerText="#{msg['global.name']}"
+          width="250">
+          <h:outputText value="#{userGroupRightsData.userGroup.name}" />
+        </p:column>
+
+        <!-- Read -->
+        <p:column
+          id="readRightsColumn"
+          headerText="#{msg['AccessRight.short.READ']}">
+          <p:selectBooleanCheckbox
+            id="inheritedReadRights"
+            value="#{userGroupRightsData.readRights}"
+            styleClass="inheritedRight"
+            disabled="#{userGroupRightsData.readRightImmutable}"
+            rendered="#{userGroupRightsData.inheritedReadRights}">
+            <p:ajax update="userGroupRightsTable" />
+          </p:selectBooleanCheckbox>
+          <p:selectBooleanCheckbox
+            id="notInheritedReadRights"
+            value="#{userGroupRightsData.readRights}"
+            disabled="#{userGroupRightsData.readRightImmutable}"
+            rendered="#{not userGroupRightsData.inheritedReadRights}">
+            <p:ajax update="userGroupRightsTable" />
+          </p:selectBooleanCheckbox>
+        </p:column>
+
+        <!-- Extended read -->
+        <p:column
+          id="extReadRightsColumn"
+          headerText="#{msg['AccessRight.short.EXTENDED_READ']}">
+          <p:selectBooleanCheckbox
+            id="inheritedExtReadRights"
+            value="#{userGroupRightsData.extendedReadRights}"
+            styleClass="inheritedRight"
+            disabled="#{userGroupRightsData.extendedReadRightImmutable}"
+            rendered="#{userGroupRightsData.inheritedExtendedReadRights}">
+            <p:ajax
+              update="userGroupRightsTable"
+              listener="#{userRightsDialogView.updateUserRights(userGroupRightsData)}" />
+          </p:selectBooleanCheckbox>
+          <p:selectBooleanCheckbox
+            id="notInheritedExtReadRights"
+            value="#{userGroupRightsData.extendedReadRights}"
+            disabled="#{userGroupRightsData.extendedReadRightImmutable}"
+            rendered="#{not userGroupRightsData.inheritedExtendedReadRights}">
+            <p:ajax
+              update="userGroupRightsTable"
+              listener="#{userRightsDialogView.updateUserRights(userGroupRightsData)}" />
+          </p:selectBooleanCheckbox>
+        </p:column>
+
+        <!-- Write -->
+        <p:column
+          id="inheritedWriteRightsColumn"
+          headerText="#{msg['AccessRight.short.WRITE']}">
+          <p:selectBooleanCheckbox
+            id="inheritedWriteRights"
+            value="#{userGroupRightsData.writeRights}"
+            styleClass="inheritedRight"
+            disabled="#{userGroupRightsData.writeRightImmutable}"
+            rendered="#{userGroupRightsData.inheritedWriteRights}">
+            <p:ajax
+              update="userGroupRightsTable"
+              listener="#{userRightsDialogView.updateUserRights(userGroupRightsData)}" />
+          </p:selectBooleanCheckbox>
+          <p:selectBooleanCheckbox
+            id="notInheritedWriteRights"
+            value="#{userGroupRightsData.writeRights}"
+            disabled="#{userGroupRightsData.writeRightImmutable}"
+            rendered="#{not userGroupRightsData.inheritedWriteRights}">
+            <p:ajax
+              update="userGroupRightsTable"
+              listener="#{userRightsDialogView.updateUserRights(userGroupRightsData)}" />
+          </p:selectBooleanCheckbox>
+        </p:column>
+
+        <!-- Grade -->
+        <p:column
+          id="inheritedGradeRightsColumn"
+          headerText="#{msg['AccessRight.short.GRADE']}">
+          <p:selectBooleanCheckbox
+            id="inheritedGradeRights"
+            value="#{userGroupRightsData.gradeRights}"
+            styleClass="inheritedRight"
+            disabled="#{userGroupRightsData.gradeRightImmutable}"
+            rendered="#{userGroupRightsData.inheritedGradeRights}">
+            <p:ajax
+              update="userGroupRightsTable"
+              listener="#{userRightsDialogView.updateUserRights(userGroupRightsData)}" />
+          </p:selectBooleanCheckbox>
+          <p:selectBooleanCheckbox
+            id="notInheritedGradeRights"
+            value="#{userGroupRightsData.gradeRights}"
+            disabled="#{userGroupRightsData.gradeRightImmutable}"
+            rendered="#{not userGroupRightsData.inheritedGradeRights}">
+            <p:ajax
+              update="userGroupRightsTable"
+              listener="#{userRightsDialogView.updateUserRights(userGroupRightsData)}" />
+          </p:selectBooleanCheckbox>
+        </p:column>
+
+        <!-- Manage -->
+        <p:column
+          id="inheritedManageRightsColumn"
+          headerText="#{msg['AccessRight.short.MANAGE']}">
+          <p:selectBooleanCheckbox
+            id="inheritedManageRights"
+            value="#{userGroupRightsData.manageRights}"
+            styleClass="inheritedRight"
+            rendered="#{userGroupRightsData.inheritedManageRights}">
+            <p:ajax
+              update="userGroupRightsTable"
+              listener="#{userRightsDialogView.updateUserRights(userGroupRightsData)}" />
+          </p:selectBooleanCheckbox>
+          <p:selectBooleanCheckbox
+            id="notInheritedManageRights"
+            value="#{userGroupRightsData.manageRights}"
+            rendered="#{not userGroupRightsData.inheritedManageRights}">
+            <p:ajax
+              update="userGroupRightsTable"
+              listener="#{userRightsDialogView.updateUserRights(userGroupRightsData)}" />
+          </p:selectBooleanCheckbox>
+        </p:column>
+      </p:dataTable>
+
+      <f:facet name="footer">
+        <p:commandButton
+          id="save"
+          value="#{msg['global.save']}"
+          icon="fas fa-check"
+          oncomplete="PF('editRightsDialog').hide();"
+          update="userRightsTable userGroupRightsTable globalGrowl"
+          action="#{userRightsDialogView.saveAndClose()}" />
+        <p:commandButton
+          id="reset"
+          styleClass="button-white"
+          value="#{msg['global.reset']}"
+          icon="fas fa-ban"
+          update="userRightsTable userGroupRightsTable"
+          action="#{userRightsDialogView.resetDialog()}" />
+        <p:commandButton
+          id="close"
+          styleClass="button-white"
+          value="#{msg['global.close']}"
+          icon="fas fa-times"
+          oncomplete="PF('editRightsDialog').hide();"
+          update="userRightsTable userGroupRightsTable"
+          action="#{userRightsDialogView.unloadDialog()}" />
+      </f:facet>
+
+    </p:dialog>
+  </h:form>
+
+</ui:composition>

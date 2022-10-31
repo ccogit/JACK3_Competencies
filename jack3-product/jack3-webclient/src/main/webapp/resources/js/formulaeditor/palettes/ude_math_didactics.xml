@@ -1,0 +1,737 @@
+<OMOBJ version='2.0' xmlns='http://www.openmath.org/OpenMath'
+	cdbase='http://www.openmath.org/cd'>
+	<OMA>
+		<OMS cd='editor1' name='palette' />
+		<OMA>
+			<!-- basic palette tab 1 Arithmetik -->
+			<OMS cd='editor1' name='palette_tab' />
+			<OMA>
+				<!-- basic palette row Grundoperationen -->
+				<OMS cd='editor1' name='palette_row' />
+				<OMS cd='arith1' name='plus' />
+				<OMS cd='arith1' name='minus' />
+				<OMS cd='arith1' name='times' />
+				<OMA>
+					<OMS cd='arith1' name='divide' />
+					<OMS cd='editor1' name='input_box' />
+					<OMS cd='editor1' name='input_box' />
+				</OMA>
+			</OMA>
+			<OMA>
+				<!-- basic palette row Vergleichsrelationen -->
+				<OMS cd='editor1' name='palette_row' />
+				<OMS cd='relation1' name='lt' />
+				<OMS cd='relation1' name='leq' />
+				<OMS cd='relation1' name='eq' />
+				<OMS cd='relation1' name='neq' />
+				<OMS cd='relation1' name='geq' />
+				<OMS cd='relation1' name='gt' />
+			</OMA>
+			<OMA>
+				<!-- basic palette row Brüche potenzen Wurzeln Fakultät Betrag -->
+				<OMS cd='editor1' name='palette_row' />
+				<OMA>
+					<!-- basic palette row Bruch -->
+					<OMS cd='nums1' name='rational' />
+					<OMS cd='editor1' name='input_box' />
+					<OMS cd='editor1' name='input_box' />
+				</OMA>
+				<OMA>
+					<!-- basic palette row Potenz -->
+					<OMS name='power' cd='arith1' />
+					<OMS cd='editor1' name='input_box' />
+					<OMS cd='editor1' name='input_box' />
+				</OMA>
+				<OMA>
+					<!-- basic palette Wurzel -->
+					<OMS cd='arith1' name='root' />
+					<OMS cd='editor1' name='input_box' />
+					<OMI>2</OMI>
+				</OMA>
+				<OMA>
+					<!-- basic palette nte Wurzel -->
+					<OMS cd='arith1' name='root' />
+					<OMS cd='editor1' name='input_box' />
+					<OMS cd='editor1' name='input_box' />
+				</OMA>
+				<OMS cd='editor1' name='palette_whitespace' />
+				<OMA>
+					<!-- basic palette Betrag -->
+					<OMS cd='arith1' name='abs' />
+					<OMS cd='editor1' name='input_box' />
+				</OMA>
+			</OMA>
+
+			<OMA>
+				<!-- basic palette row Summe und Produkt -->
+				<OMS cd='editor1' name='palette_row' />
+				<OMA>
+					<!-- basic palette row Summe -->
+					<OMS cd='arith1' name='sum' />
+					<OMA>
+						<OMS cd='interval1' name='integer_interval' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+					</OMA>
+					<OMBIND>
+						<OMS cd='fns1' name='lambda' />
+						<OMBVAR>
+							<OMV name='n' />
+						</OMBVAR>
+						<OMS cd='editor1' name='input_box' />
+					</OMBIND>
+				</OMA>
+				<OMA>
+					<!-- basic palette row Produkt -->
+					<OMS cd='arith1' name='product' />
+					<OMA>
+						<OMS cd='interval1' name='integer_interval' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+					</OMA>
+					<OMBIND>
+						<OMS cd='fns1' name='lambda' />
+						<OMBVAR>
+							<OMV name='n' />
+						</OMBVAR>
+						<OMS cd='editor1' name='input_box' />
+					</OMBIND>
+				</OMA>
+				<OMA>
+					<!-- basic palette row Fakultät -->
+					<OMS cd='integer1' name='factorial' />
+					<OMS cd='editor1' name='input_box' />
+				</OMA>
+			</OMA>
+			<OMA>
+				<!-- basic palette row Leerzeile -->
+				<OMS cd='editor1' name='palette_row' />
+			</OMA>
+			<OMA>
+				<!-- basic palette row -->
+				<OMS cd='editor1' name='palette_row' />
+				<!-- Element von, nicht Element von -->
+				<OMA>
+					<OMS cd='list1' name='list' />
+					<OMS cd='editor1' name='input_box' />
+				</OMA>
+				<OMA>
+					<OMS cd='set1' name='in' />
+					<OMS cd='editor1' name='input_box' />
+					<OMS cd='editor1' name='input_box' />
+				</OMA>
+				<OMA>
+					<OMS cd='set1' name='notin' />
+					<OMS cd='editor1' name='input_box' />
+					<OMS cd='editor1' name='input_box' />
+				</OMA>
+
+				<OMA>
+					<OMS cd='set1' name='intersect' />
+					<OMS cd='editor1' name='input_box' />
+					<OMS cd='editor1' name='input_box' />
+				</OMA>
+				<OMA>
+					<OMS cd='set1' name='union' />
+					<OMS cd='editor1' name='input_box' />
+					<OMS cd='editor1' name='input_box' />
+				</OMA>
+				<OMA>
+					<OMS cd='set1' name='setdiff' />
+					<OMS cd='editor1' name='input_box' />
+					<OMS cd='editor1' name='input_box' />
+				</OMA>
+				<OMS cd='set1' name='emptyset' />
+			</OMA>
+
+			<!-- <OMA> -->
+			<!-- basic palette row Komplexe Zahlen -->
+			<!-- <OMS cd='editor1' name='palette_row'/> -->
+			<!-- <OMA> -->
+			<!-- basic palette row Komplement -->
+			<!-- <OMS cd='complex1' name='conjugate'/> -->
+			<!-- <OMS cd='editor1' name='input_box'/> -->
+			<!-- </OMA> -->
+			<!-- </OMA> -->
+		</OMA>
+
+		<OMA>
+			<!-- basic palette tab 2 Analysis -->
+			<OMS cd='editor1' name='palette_tab' />
+			<OMA>
+				<!-- basic palette row Intervalle -->
+				<OMS cd='editor1' name='palette_row' />
+				<OMA>
+					<!-- offenes Intervall -->
+					<OMS cd='interval1' name='interval_oo' />
+					<OMS cd='editor1' name='input_box' />
+					<OMS cd='editor1' name='input_box' />
+				</OMA>
+				<OMA>
+					<OMS cd='interval1' name='interval_co' />
+					<OMS cd='editor1' name='input_box' />
+					<OMS cd='editor1' name='input_box' />
+				</OMA>
+				<OMA>
+					<OMS cd='interval1' name='interval_oc' />
+					<OMS cd='editor1' name='input_box' />
+					<OMS cd='editor1' name='input_box' />
+				</OMA>
+				<OMA>
+					<!-- basic palette row geschlossenes Intervall -->
+					<OMS cd='interval1' name='interval_cc' />
+					<OMS cd='editor1' name='input_box' />
+					<OMS cd='editor1' name='input_box' />
+				</OMA>
+			</OMA>
+			<OMA>
+				<!-- basic palette row Leerzeile -->
+				<OMS cd='editor1' name='palette_row' />
+			</OMA>
+			<OMA>
+				<!-- basic palette row Logarithmus und eFkt. -->
+				<OMS cd='editor1' name='palette_row' />
+				<OMA>
+					<!-- basic palette row exp(x) -->
+					<OMS name='power' cd='arith1' />
+					<OMS cd='nums1' name='e' />
+					<OMS cd='editor1' name='input_box' />
+				</OMA>
+				<OMA>
+					<!-- basic palette row ln() -->
+					<OMS name='ln' cd='transc1' />
+					<OMS cd='editor1' name='input_box' />
+				</OMA>
+				<OMA>
+					<!-- basic palette row log()() -->
+					<OMS cd='transc1' name='log' />
+					<OMS cd='editor1' name='input_box' />
+					<OMS cd='editor1' name='input_box' />
+				</OMA>
+				<OMA>
+					<!-- basic palette row lg() -->
+					<OMS cd='transc1' name='log' />
+					<OMI>10</OMI>
+					<OMS cd='editor1' name='input_box' />
+				</OMA>
+			</OMA>
+			<OMA>
+				<!-- basic palette row Leerzeile -->
+				<OMS cd='editor1' name='palette_row' />
+			</OMA>
+			<OMA>
+				<!-- basic palette row besondere Zahlen -->
+				<OMS cd='editor1' name='palette_row' />
+				<OMS cd='nums1' name='pi' />
+				<OMS cd='nums1' name='e' />
+				<OMS cd='nums1' name='i' />
+				<OMS cd='editor1' name='palette_whitespace' />
+				<OMS cd='nums1' name='infinity' />
+			</OMA>
+
+			<OMA>
+				<!-- basic palette row Leerzeile -->
+				<OMS cd='editor1' name='palette_row' />
+			</OMA>
+			<OMA>
+				<!-- basic palette row Leerzeile -->
+				<OMS cd='editor1' name='palette_row' />
+			</OMA>
+			<OMA>
+				<!-- basic palette row Leerzeile -->
+				<OMS cd='editor1' name='palette_row' />
+			</OMA>
+			<OMA>
+				<!-- basic palette row Leerzeile -->
+				<OMS cd='editor1' name='palette_row' />
+			</OMA>
+		</OMA>
+
+		<OMA>
+			<!-- basic palette tab 3 Matrizen -->
+			<OMS cd='editor1' name='palette_tab' />
+			<OMA>
+				<!-- basic palette row -->
+				<OMS cd='editor1' name='palette_row' />
+				<OMA>
+					<!-- basic palette 1x1 Vektor -->
+					<OMS cd='linalg2' name='vector' />
+					<OMS cd='editor1' name='input_box' />
+				</OMA>
+				<OMA>
+					<!-- basic palette 1x2 Matrix -->
+					<OMS cd='linalg2' name='matrix' />
+					<OMA>
+						<OMS cd='linalg2' name='matrixrow' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+					</OMA>
+				</OMA>
+				<OMA>
+					<!-- basic palette 1x3 Matrix -->
+					<OMS cd='linalg2' name='matrix' />
+					<OMA>
+						<OMS cd='linalg2' name='matrixrow' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+					</OMA>
+				</OMA>
+				<OMA>
+					<!-- basic palette 1x4 Matrix -->
+					<OMS cd='linalg2' name='matrix' />
+					<OMA>
+						<OMS cd='linalg2' name='matrixrow' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+					</OMA>
+				</OMA>
+				<OMA>
+					<!-- basic palette 1x5 Matrix -->
+					<OMS cd='linalg2' name='matrix' />
+					<OMA>
+						<OMS cd='linalg2' name='matrixrow' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+					</OMA>
+				</OMA>
+			</OMA>
+			<OMA>
+				<!-- Zweite Reihe mit 2*X-Matrizen -->
+				<OMS cd='editor1' name='palette_row' />
+				<OMA>
+					<!-- basic palette 2x1 Vektor -->
+					<OMS cd='linalg2' name='vector' />
+					<OMS cd='editor1' name='input_box' />
+					<OMS cd='editor1' name='input_box' />
+				</OMA>
+				<OMA>
+					<!-- basic palette 2x2 Matrix -->
+					<OMS cd='linalg2' name='matrix' />
+					<OMA>
+						<OMS cd='linalg2' name='matrixrow' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+					</OMA>
+					<OMA>
+						<OMS cd='linalg2' name='matrixrow' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+					</OMA>
+				</OMA>
+				<OMA>
+					<!-- basic palette 2x3 Matrix -->
+					<OMS cd='linalg2' name='matrix' />
+					<OMA>
+						<OMS cd='linalg2' name='matrixrow' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+					</OMA>
+					<OMA>
+						<OMS cd='linalg2' name='matrixrow' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+					</OMA>
+				</OMA>
+				<OMA>
+					<!-- basic palette 2x4 Matrix -->
+					<OMS cd='linalg2' name='matrix' />
+					<OMA>
+						<OMS cd='linalg2' name='matrixrow' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+					</OMA>
+					<OMA>
+						<OMS cd='linalg2' name='matrixrow' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+					</OMA>
+				</OMA>
+				<OMA>
+					<!-- basic palette 2x5 Matrix -->
+					<OMS cd='linalg2' name='matrix' />
+					<OMA>
+						<OMS cd='linalg2' name='matrixrow' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+					</OMA>
+					<OMA>
+						<OMS cd='linalg2' name='matrixrow' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+					</OMA>
+				</OMA>
+			</OMA>
+			<OMA>
+				<!-- Zweite Reihe mit 3*X-Matrizen -->
+				<OMS cd='editor1' name='palette_row' />
+				<OMA>
+					<!-- basic palette 3x1 Vektor -->
+					<OMS cd='linalg2' name='vector' />
+					<OMS cd='editor1' name='input_box' />
+					<OMS cd='editor1' name='input_box' />
+					<OMS cd='editor1' name='input_box' />
+				</OMA>
+				<OMA>
+					<!-- basic palette 3x2 Matrix -->
+					<OMS cd='linalg2' name='matrix' />
+					<OMA>
+						<OMS cd='linalg2' name='matrixrow' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+					</OMA>
+					<OMA>
+						<OMS cd='linalg2' name='matrixrow' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+					</OMA>
+					<OMA>
+						<OMS cd='linalg2' name='matrixrow' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+					</OMA>
+				</OMA>
+				<OMA>
+					<!-- basic palette 3x3 Matrix -->
+					<OMS cd='linalg2' name='matrix' />
+					<OMA>
+						<OMS cd='linalg2' name='matrixrow' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+					</OMA>
+					<OMA>
+						<OMS cd='linalg2' name='matrixrow' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+					</OMA>
+					<OMA>
+						<OMS cd='linalg2' name='matrixrow' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+					</OMA>
+				</OMA>
+				<OMA>
+					<!-- basic palette 3x4 Matrix -->
+					<OMS cd='linalg2' name='matrix' />
+					<OMA>
+						<OMS cd='linalg2' name='matrixrow' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+					</OMA>
+					<OMA>
+						<OMS cd='linalg2' name='matrixrow' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+					</OMA>
+					<OMA>
+						<OMS cd='linalg2' name='matrixrow' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+					</OMA>
+				</OMA>
+				<OMA>
+					<!-- basic palette 3x5 Matrix -->
+					<OMS cd='linalg2' name='matrix' />
+					<OMA>
+						<OMS cd='linalg2' name='matrixrow' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+					</OMA>
+					<OMA>
+						<OMS cd='linalg2' name='matrixrow' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+					</OMA>
+					<OMA>
+						<OMS cd='linalg2' name='matrixrow' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+					</OMA>
+				</OMA>
+			</OMA>
+			<OMA>
+				<!-- Zweite Reihe mit 4*X-Matrizen -->
+				<OMS cd='editor1' name='palette_row' />
+				<OMA>
+					<!-- basic palette 4x1 Vektor -->
+					<OMS cd='linalg2' name='vector' />
+					<OMS cd='editor1' name='input_box' />
+					<OMS cd='editor1' name='input_box' />
+					<OMS cd='editor1' name='input_box' />
+					<OMS cd='editor1' name='input_box' />
+				</OMA>
+				<OMA>
+					<!-- basic palette 4x2 Matrix -->
+					<OMS cd='linalg2' name='matrix' />
+					<OMA>
+						<OMS cd='linalg2' name='matrixrow' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+					</OMA>
+					<OMA>
+						<OMS cd='linalg2' name='matrixrow' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+					</OMA>
+					<OMA>
+						<OMS cd='linalg2' name='matrixrow' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+					</OMA>
+					<OMA>
+						<OMS cd='linalg2' name='matrixrow' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+					</OMA>
+				</OMA>
+				<OMA>
+					<!-- basic palette 4x3 Matrix -->
+					<OMS cd='linalg2' name='matrix' />
+					<OMA>
+						<OMS cd='linalg2' name='matrixrow' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+					</OMA>
+					<OMA>
+						<OMS cd='linalg2' name='matrixrow' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+					</OMA>
+					<OMA>
+						<OMS cd='linalg2' name='matrixrow' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+					</OMA>
+					<OMA>
+						<OMS cd='linalg2' name='matrixrow' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+					</OMA>
+				</OMA>
+				<OMA>
+					<!-- basic palette 4x4 Matrix -->
+					<OMS cd='linalg2' name='matrix' />
+					<OMA>
+						<OMS cd='linalg2' name='matrixrow' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+					</OMA>
+					<OMA>
+						<OMS cd='linalg2' name='matrixrow' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+					</OMA>
+					<OMA>
+						<OMS cd='linalg2' name='matrixrow' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+					</OMA>
+					<OMA>
+						<OMS cd='linalg2' name='matrixrow' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+					</OMA>
+				</OMA>
+				<OMA>
+					<!-- basic palette 4x5 Matrix -->
+					<OMS cd='linalg2' name='matrix' />
+					<OMA>
+						<OMS cd='linalg2' name='matrixrow' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+					</OMA>
+					<OMA>
+						<OMS cd='linalg2' name='matrixrow' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+					</OMA>
+					<OMA>
+						<OMS cd='linalg2' name='matrixrow' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+					</OMA>
+					<OMA>
+						<OMS cd='linalg2' name='matrixrow' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+						<OMS cd='editor1' name='input_box' />
+					</OMA>
+				</OMA>
+			</OMA>
+			<OMA>
+				<!-- basic palette row Leerzeile -->
+				<OMS cd='editor1' name='palette_row' />
+			</OMA>
+			<OMA>
+				<!-- Matrixoperationen -->
+				<OMS cd='editor1' name='palette_row' />
+				<OMA>
+					<OMS cd='linalg1' name='determinant' />
+					<OMS cd='editor1' name='input_box' />
+				</OMA>
+
+				<!-- <OMA> -->
+				<!-- <OMS cd='linalg1' name='vectorproduct'/> -->
+				<!-- <OMS cd='editor1' name='input_box'/> -->
+				<!-- <OMS cd='editor1' name='input_box'/> -->
+				<!-- </OMA> -->
+			</OMA>
+		</OMA>
+
+		<OMA>
+			<!-- basic palette tab 7 Trigonometrie -->
+			<OMS cd='editor1' name='palette_tab' />
+			<OMA>
+				<!-- basic palette row Trigonometrische Funktionen -->
+				<OMS cd='editor1' name='palette_row' />
+				<OMA>
+					<!-- basic palette Sinus -->
+					<OMS cd='transc1' name='sin' />
+					<OMS cd='editor1' name='input_box' />
+				</OMA>
+				<OMA>
+					<!-- basic palette Kosinus -->
+					<OMS cd='transc1' name='cos' />
+					<OMS cd='editor1' name='input_box' />
+				</OMA>
+				<OMA>
+					<!-- basic palette Kosinus -->
+					<OMS cd='transc1' name='tan' />
+					<OMS cd='editor1' name='input_box' />
+				</OMA>
+			</OMA>
+			<OMA>
+				<!-- basic palette row Leerzeile -->
+				<OMS cd='editor1' name='palette_row' />
+			</OMA>
+			<OMA>
+				<!-- basic palette row Arcus Funktionen -->
+				<OMS cd='editor1' name='palette_row' />
+				<OMA>
+					<!-- basic palette ArcusSinus -->
+					<OMS cd='transc1' name='arcsin' />
+					<OMS cd='editor1' name='input_box' />
+				</OMA>
+				<OMA>
+					<!-- basic palette ArcusKosinus -->
+					<OMS cd='transc1' name='arccos' />
+					<OMS cd='editor1' name='input_box' />
+				</OMA>
+				<OMA>
+					<!-- basic palette ArcusTangens -->
+					<OMS cd='transc1' name='arctan' />
+					<OMS cd='editor1' name='input_box' />
+				</OMA>
+			</OMA>
+			<OMA>
+				<!-- basic palette row Leerzeile -->
+				<OMS cd='editor1' name='palette_row' />
+			</OMA>
+			<OMA>
+				<!-- basic palette row Leerzeile -->
+				<OMS cd='editor1' name='palette_row' />
+			</OMA>
+			<OMA>
+				<!-- basic palette row Leerzeile -->
+				<OMS cd='editor1' name='palette_row' />
+			</OMA>
+			<OMA>
+				<!-- basic palette row Leerzeile -->
+				<OMS cd='editor1' name='palette_row' />
+			</OMA>
+			<OMA>
+				<!-- basic palette row Leerzeile -->
+				<OMS cd='editor1' name='palette_row' />
+			</OMA>
+			<OMA>
+				<!-- basic palette row Leerzeile -->
+				<OMS cd='editor1' name='palette_row' />
+			</OMA>
+			<OMA>
+				<!-- basic palette row Leerzeile -->
+				<OMS cd='editor1' name='palette_row' />
+			</OMA>
+			<OMA>
+				<!-- basic palette row Leerzeile -->
+				<OMS cd='editor1' name='palette_row' />
+			</OMA>
+			<OMA>
+				<!-- basic palette row Leerzeile -->
+				<OMS cd='editor1' name='palette_row' />
+			</OMA>
+		</OMA>
+
+		<!-- <OMA> -->
+		<!-- basic palette tab 8 Logik Junktoren und Quantoren -->
+		<!-- <OMS cd='editor1' name='palette_tab'/> -->
+		<!-- <OMA> -->
+		<!-- basic palette row Pfeile -->
+		<!-- <OMS cd='editor1' name='palette_row'/> -->
+		<!-- <OMS cd='logic1' name='implies'/> -->
+		<!-- <OMS cd='editor1' name='palette_whitespace'/> -->
+		<!-- <OMS cd='logic1' name='not'/> -->
+		<!-- <OMS cd='logic1' name='and'/> -->
+		<!-- <OMS cd='logic1' name='or'/> -->
+		<!-- </OMA> -->
+		<!-- </OMA> -->
+
+	</OMA>
+</OMOBJ>

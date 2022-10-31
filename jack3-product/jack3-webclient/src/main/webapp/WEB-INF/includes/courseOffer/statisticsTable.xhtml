@@ -1,0 +1,110 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:j="http://jack.s3.uni-due.de/ui-elements">
+
+  <h:panelGrid
+    id="statisticsGrid"
+    columns="2"
+    styleClass="align-top">
+
+    <p:panelGrid
+      id="statisticsParticipants"
+      columns="2"
+      styleClass="ui-panelgrid-blank">
+
+      <!-- All participants -->
+      <h:outputLabel value="#{msg['statistics.participantsCount']}:" />
+      <j:helperTooltip
+        id="participants"
+        text="#{courseOfferParticipantsView.numberOfParticipants}"
+        tooltip="#{msg['statistics.participantsCount.info']}" />
+
+      <!-- Currently enrolled users -->
+      <h:outputLabel
+        value="#{msg['statistics.enrollments']}:"
+        rendered="#{courseOfferParticipantsView.showEnrollmentData}" />
+      <h:outputText
+        id="currentParticipants"
+        value="#{courseOfferParticipantsView.numberOfEnrolledParticipants}"
+        rendered="#{courseOfferParticipantsView.showEnrollmentData}" />
+
+      <!-- Current waiting users -->
+      <h:outputLabel
+        value="#{msg['statistics.waitingParticipants']}:"
+        rendered="#{courseOfferParticipantsView.showEnrollmentData and courseOfferParticipantsView.numberOfWaitinglistParticipants > 0}" />
+      <h:outputText
+        id="currentWaitingParticipants"
+        value="#{courseOfferParticipantsView.numberOfWaitinglistParticipants}"
+        rendered="#{courseOfferParticipantsView.showEnrollmentData and courseOfferParticipantsView.numberOfWaitinglistParticipants > 0}" />
+
+      <!-- Course Submissions (number of course records) -->
+      <h:outputLabel
+        value="#{msg['statistics.courseSubmissions']}:"
+        rendered="#{courseOfferParticipantsView.showSubmissionData}" />
+      <j:helperTooltip
+        id="participations"
+        text="#{courseOfferParticipantsView.numberOfCourseRecords}"
+        tooltip="#{msg['statistics.courseSubmissions.info']}"
+        rendered="#{courseOfferParticipantsView.showSubmissionData}" />
+
+      <!-- Submissions (number of exercise submissions) -->
+      <h:outputLabel
+        value="#{msg['statistics.submissions']}:"
+        rendered="#{courseOfferParticipantsView.showSubmissionData}" />
+      <j:helperTooltip
+        id="submissions"
+        text="#{courseOfferParticipantsView.numberOfSubmissions}"
+        tooltip="#{msg['statistics.submissions.info']}"
+        rendered="#{courseOfferParticipantsView.showSubmissionData}" />
+    </p:panelGrid>
+
+    <p:panelGrid
+      id="statisticsAverage"
+      columns="2"
+      styleClass="ui-panelgrid-blank">
+
+      <!-- Average score -->
+      <h:outputLabel
+        value="#{msg['statistics.avgScore']}:"
+        rendered="#{courseOfferParticipantsView.showSubmissionSummary}" />
+      <h:outputText
+        id="avgScore"
+        value="#{courseOfferParticipantsView.averagePoints} %"
+        rendered="#{courseOfferParticipantsView.showSubmissionSummary}" />
+
+      <!-- Highest score -->
+      <h:outputLabel
+        value="#{msg['statistics.highestScore']}:"
+        rendered="#{courseOfferParticipantsView.showSubmissionSummary}" />
+      <h:outputText
+        id="highestScore"
+        value="#{courseOfferParticipantsView.highestScore} %"
+        rendered="#{courseOfferParticipantsView.showSubmissionSummary}" />
+
+      <!-- Lowest score -->
+      <h:outputLabel
+        value="#{msg['statistics.lowestScore']}:"
+        rendered="#{courseOfferParticipantsView.showSubmissionSummary}" />
+      <h:outputText
+        id="lowestScore"
+        value="#{courseOfferParticipantsView.lowestScore} %"
+        rendered="#{courseOfferParticipantsView.showSubmissionSummary}" />
+
+      <!-- Unread comments -->
+      <h:outputLabel
+        style="font-weight:bold"
+        value="#{msg['statistics.unreadComments']}:"
+        rendered="#{courseOfferParticipantsView.numberOfUnreadComments > 0}" />
+      <h:outputText
+        id="unreadComments"
+        style="font-weight:bold"
+        value="#{courseOfferParticipantsView.numberOfUnreadComments}"
+        rendered="#{courseOfferParticipantsView.numberOfUnreadComments > 0}" />
+    </p:panelGrid>
+  </h:panelGrid>
+
+</ui:composition>

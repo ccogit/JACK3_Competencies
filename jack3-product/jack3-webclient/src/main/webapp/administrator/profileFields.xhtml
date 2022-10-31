@@ -1,0 +1,161 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:c="http://java.sun.com/jsp/jstl/core"
+  xmlns:p="http://primefaces.org/ui"
+  template="/WEB-INF/templates/template.xhtml">
+
+  <ui:define name="content">
+    <c:set
+      var="current"
+      value="#{'admin-profileFields'}"
+      scope="request" />
+    <h3>#{msg['tenantadmin.profileFields']}</h3>
+
+    <h:form id="profileFields">
+
+      <p:dataTable
+        id="fixedProfileFields"
+        value="#{profileFieldsView.fixedProfileFields}"
+        var="field"
+        sortBy="#{field.name}"
+        styleClass="ui-datatable-panel-header">
+        <f:facet name="header">
+          <h:outputText value="#{msg['tenantadmin.fixedProfileFields']}" />
+        </f:facet>
+        <p:column
+          headerText="#{msg['tenantadmin.profileField.name']}"
+          width="20%">
+          <h:outputText value="#{field.name}" />
+        </p:column>
+        <p:column
+          headerText="#{msg['tenantadmin.profileField.type']}">
+          <h:outputText value="#{msg['tenantadmin.profileField.type.mixed']}" />
+        </p:column>
+        <p:column
+          headerText="#{msg['tenantadmin.profileField.public']}"
+          width="15%">
+          <p:selectBooleanCheckbox
+            value="#{field.public}"
+            disabled="true" />
+        </p:column>
+      </p:dataTable>
+
+      <p:dataTable
+        id="customFields"
+        value="#{profileFieldsView.profileFields}"
+        var="field"
+        sortBy="#{field.name}"
+        styleClass="ui-datatable-panel-header"
+        style="margin-top: 2px;">
+        <f:facet name="header">
+          <h:outputText value="#{msg['tenantadmin.customProfileFields']}" />
+        </f:facet>
+  
+        <!-- Name column -->
+        <p:column
+          id="names"
+          headerText="#{msg['tenantadmin.profileField.name']}"
+          width="20%">
+          <h:outputText value="#{field.name}" />
+        </p:column>
+  
+        <!-- Type column -->
+        <p:column
+          id="type"
+          headerText="#{msg['tenantadmin.profileField.type']}">
+          <h:outputText value="#{msg['tenantadmin.profileField.type.identity']}" rendered="#{field.getClass() eq 'class de.uni_due.s3.jack3.entities.tenant.IdentityProfileField'}" />
+          <h:outputText value="#{msg['tenantadmin.profileField.type.text']}" rendered="#{field.getClass() eq 'class de.uni_due.s3.jack3.entities.tenant.TextProfileField'}" />
+          <h:outputText value="#{msg['tenantadmin.profileField.type.select']}" rendered="#{field.getClass() eq 'class de.uni_due.s3.jack3.entities.tenant.SelectProfileField'}" />
+          <h:outputText value="#{msg['tenantadmin.profileField.type.ldap']}" rendered="#{field.getClass() eq 'class de.uni_due.s3.jack3.entities.tenant.LDAPProfileField'}" />
+        </p:column>
+  
+        <!-- Public column -->
+        <p:column
+          id="public"
+          headerText="#{msg['tenantadmin.profileField.public']}"
+          width="15%">
+          <p:selectBooleanCheckbox value="#{field.public}">
+            <p:ajax
+              listener="#{profileFieldsView.updateField(field)}"
+              update="globalGrowl" />
+          </p:selectBooleanCheckbox>
+        </p:column>
+  
+        <!-- Action column -->
+        <p:column
+          id="actions"
+          width="15%">
+          <p:commandButton
+            id="deleteField"
+            icon="fas fa-trash-alt fa-sm"
+            value="#{msg['global.delete']}"
+            action="#{profileFieldsView.deleteField(field)}"
+            update="customFields globalGrowl"
+            rendered="#{field.getClass() ne 'class de.uni_due.s3.jack3.entities.tenant.IdentityProfileField'}" />
+        </p:column>
+  
+      </p:dataTable>
+    
+      <p:panel
+        header="#{msg['tenantadmin.displayName']}"
+        id="displayNamePanel">
+        <h:outputText value="#{msg['tenantadmin.displayNameDefault']}" />
+        <p:panelGrid
+          columns="2"
+          styleClass="ui-panelgrid-blank"
+          style="">
+          <h:outputLabel
+            for="primaryDisplayName"
+            value="#{msg['tenantadmin.displayNameRule.primary']}:" />
+          <h:panelGroup
+            layout="block"
+            class="ui-inputgroup">
+            <p:inputText
+              id="primaryDisplayName"
+              value="#{profileFieldsView.primaryDisplayName}"
+              size="40" />
+            <p:commandButton
+              icon="fas fa-times"
+              styleClass="button-white"
+              action="#{profileFieldsView.setPrimaryDisplayName('')}"
+              update="primaryDisplayName" />
+          </h:panelGroup>
+
+          <h:outputLabel
+            for="secondaryDisplayName"
+            value="#{msg['tenantadmin.displayNameRule.secondary']}:" />
+          <h:panelGroup
+            layout="block"
+            class="ui-inputgroup">
+            <p:inputText
+              id="secondaryDisplayName"
+              value="#{profileFieldsView.secondaryDisplayName}"
+              size="40" />
+            <p:commandButton
+              icon="fas fa-times"
+              styleClass="button-white"
+              action="#{profileFieldsView.setSecondaryDisplayName('')}"
+              update="secondaryDisplayName" />
+          </h:panelGroup>
+        </p:panelGrid>
+        <div style="display: flex;">
+          <div>
+            <p:commandButton
+              id="cbDisplayName"
+              value="#{msg['global.save']}"
+              action="#{profileFieldsView.saveDisplayName()}"
+              update="globalGrowl" />
+          </div>
+          <div style="padding-left: 10px;">
+            <h:outputText styleClass="fas fa-exclamation-triangle" />
+            <h:outputText value=" #{msg['tenantadmin.displayNameRule.changeNotice']}" />
+          </div>
+        </div>
+      </p:panel>
+    </h:form>
+
+  </ui:define>
+</ui:composition>

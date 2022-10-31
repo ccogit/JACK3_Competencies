@@ -1,0 +1,10 @@
+.feedbackRule.ui-panelgrid thead {
+  display: table-header-group;
+  text-align: left;
+  font-weight: bold;
+}
+.feedbackRule.ui-panelgrid {
+  border-style: solid solid solid solid;
+  border-width: 1px;
+  border-color:black;
+}

@@ -1,0 +1,39 @@
+embed-server --server-config=standalone.xml --admin-only
+
+# We first add a datasource for the given tenant.
+/subsystem=datasources/data-source=jack-${tenant.identifier}-datasource:add(jndi-name=java:jboss/datasources/jack-${tenant.identifier}-datasource, enabled=true, use-ccm=false, connection-url=jdbc:postgresql://localhost:5432/jack-${tenant.identifier},driver-class=org.postgresql.Driver, driver-name=postgresql, jta=true, user-name=${database.username}, password=${database.password})
+
+# We configure the datasource to use background validation for its connections.
+cd /subsystem=datasources/data-source=jack-${tenant.identifier}-datasource
+:write-attribute(name=check-valid-connection-sql,value="SELECT 1")
+:write-attribute(name=validate-on-match,value=false)
+:write-attribute(name=background-validation-millis,value=15000)
+cd /
+
+# Adding the datasource needs a reload before it is available.
+reload
+
+# Then we create a JDBC realm with a bcrypt mapper linked to the tenant's datasource.
+/subsystem=elytron/jdbc-realm=jack-${tenant.identifier}-jdbc-realm:add(principal-query=[{sql="SELECT rounds,salt,hash,'authenticated' FROM usertable WHERE loginName = ?",data-source=jack-${tenant.identifier}-datasource,bcrypt-mapper={iteration-count-index=1,salt-index=2,password-index=3},attribute-mapping=[{to=Roles,index=4}]}])
+
+# Next we create a caching jdbc realm to speed up authentication.
+/subsystem=elytron/caching-realm=jack-${tenant.identifier}-caching-jdbc-realm:add(realm=jack-${tenant.identifier}-jdbc-realm,maximum-age=60000,maximum-entries=256)
+
+# We add the caching realm to jack's security domain ...
+/subsystem=elytron/security-domain=jack-security-domain:list-add(name=realms,value={realm=jack-${tenant.identifier}-caching-jdbc-realm})
+
+# ... and create a mapping in its realm mapper.
+/subsystem=elytron/mapped-regex-realm-mapper=jack-realm-mapper:map-put(name=realm-map,key=${tenant.identifier},value=jack-${tenant.identifier}-caching-jdbc-realm)
+
+# In our global setup we added a dummy entry to the realm mappers map. If that is still present we remove it.
+if (result == dummy) of /subsystem=elytron/mapped-regex-realm-mapper=jack-realm-mapper:map-get(name=realm-map,key=dummy)
+    /subsystem=elytron/mapped-regex-realm-mapper=jack-realm-mapper:map-remove(name=realm-map,key=dummy)
+end-if
+
+# We reload the configuration to bring the new configuration to effect.
+reload
+
+# Finally we deploy the application for our new tenant
+deploy jack3.war --name=${tenant.identifier}.war
+
+stop-embedded-server

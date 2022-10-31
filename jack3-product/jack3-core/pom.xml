@@ -1,0 +1,146 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>de.uni-due.s3.jack3</groupId>
+		<artifactId>jack3-product</artifactId>
+		<version>${revision}</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+	<artifactId>jack3-core</artifactId>
+	<packaging>ejb</packaging>
+	<name>jack3-core</name>
+
+	<dependencyManagement>
+		<dependencies>
+			<!-- importing the jakartaee8-with-tools BOM adds specs and other useful
+				artifacts as managed dependencies -->
+			<dependency>
+				<groupId>org.wildfly.bom</groupId>
+				<artifactId>wildfly-jakartaee8-with-tools</artifactId>
+				<version>25.0.0.Final</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+			<!-- importing the microprofile BOM adds MicroProfile specs -->
+			<dependency>
+				<groupId>org.wildfly.bom</groupId>
+				<artifactId>wildfly-microprofile</artifactId>
+				<version>25.0.0.Final</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<dependencies>
+		<!-- Import the CDI API, we use provided scope as the API is included in
+			WildFly -->
+		<dependency>
+			<groupId>jakarta.enterprise</groupId>
+			<artifactId>jakarta.enterprise.cdi-api</artifactId>
+		</dependency>
+		<!-- Import the Kafka Client API, we use provided scope as the API is included
+			in WildFly -->
+		<dependency>
+			<groupId>org.apache.kafka</groupId>
+			<artifactId>kafka-clients</artifactId>
+		</dependency>
+		<!-- Import the Reactive Messaging API, we use provided scope as the API
+			is included in WildFly -->
+		<dependency>
+			<groupId>org.eclipse.microprofile.reactive.messaging</groupId>
+			<artifactId>microprofile-reactive-messaging-api</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>io.smallrye.reactive</groupId>
+			<artifactId>smallrye-reactive-messaging-kafka-api</artifactId>
+		</dependency>
+
+		<!-- Import the Reactive Streams Operators API, we use provided scope as
+			the API is included in WildFly -->
+		<dependency>
+			<groupId>org.eclipse.microprofile.reactive-streams-operators</groupId>
+			<artifactId>microprofile-reactive-streams-operators-api</artifactId>
+		</dependency>
+
+		<!-- Import the Reactive Streams Operators API, we use provided scope as
+			the API is included in WildFly -->
+		<dependency>
+			<groupId>org.reactivestreams</groupId>
+			<artifactId>reactive-streams</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.microprofile.config</groupId>
+			<artifactId>microprofile-config-api</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-envers</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+		</dependency>
+
+		<!-- Gson: Java to Json conversion -->
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.8.6</version>
+			<scope>compile</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.thoughtworks.xstream</groupId>
+			<artifactId>xstream</artifactId>
+			<version>1.4.19</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.codehaus.jettison/jettison -->
+		<dependency>
+			<groupId>org.codehaus.jettison</groupId>
+			<artifactId>jettison</artifactId>
+			<version>1.4.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>28.0-jre</version>
+			<scope>compile</scope>
+		</dependency>
+		<!-- Our own project for data transfer objects (dto), e.g. RTransport.
+			Those objects are used to provide data to our backend servicess and
+			when sent are usually serialized to a byte array and put in a kafka topic.
+			To savely do this, this project uses Google's protocol buffers. -->
+		<dependency>
+			<groupId>de.uni_due.s3.jack</groupId>
+			<artifactId>dto</artifactId>
+			<version>0.28</version>
+		</dependency>
+
+	</dependencies>
+	<build>
+		<plugins>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-ejb-plugin</artifactId>
+				<version>2.5.1</version>
+				<configuration>
+					<ejbVersion>3.1</ejbVersion>
+				</configuration>
+			</plugin>
+
+		</plugins>
+		<pluginManagement>
+			<plugins></plugins>
+		</pluginManagement>
+	</build>
+</project>

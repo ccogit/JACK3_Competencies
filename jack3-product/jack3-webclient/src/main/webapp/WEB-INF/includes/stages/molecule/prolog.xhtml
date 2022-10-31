@@ -1,0 +1,44 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:ui="http://java.sun.com/jsf/facelets">
+
+  <!-- The JS module for the kekule.js molecule editor. -->
+  <h:outputScript library="js" name="kekule.js/kekule.min.js" target="head" />
+  
+  <!-- The style for the kekule.js molecule editor. -->
+  <h:outputStylesheet library="js" name="kekule.js/themes/default/kekule.css" target="head" />
+
+  <!-- The function to create InChI strings from user input to the molecule editor. -->
+  <h:outputScript>
+  var InChI = {
+    onRuntimeInitialized: function () {
+          var cwrap = InChI.cwrap('molfile_to_inchi', 'number', ['number', 'number']);
+          
+          InChI.fromMolfile = function (molfile) {
+            var input = InChI._malloc(molfile.length + 1);
+            // TODO: catch if inchi length exceeds buffer length
+            var output = InChI._malloc(1024);
+            
+            InChI.writeStringToMemory(molfile.replace(/[^\x00-\x7F]/g, ''), input);
+            
+            let status = cwrap(input, output);
+            let result = InChI.Pointer_stringify(output);
+            
+            InChI._free(input);
+            InChI._free(output);
+            
+            if (status &lt; 0) {
+              throw new Error(result);
+            }
+            
+            return result;
+          };
+        }
+  };
+  </h:outputScript>
+
+  <!-- The JS module that can create InChI strings. -->
+  <h:outputScript library="js" name="inchi-js/inchi-node.js" target="body" />
+
+</ui:composition>

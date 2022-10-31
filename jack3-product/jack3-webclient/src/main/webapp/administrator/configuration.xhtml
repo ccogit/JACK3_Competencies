@@ -1,0 +1,147 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:c="http://java.sun.com/jsp/jstl/core"
+  xmlns:p="http://primefaces.org/ui"
+  template="/WEB-INF/templates/template.xhtml">
+
+  <ui:define name="content">
+    <c:set
+      var="current"
+      value="#{'admin-configuration'}"
+      scope="request" />
+    <h:outputStylesheet
+      library="jack"
+      name="css/coloredInfobox.css" />
+    <h3>#{msg['global.configuration']}</h3>
+
+    <!-- Datatable with config key-value pairs -->
+    <h:form id="listForm">
+      <p:dataTable
+        id="configuration"
+        value="#{configurationView.configs}"
+        var="config"
+        sortBy="#{config.key}">
+        <p:column
+          id="keys"
+          headerText="#{msg['global.key']}"
+          width="250">
+          <h:outputText value="#{config.key}" />
+        </p:column>
+        <p:column
+          id="values"
+          headerText="#{msg['global.value']}">
+          <p:inputText
+            id="configValue"
+            value="#{config.value}"
+            style="width:calc(100% - 10px)"
+            onkeypress="if (event.keyCode == 13) { return false; }">
+            <f:validator validatorId="custom.jsonValidator" />
+            <p:tooltip
+              id="toolTipFocus"
+              for="configValue"
+              position="bottom"
+              value="#{msg['tenantadmin.useJsonFormat']}"
+              showEvent="focus"
+              hideEvent="blur" />
+          </p:inputText>
+        </p:column>
+        <p:column
+          id="actions"
+          headerText="#{msg['global.actions']}"
+          width="100"
+          style="text-align:center;">
+          <div
+            class="ui-inputgroup"
+            style="justify-content: center;">
+            <p:commandButton
+              id="updateConfig"
+              title="#{msg['global.save']}"
+              icon="far fa-save"
+              action="#{configurationView.updateConfig(config)}"
+              update="globalGrowl configuration :updateConfigForm" />
+            <!--
+            Eine Möglichkeit, den Key direkt als Wert zu übergeben, ist: 
+            param['tenantAdministration:tabs:singleValuesForm:repeat_singles:' += repeat_counter.index += ':singleValueInput'] 
+          -->
+            <p:commandButton
+              id="deleteConfig"
+              title="#{msg['global.delete']}"
+              icon="fas fa-trash"
+              action="#{configurationView.deleteConfig(config)}"
+              update="globalGrowl configuration :updateConfigForm" />
+          </div>
+        </p:column>
+      </p:dataTable>
+    </h:form>
+
+    <!-- Input group for creating a new key-value pair -->
+    <h:form id="newConfigForm">
+      <p:panel
+        id="createNewRootForAdministrators"
+        header="#{msg['tenantadmin.addNewConfig']}">
+        <h:panelGroup
+          styleClass="jack-input-group"
+          layout="block">
+          <p:inputText
+            id="newKey"
+            size="25"
+            value="#{configurationView.newKey}"
+            placeholder="#{msg['global.key']}">
+            <f:validator validatorId="requiredValidator" />
+          </p:inputText>
+          <p:inputText
+            id="newValue"
+            size="40"
+            value="#{configurationView.newValue}"
+            placeholder="#{msg['global.value']}">
+            <f:validator validatorId="custom.jsonValidator" />
+          </p:inputText>
+          <p:commandButton
+            id="addNewKeyValuePair"
+            icon="fas fa-plus"
+            update="globalGrowl :listForm :newConfigForm :updateConfigForm"
+            action="#{configurationView.addNewConfig}"
+            value="#{msg['global.add']}" />
+          <p:tooltip
+            id="toolTipFocus"
+            for="newValue"
+            value="#{msg['tenantadmin.useJsonFormat']}"
+            showEvent="focus"
+            hideEvent="blur"
+            position="bottom" />
+        </h:panelGroup>
+      </p:panel>
+    </h:form>
+
+    <!-- Update form -->
+    <h:form id="updateConfigForm">
+      <p:panel
+        id="configRefreshWarning"
+        rendered="#{configurationView.cacheOutdated}"
+        styleClass="colored-panel yellow"
+        header="#{msg['tenantadmin.resetCacheHeader']}">
+        <p>
+          <h:outputText value="#{msg['tenantadmin.configCacheOutdated']}" />
+        </p>
+        <p:commandButton
+          update="@parent:@parent globalGrowl"
+          action="#{configurationView.resetCache}"
+          icon="fas fa-sync fa-sm"
+          value="#{msg['tenantadmin.resetCache']}" />
+      </p:panel>
+    </h:form>
+
+    <!-- Evaluator Shell -->
+    <h:form id="evaluatorShellForm">
+      <ui:include page="/WEB-INF/includes/evaluatorShell.xhtml">
+        <ui:param
+          name="id"
+          value="evaluatorShell" />
+      </ui:include>
+    </h:form>
+
+  </ui:define>
+</ui:composition>

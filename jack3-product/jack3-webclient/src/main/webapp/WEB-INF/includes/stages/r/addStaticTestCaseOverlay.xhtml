@@ -1,0 +1,122 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:f="http://xmlns.jcp.org/jsf/core"
+  xmlns:h="http://xmlns.jcp.org/jsf/html"
+  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+  xmlns:p="http://primefaces.org/ui">
+
+  <!-- addStaticTestCaseOverlay -->
+  <p:overlayPanel
+    id="addStaticTestCaseOverlayPanel"
+    widgetVar="addStaticTestCaseOverlay#{stageBean.stage.orderIndex}">
+    <p:panel
+      header="#{msg['rStage.testCaseOverlay.addTestcase']}"
+      id="addStaticTestCasePanel">
+      <p:panelGrid
+        columns="2"
+        id="addStaticTestCaseOverlayPanelGrid">
+
+        <h:outputText
+          value="#{msg['global.name']}"
+          id="addStaticTestCaseOverlayNameOutput" />
+        <p:inputText
+          value="#{newStaticRTestCase.name}"
+          disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+          style="width:97%"
+          id="addStaticTestCaseOverlayNameInput" />
+
+        <p:outputLabel value="#{msg['rStage.testCaseOverlay.query']}" />
+        <p:panel>
+          <p:dataTable
+            id="addStaticTestCaseOverlayQueryTable"
+            editable="true"
+            widgetVar="queryTable"
+            var="query"
+            value="#{newStaticRTestCase.editableQueries}">
+            <p:column>
+              <p:inputTextarea
+                id="addStaticTestCaseOverlayQueryInput"
+                disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+                autoResize="true"
+                rows="5"
+                cols="60"
+                value="#{query.query}"
+                onchange="processChange()" />
+            </p:column>
+            <p:column style="width:35px">
+              <p:commandButton
+                icon="fas fa-trash-alt"
+                process="@this"
+                update="addStaticTestCaseOverlayQueryTable"
+                action="#{newStaticRTestCase.removeQuery(query)}">
+              </p:commandButton>
+            </p:column>
+          </p:dataTable>
+          <p:commandButton
+            id="addStaticTestCaseOverlayAddRuleButton"
+            icon="fas fa-plus"
+            value="#{msg['rStage.testCaseOverlay.addQuery']}"
+            process="@this"
+            update="addStaticTestCaseOverlayQueryTable"
+            action="#{newStaticRTestCase.addQuery('')}" />
+        </p:panel>
+
+        <h:outputText value="#{msg['rStage.staticRuleMode']}" />
+        <h:selectOneMenu
+          disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+          value="#{newStaticRTestCase.ruleMode}"
+          id="addStaticTestCaseOverlayRuleMode">
+          <f:selectItems
+            value="#{stageBean.ruleModes}"
+            var="mode"
+            itemLabel="#{mode}"
+            itemValue="#{mode}" />
+        </h:selectOneMenu>
+
+        <h:outputText value="#{msg['global.points']}" />
+        <p:inputText
+          disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+          value="#{newStaticRTestCase.points}"
+          id="addStaticTestCaseOverlayPointsInput"
+          style="width:97%" />
+
+        <h:outputText value="#{msg['rStage.pointsMode']}" />
+        <h:selectOneMenu
+          disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+          value="#{newStaticRTestCase.pointsMode}"
+          id="addStaticTestCaseOverlayPointsMode">
+          <f:selectItems
+            value="#{stageBean.pointModes}"
+            var="mode"
+            itemLabel="#{mode}"
+            itemValue="#{mode}" />
+        </h:selectOneMenu>
+
+        <h:outputText value="#{msg['rStage.testCaseOverlay.feedbackIfFailed']}" />
+        <p:inputTextarea
+          autoResize="true"
+          rows="5"
+          cols="70"
+          disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+          value="#{newStaticRTestCase.feedbackIfFailed}"
+          id="addStaticTestCaseOverlayFeedbackInput"
+          onchange="processChange()" />
+      </p:panelGrid>
+
+    </p:panel>
+
+    <p:commandButton
+      action="#{stageBean.addStaticTestcase()}"
+      disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+      id="addStaticTestCaseOverlayAddBtn"
+      value="#{msg['rStage.testCaseOverlay.addTestcase']}"
+      oncomplete="processChange();PF('addStaticTestCaseOverlay#{stageBean.stage.orderIndex}').hide();"
+      update="testCaseGroupsPanel" />
+
+    <p:commandButton
+      value="#{msg['rStage.testCaseOverlay.closeDontAdd']}"
+      id="addStaticTestCaseOverlayCancelBtn"
+      oncomplete="PF('addStaticTestCaseOverlay#{stageBean.stage.orderIndex}').hide()" />
+  </p:overlayPanel>
+</ui:composition>
+

@@ -1,0 +1,14 @@
+# Generates the JACK3-JavaDoc
+JavaDoc:
+  stage: report
+  script:
+    - cd jack3-product
+    - mvn -U $MAVEN_CLI_OPTS javadoc:javadoc
+  artifacts:
+    when: always
+    expire_in: 1 week
+    paths:
+    - "jack3-product/*/target/site/apidocs"
+  dependencies:
+    - Build
+  needs: ["Build"]

@@ -1,0 +1,321 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:c="http://java.sun.com/jsp/jstl/core"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:j="http://jack.s3.uni-due.de/ui-elements"
+  template="/WEB-INF/templates/template.xhtml">
+
+  <ui:define name="content">
+    <c:set
+      var="current"
+      value="#{'admin-userManagement'}"
+      scope="request" />
+    <h3>#{msg['tenantadmin.userManagement']}</h3>
+
+    <h:form id="userManagement">
+
+      <p:commandButton
+        id="cbCreateUser"
+        value="#{msg['tenantadmin.createUser']}"
+        oncomplete="PF('createUserDialog').show();"
+        style="margin:0 0 10px 0;" />
+      <p:commandButton
+        id="cbCreateUserGroup"
+        value="#{msg['tenantadmin.createUserGroup']}"
+        oncomplete="PF('createUserGroupDialog').show();"
+        style="margin:0 0 10px 5px;" />
+
+      <p:dataTable
+        id="dtUserTable"
+        var="user"
+        widgetVar="userTable"
+        value="#{userManagementView.userList}"
+        filteredValue="#{userManagementView.filteredUserList}"
+        selectionMode="single"
+        selection="#{userManagementView.selectedUser}"
+        rowKey="#{user.id}"
+        editable="true"
+        editMode="cell"
+        emptyMessage="#{msg['tenantadmin.emptyUserList']}"
+        scrollable="true"
+        scrollHeight="500"
+        styleClass="ui-datatable-panel-header"
+        resizableColumns="true">
+        <p:ajax event="rowSelect" />
+        <f:facet name="header">
+          <h:outputText value="#{msg['tenantadmin.users']}" />
+        </f:facet>
+        <p:column
+          id="headerTextUserName"
+          headerText="#{msg['tenantadmin.username']}"
+          sortBy="#{user.loginName}"
+          filterBy="#{user.loginName}"
+          filterMatchMode="contains">
+          <f:facet
+            id="facetUserNameFilter"
+            name="filter">
+            <p:inputText
+              id="inputUserTableFilter"
+              onkeyup="PF('userTable').filter()" />
+          </f:facet>
+          <h:outputText value="#{user.loginName}" />
+        </p:column>
+        <p:column
+          id="columnUserWithAdminRights"
+          style="text-align:center"
+          filterBy="#{user.hasAdminRights}"
+          filterMatchMode="equals">
+          <f:facet
+            id="facetAdminRightsHeader"
+            name="header">
+            <h:outputText value="#{msg['tenantadmin.hasAdminRights']}" />
+          </f:facet>
+          <f:facet
+            id="facetAdminRightsFilter"
+            name="filter">
+            <p:selectOneButton
+              id="selectOneUserFilter"
+              onchange="PF('userTable').filter()">
+              <f:converter converterId="javax.faces.Boolean" />
+              <f:selectItem
+                id="filterAdminRightsDoesNotMatter"
+                itemLabel="#{msg['tenantadmin.doesnotmatter']}"
+                itemValue="" />
+              <f:selectItem
+                id="filterAdminRightsYes"
+                itemLabel="#{msg['global.yes']}"
+                itemValue="true" />
+              <f:selectItem
+                id="filterAdminRightsNo"
+                itemLabel="#{msg['global.no']}"
+                itemValue="false" />
+            </p:selectOneButton>
+          </f:facet>
+          <p:selectBooleanCheckbox
+            id="selectedHasAdminRights"
+            value="#{user.hasAdminRights}"
+            disabled="true" />
+        </p:column>
+        <p:column
+          id="columnHasEditRights"
+          style="text-align:center"
+          filterBy="#{user.hasEditRights}"
+          filterMatchMode="equals">
+          <f:facet
+            id="facetHasEditRightsHeader"
+            name="header">
+            <h:outputText value="#{msg['tenantadmin.hasEditRights']}" />
+          </f:facet>
+          <f:facet
+            id="facetHasEditRightsFilter"
+            name="filter">
+            <p:selectOneButton
+              id="selectButtonHasEditRights"
+              onchange="PF('userTable').filter()">
+              <f:converter converterId="javax.faces.Boolean" />
+              <f:selectItem
+                id="filterHasEditRightsDoesNotMatter"
+                itemLabel="#{msg['tenantadmin.doesnotmatter']}"
+                itemValue="" />
+              <f:selectItem
+                id="filterHasEditRightsYes"
+                itemLabel="#{msg['global.yes']}"
+                itemValue="true" />
+              <f:selectItem
+                id="filterHasEditRightsNo"
+                itemLabel="#{msg['global.no']}"
+                itemValue="false" />
+            </p:selectOneButton>
+          </f:facet>
+          <p:selectBooleanCheckbox
+            id="selectedHasEditRights"
+            value="#{user.hasEditRights}"
+            disabled="true" />
+        </p:column>
+      </p:dataTable>
+
+      <p:dataTable
+        id="dtUserGroup"
+        var="userGroup"
+        widgetVar="userGroupTable"
+        value="#{userManagementView.userGroupList}"
+        selectionMode="single"
+        rowKey="#{userGroup.id}"
+        selection="#{userManagementView.selectedUserGroup}"
+        emptyMessage="#{msg['tenantadmin.emptyUserGroupList']}"
+        scrollable="true"
+        scrollHeight="500"
+        styleClass="ui-datatable-panel-header"
+        style="margin-top: 10px;">
+        <f:facet name="header">
+          <h:outputText value="#{msg['tenantadmin.userGroups']}" />
+        </f:facet>
+        <p:ajax event="rowSelect" />
+        <p:column
+          id="headerTextUserGroupName"
+          headerText="#{msg['tenantadmin.userGroupName']}"
+          sortBy="#{userGroup.name}">
+          <h:outputText value="#{userGroup.name}" />
+        </p:column>
+        <p:column
+          id="columnUserGroupDescription"
+          style="width:30%">
+          <h:outputText value="#{userGroup.description}" />
+        </p:column>
+        <p:column
+          id="headerTextUserGroupUsers"
+          headerText="#{msg['tenantadmin.userGroupUsers']}"
+          sortBy="#{userGroup.numberOfMemberUsers}"
+          style="text-align:center;width:18%">
+          <h:outputText value="#{userGroup.numberOfMemberUsers}" />
+        </p:column>
+        <p:column
+          id="headerTextUserGroupSubGroups"
+          headerText="#{msg['tenantadmin.userGroupSubgroups']}"
+          sortBy="#{userGroup.numberOfMemberGroups}"
+          style="text-align:center;width:18%">
+          <h:outputText value="#{userGroup.numberOfMemberGroups}" />
+        </p:column>
+      </p:dataTable>
+    </h:form>
+
+  </ui:define>
+
+  <ui:define name="dialogs">
+    <!-- Edit user rights dialog, has its own form -->
+    <ui:include src="/WEB-INF/includes/dialogs/userRightsDialog.xhtml" />
+
+    <!-- Dialog for creating new users -->
+    <h:form id="createUserForm">
+      <p:dialog
+        id="createUserDialog"
+        widgetVar="createUserDialog"
+        closable="true"
+        closeOnEscape="true"
+        header="#{msg['tenantadmin.createUser']}"
+        modal="true"
+        draggable="false"
+        resizable="false"
+        styleClass="dialog-like-confirmdialog">
+        <p:panelGrid
+          columns="2"
+          styleClass="ui-panelgrid-blank">
+          <p:outputLabel
+            for="newName"
+            value="#{msg['tenantadmin.username']}:" />
+          <p:inputText
+            id="newName"
+            size="30"
+            value="#{userManagementView.newUserLoginName}"
+            required="true"
+            validatorMessage="#{msg['global.usernameInvalid']}">
+            <f:validateRegex pattern="#{userManagementView.loginNameRegex}" />
+          </p:inputText>
+          <p:outputLabel
+            for="newEmail"
+            value="#{msg['tenantadmin.email']}:" />
+          <p:inputText
+            id="newEmail"
+            size="30"
+            value="#{userManagementView.newUserEmail}"
+            validator="custom.emailValidator"
+            required="true" />
+          <p:outputLabel
+            for="newHasAdminRights"
+            value="#{msg['tenantadmin.hasAdminRights']}:" />
+          <p:selectBooleanCheckbox
+            id="newHasAdminRights"
+            value="#{userManagementView.newUserAdminRights}" />
+          <p:outputLabel
+            for="newHasEditRights"
+            value="#{msg['tenantadmin.hasEditRights']}:" />
+          <p:selectBooleanCheckbox
+            id="newHasEditRights"
+            value="#{userManagementView.newUserEditRights}" />
+        </p:panelGrid>
+        <p:messages
+          id="validationError"
+          showDetail="true"
+          for="createUserDialog newName newEmail"
+          skipDetailIfEqualsSummary="true"
+          style="max-width: 400px;" />
+        <f:facet name="footer">
+          <p:commandButton
+            id="cbCreateNewUserDialog"
+            value="#{msg['global.ok']}"
+            update="globalGrowl validationError"
+            action="#{userManagementView.createUser}"
+            icon="fa fa-check" />
+          <p:commandButton
+            id="cbCreateNewUserCancelDialog"
+            value="#{msg['global.cancel']}"
+            action="#{userManagementView.closeUserCreationDialog(false)}"
+            process="cbCreateNewUserCancelDialog"
+            styleClass="button-white"
+            icon="fa fa-times" />
+        </f:facet>
+      </p:dialog>
+    </h:form>
+
+    <!-- Dialog for creating user groups -->
+    <h:form id="createUserGroupForm">
+      <p:dialog
+        id="createUserGroupDialog"
+        widgetVar="createUserGroupDialog"
+        closable="true"
+        closeOnEscape="true"
+        header="#{msg['tenantadmin.createUserGroup']}"
+        modal="true"
+        draggable="false"
+        resizable="false"
+        styleClass="dialog-like-confirmdialog">
+        <p:panelGrid
+          columns="2"
+          styleClass="ui-panelgrid-blank">
+          <p:outputLabel
+            for="newGroupName"
+            value="#{msg['tenantadmin.userGroupName']}:" />
+          <p:inputText
+            id="newGroupName"
+            size="30"
+            value="#{userManagementView.newUserGroupName}"
+            required="true" />
+          <p:outputLabel
+            for="newGroupDescription"
+            value="#{msg['tenantadmin.userGroupDescription']}:" />
+          <p:inputTextarea
+            id="newGroupDescription"
+            rows="4"
+            cols="40"
+            autoResize="false"
+            value="#{userManagementView.newUserGroupDescription}" />
+        </p:panelGrid>
+        <p:messages
+          id="validationError"
+          showDetail="true"
+          for="createUserGroupDialog newGroupName"
+          skipDetailIfEqualsSummary="true"
+          style="max-width: 450px;" />
+        <f:facet name="footer">
+          <p:commandButton
+            id="cbCreateNewUserGroup"
+            value="#{msg['global.ok']}"
+            update="globalGrowl validationError"
+            action="#{userManagementView.createUserGroup}"
+            icon="fa fa-check" />
+          <p:commandButton
+            id="cbCreateNewUserGroupCancel"
+            value="#{msg['global.cancel']}"
+            action="#{userManagementView.closeUserGroupCreationDialog(false)}"
+            process="cbCreateNewUserGroupCancel"
+            styleClass="button-white"
+            icon="fa fa-times" />
+        </f:facet>
+      </p:dialog>
+    </h:form>
+
+  </ui:define>
+</ui:composition>

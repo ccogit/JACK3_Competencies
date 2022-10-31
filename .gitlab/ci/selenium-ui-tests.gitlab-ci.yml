@@ -1,0 +1,30 @@
+# Execute Selenium tests (project "jack3-ui-tests")
+Selenium Tests:
+  stage: test
+  tags:
+    - "dontRunConcurrent"
+  script:
+    # Setup Wildfly for Arquillian and webdriver for Selenium
+    - apt-get -qq update && apt-get -qq install software-properties-common > /dev/null
+    - add-apt-repository ppa:mozillateam/ppa 
+    - apt-get -qq install firefox firefox-esr > /dev/null
+    - chmod +x test-setup/setup-arquillian-wildfly.sh; test-setup/setup-arquillian-wildfly.sh
+    - chmod +x test-setup/setup-webdriver.sh; test-setup/setup-webdriver.sh
+    # Run all tests and specify webdriver location
+    - cd jack3-product
+    - mvn $MAVEN_CLI_OPTS -f jack3-ui-tests/pom.xml -Dwebdriver.gecko.driver="../../geckodriver" test
+    # Generate test coverage output
+    - mvn $MAVEN_CLI_OPTS org.jacoco:jacoco-maven-plugin:report-aggregate
+    - cat jack3-ui-tests/target/site/jacoco-aggregate/index.html | grep -o '<tfoot>.*</tfoot>'
+  artifacts:
+    when: always
+    expire_in: 1 week
+    paths:
+    # Store test data for downloading and code analysis
+    - jack3-product/jack3-ui-tests/target
+    - jack3-product/arquillian-wildfly/wildfly-current/standalone/log
+    reports:
+      # Reports from Maven Surefire
+      junit:
+        - jack3-product/jack3-ui-tests/target/surefire-reports/TEST-*.xml
+  needs: ["Build"]

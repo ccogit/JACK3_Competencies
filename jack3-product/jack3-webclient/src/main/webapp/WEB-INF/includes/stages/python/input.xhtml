@@ -1,0 +1,80 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core">
+
+	<script>
+		function handleStudentSubmission#{loopStatus.index}() {
+			if (typeof ace === 'undefined') {
+				return;
+			}
+
+			var editor = ace.edit('pythonEditor#{loopStatus.index}');
+
+			if (typeof editor === 'undefined' || editor === null) {
+				return;
+			}
+
+			editor.setReadOnly(true);
+
+			var content = editor.getSession().getValue();
+			
+			// This calls de.uni_due.s3.jack3.beans.stagetypes.PythonSubmissionView.updateStudentPythonSubmissionInSubmission()
+			// using primefaces p:remoteCommand.
+			// 'studentRSubmission' is set in the bean method using the FacesContext
+			updateStudentPythonSubmissionInSubmission([ {
+				name : 'studentPythonSubmission',
+				value : content
+			} ]);
+		}
+	</script>
+
+	<!-- 	
+		So Javascript can call the bean method: 
+		de.uni_due.s3.jack3.beans.stagetypes.PythonSubmissionView.updateStudentPythonSubmissionInSubmission()	
+	-->
+	<p:remoteCommand name="updateStudentPythonSubmissionInSubmission"
+		action="#{exercisePlayerView.getStageSubmissionViewBean(stageSubmission).updateStudentPythonSubmissionInSubmission}" />
+
+	<p>
+		<p:outputLabel style="vertical-align:middle"
+			value="#{exercisePlayerView.getStageSubmissionViewBean(stageSubmission).taskDescription}"
+			escape="false" />
+	</p>
+
+	<p:panel>
+		<pre id="pythonEditor#{loopStatus.index}" style="height: 400px; width: 100%">
+			<p:outputLabel>#{exercisePlayerView.getStageSubmissionViewBean(stageSubmission).initialCode}</p:outputLabel>
+</pre>
+		<!-- Please leave this "</pre>" formating as it is (at the start of the line), or else the user will 
+			start in a awkward position -->
+	</p:panel>
+
+	<script>
+		var editor = ace.edit("pythonEditor#{loopStatus.index}");
+		editor.session.setMode("ace/mode/python");
+		editor.setOptions({
+			enableBasicAutocompletion : true
+		});
+		var disableEditor = #{not (exercisePlayerView.isCurrentStage(stageSubmission)) 
+			or (exercisePlayerView.submission.isCompleted())
+			or (exercisePlayerView.submission.hasInternalErrors())
+			or (stageSubmission.hasPendingChecks())
+			or (exercisePlayerView.isReviewMode())};
+		if(disableEditor){
+			// https://github.com/ajaxorg/ace/issues/266
+			var cover = document.createElement("div")
+			editor.container.appendChild(cover)
+			cover.style.cssText = "position:absolute;\
+			top:0;bottom:0;right:0;left:0;\
+			background:rgba(192,192,192,0.5);\
+			z-index:100"
+			cover.addEventListener("mousedown", function(e){e.stopPropagation()}, true)
+		} else {
+			editor.focus();
+			editor.setReadOnly(false);
+		}	
+	</script>
+</ui:composition>

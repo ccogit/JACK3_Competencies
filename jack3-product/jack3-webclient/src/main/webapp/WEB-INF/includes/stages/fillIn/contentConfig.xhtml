@@ -1,0 +1,225 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:c="http://java.sun.com/jsp/jstl/core">
+	<h:head />
+	<h:outputStylesheet library="jack" name="css/borderlessTable.css" />
+	<ui:include page="../taskDescriptionEditor.xhtml" />
+	<p:spacer width="5" height="30" />
+	<p:commandButton id="cbAddFillInField"
+		value="#{msg['exerciseEdit.fillIn.addFillInField']}"
+		style="width:250px;height:30px;"
+		action="#{stageBean.addFillInField('fillin')}"
+		oncomplete="processChange()" update="@this @parent:fillInFields"
+		disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}" />
+	<p:spacer width="5" height="30" />
+	<p:commandButton id="cbAddDropDownField"
+		value="#{msg['exerciseEdit.fillIn.addDropDownField']}"
+		style="width:250px;height:30px;"
+		action="#{stageBean.addDropDownField('dropdown')}"
+		oncomplete="processChange()" update="@this @parent:dropDownFields"
+		disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}" />
+	<br />
+	<h4>
+		<h:outputText value="#{msg['exerciseEdit.fillIn.fillInFields']}" />
+	</h4>
+
+	<h:outputText
+		value="#{msg['exerciseEdit.fillIn.formularEditorType.formularEditor']} :" />
+	<p:spacer width="20" />
+	<p:selectOneMenu id="formularEditorPalette"
+		value="#{stageBean.stage.formularEditorPalette}" style="width:150px"
+		disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}">
+		<f:selectItems value="#{stageBean.getFormularEditorPalettes()}" />
+		<p:ajax event="change" oncomplete="processChange()"></p:ajax>
+	</p:selectOneMenu>
+	<br />
+	<br />
+
+	<!-- Fill In Fields -->
+	<p:dataTable id="fillInFields"
+		value="#{stageBean.getFillInFieldsDataModel()}" var="fillInField"
+		emptyMessage="#{msg['exerciseEdit.fillIn.noFillInFields']}"
+		style="width:100%;" rowIndexVar="fillInFieldsIndex">
+		<p:column id="headerTextFillInFields" width="200"
+			headerText="#{msg['exerciseEdit.fillIn.fillInFieldName']}">
+			<p:inplace id="editorFillInFieldName" editor="true"
+				widgetVar="stage_#{stageIndex}_editorFillInFieldNameVar_#{fillInFieldsIndex}"
+				effectSpeed="fast" disabled="#{!exerciseEditView.newestRevision  or !exerciseEditView.userAllowedToEdit}"
+                class="inplaceIcon">
+				<p:inputText id="inputFillInFieldName" value="#{fillInField.name}"
+					validator="#{stageBean.checkIsStageFieldNameUnique}"
+					valueChangeListener="#{stageBean.updateFillInFieldNameOnTaskDescription}"
+					onkeyup="if (event.keyCode == 27) { PF('stage_#{stageIndex}_editorFillInFieldNameVar_#{fillInFieldsIndex}').cancel(); return false;}"
+					onkeydown="if (event.keyCode == 13) { PF('stage_#{stageIndex}_editorFillInFieldNameVar_#{fillInFieldsIndex}').save(); return false; }  checkUserInputForActivationOfSaveButton();"
+					onchange="processChange()"
+					disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}" required="true"
+					style="width:95%;">
+					<p:message for="inputFillInFieldName" />
+					<f:validator id="validatorFillInName"
+						validatorId="variableNameValidator" />
+				</p:inputText>
+				<p:ajax event="save"
+					update="@this @parent:@parent:@parent:@parent:editor_#{stageBean.stage.orderIndex}"
+					oncomplete="processChange();CopyToFeedbackEditor(#{stageBean.stage.orderIndex});" />
+			</p:inplace>
+		</p:column>
+		<p:column id="headerTextFillInFieldSize" width="150"
+			headerText="#{msg['exerciseEdit.fillIn.fillInFieldSize']}">
+			<p:inplace id="editorFillInFieldSize" editor="true"
+				widgetVar="stage_#{stageIndex}_editorFillInFieldSizeVar_#{fillInFieldsIndex}"
+				effectSpeed="fast" disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+                class="inplaceIcon">
+				<p:spinner
+					id="inputFillInFieldSize"
+					value="#{fillInField.size}"
+					valueChangeListener="#{stageBean.updateSizeOnTaskDescription}"
+					onkeyup="if (event.keyCode == 27) { PF('stage_#{stageIndex}_editorFillInFieldSizeVar_#{fillInFieldsIndex}').cancel(); return false;}"
+					onkeydown="if (event.keyCode == 13) { PF('stage_#{stageIndex}_editorFillInFieldSizeVar_#{fillInFieldsIndex}').save(); return false; } checkUserInputForActivationOfSaveButton();"
+					disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit} "
+					min="1" max="200" required="true" size="2" />
+				<p:ajax event="save"
+					update="@this @parent:@parent:@parent:@parent:editor_#{stageBean.stage.orderIndex}"
+					oncomplete="processChange();CopyToFeedbackEditor(#{stageBean.stage.orderIndex});" />
+			</p:inplace>
+		</p:column>
+		<p:column id="headerTextFillInFieldFormelEditorType"
+			headerText="#{msg['exerciseEdit.fillIn.fillInFieldFormelEditorType']}">
+			<p:selectOneMenu id="selectMenuFillInFieldFormularEditorType"
+				value="#{fillInField.formularEditorType}" style="width:150px"
+				disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}">
+				<f:selectItems value="#{stageBean.getFillInFieldEditorTypes()}" />
+				<p:ajax event="change" oncomplete="processChange()"></p:ajax>
+			</p:selectOneMenu>
+		</p:column>
+		<p:column id="headerTextFillInFieldControls" style="width:80px;">
+			<p:commandButton id="cbRemoveFillInField" icon="fas fa-trash-alt fa-sm"
+				action="#{stageBean.removeFillInField}"
+				update="@parent:fillInFields @parent:@parent:@parent:@parent:editor_#{stageBean.stage.orderIndex}"
+				oncomplete="processChange()"
+				disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}" />
+			<p:commandButton id="insertFillInFieldInEdtior"
+				icon="fas fa-level-up-alt fa-sm"
+				action="#{stageBean.insertFillInFieldInEdidor}"
+				update="globalGrowl" oncomplete="processChange()"
+				disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}" />
+			<p:tooltip id="toolTipInsertFillInFieldInEdtior"
+				for="insertFillInFieldInEdtior"
+				value="#{msg['exerciseEdit.fillIn.insertFieldInEditor']}"
+				position="top" />
+		</p:column>
+
+	</p:dataTable>
+	<!-- End of Fill In Fields -->
+
+	<h4>
+		<h:outputText value="#{msg['exerciseEdit.fillIn.dropDownFields']}" />
+	</h4>
+
+	<!-- Drop Down Fields -->
+	<p:dataTable id="dropDownFields" rowIndexVar="dropDownFieldsIndex"
+		value="#{stageBean.getDropDownFieldsDataModel()}" var="dropDownField"
+		emptyMessage="#{msg['exerciseEdit.fillIn.noDropDownFields']}"
+		style="width:100%;">
+		<p:column id="headerTextDropDownFields" width="200"
+			headerText="#{msg['exerciseEdit.fillIn.dropDownFieldName']}">
+			<p:inplace id="editorDropDownFieldName" editor="true"
+				effectSpeed="fast" disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+				widgetVar="stage_#{stageIndex}_editorDropDownFieldNameVar_#{dropDownFieldsIndex}"
+                class="inplaceIcon">
+				<p:inputText id="inputDropDownFieldName"
+					value="#{dropDownField.name}"
+					validator="#{stageBean.checkIsStageFieldNameUnique}"
+					valueChangeListener="#{stageBean.updateDropDownFieldNameOnTaskDescription}"
+					onkeyup="if (event.keyCode == 27) { PF('stage_#{stageIndex}_editorDropDownFieldNameVar_#{dropDownFieldsIndex}').cancel(); return false;}"
+					onkeydown="if (event.keyCode == 13) { PF('stage_#{stageIndex}_editorDropDownFieldNameVar_#{fillInFieldsIndex}').save(); return false; }  checkUserInputForActivationOfSaveButton();"
+					onchange="processChange()"
+					disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}" required="true"
+					style="width:95%;">
+					<p:message for="inputDropDownFieldName" />
+					<f:validator id="validatorDropDownName"
+						validatorId="variableNameValidator" />
+				</p:inputText>
+				<p:ajax event="save"
+					update="@this @parent:@parent:@parent:@parent:editor_#{stageBean.stage.orderIndex}"
+					oncomplete="processChange();CopyToFeedbackEditor(#{stageBean.stage.orderIndex});" />
+			</p:inplace>
+		</p:column>
+		<p:column id="headerTextDropDownFieldRandomize" width="150"
+			headerText="#{msg['exerciseEdit.fillIn.dropDownFieldRandomize']}">
+			<p:selectBooleanCheckbox id="dropDownFieldRandomize"
+				value="#{dropDownField.randomize}" onchange="processChange()"
+				disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}" />
+		</p:column>
+		<p:column id="headerTextDropDownFieldAnswerOptions"
+			headerText="#{msg['exerciseEdit.fillIn.answerOptions']}">
+			<!--  Answer Data Table -->
+			<p:dataTable id="dropDownFieldAnswerOptions"
+				value="#{dropDownField.getAnswerOptionsModell()}" var="answer"
+				emptyMessage="#{msg['exerciseEdit.mc.noAnswerOptions']}"
+				draggableRows="#{exerciseEditView.newestRevision}"
+				style="width:100%;" styleClass="borderless nobackground"
+				rowStyleClass="borderless"
+				rowIndexVar="dropDownFieldAnswerOptionsIndex">
+				
+				<p:ajax event="rowReorder"
+					listener="#{stageBean.dropDownAnswerReorder}" update="@this"
+					oncomplete="processChange()" />
+				<p:column id="headerTextDropDownFieldAnswerOption"
+					headerText="#{msg['exerciseEdit.fillIn.answerOption']}">
+					<p:inplace id="editorInputDropDownAnswer" editor="true"
+						widgetVar="stage_#{stageIndex}_dropDownField_#{dropDownFieldsIndex}_editorInputDropDownAnswer_#{dropDownFieldAnswerOptionsIndex}" effectSpeed="fast"
+						disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+                        class="inplaceIcon">
+						<p:inputText id="inputDropDownAnswer" value="#{answer}"
+							valueChangeListener="#{dropDownField.updateAnswerOption}"
+							onkeyup="if (event.keyCode == 27) { PF('stage_#{stageIndex}_dropDownField_#{dropDownFieldsIndex}_editorInputDropDownAnswer_#{dropDownFieldAnswerOptionsIndex}').cancel(); return false;}"
+							onkeypress="if (event.keyCode == 13) { PF('stage_#{stageIndex}_dropDownField_#{dropDownFieldsIndex}_editorInputDropDownAnswer_#{dropDownFieldAnswerOptionsIndex}').save(); return false; }"
+							disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}" required="true"
+							style="width:95%;" />
+						<p:ajax event="save" oncomplete="processChange()" update="@this" />
+					</p:inplace>
+
+				</p:column>
+				<p:column id="headerTextDropDownFieldAnswerControls"
+					style="width:43px;">
+					<p:commandButton id="cbRemoveDropDownAnswer" icon="fas fa-trash-alt fa-sm"
+						action="#{dropDownField.removeItem}"
+						update="@parent:dropDownFieldAnswerOptions"
+						oncomplete="processChange()"
+						disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}" />
+				</p:column>
+			</p:dataTable>
+			<!-- End of  Answer Data Table -->
+			<br />
+			<p:commandButton id="cbAddAnswerAtDropDownField"
+				value="+"
+				action="#{dropDownField.addItem((msg['exerciseEdit.mc.answer']))}"
+				oncomplete="processChange()"
+				update="@parent:dropDownFieldAnswerOptions @parent:@parent:dropDownFields"
+				disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}" />
+		</p:column>
+		<p:column id="headerTextDropDownFieldControls" style="width:80px;">
+			<p:commandButton id="cbRemoveDropDownField" icon="fas fa-trash-alt fa-sm"
+				action="#{stageBean.removeDropDownField}"
+				update="@parent:dropDownFields @parent:@parent:@parent:@parent:editor_#{stageBean.stage.orderIndex}"
+				oncomplete="processChange()"
+				disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}" />
+			<p:commandButton id="insertDropDownFieldInEdtior"
+				icon="fas fa-level-up-alt fa-sm"
+				action="#{stageBean.insertDropDownFieldInEditor()}"
+				update="globalGrowl" oncomplete="processChange()"
+				disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}" />
+			<p:tooltip id="toolTipInsertDropDownFieldInEdtior"
+				for="insertDropDownFieldInEdtior"
+				value="#{msg['exerciseEdit.fillIn.insertFieldInEditor']}"
+				position="top" />
+		</p:column>
+
+	</p:dataTable>
+	<!-- End of Drop Down Fields -->
+
+</ui:composition>

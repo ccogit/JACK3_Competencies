@@ -1,0 +1,116 @@
+<ExportedExercise id="1">
+  <name>Mittelwert berechnen (R)</name>
+  <publicDescription></publicDescription>
+  <internalNotes></internalNotes>
+  <language>de</language>
+  <difficulty>0</difficulty>
+  <resources id="2"/>
+  <stages id="3">
+    <RStage id="4">
+      <internalName>#1</internalName>
+      <externalName>Mittelwert berechnen</externalName>
+      <taskDescription>&lt;p&gt;In dieser Aufgabe sollen Sie die R-Funktion &lt;strong&gt;mean &lt;/strong&gt;auf den angegebenen Datensatz anwenden, um den Mittelwert der Daten zu finden.&lt;/p&gt;&#xd;
+</taskDescription>
+      <defaultTransition id="5">
+        <conditionExpression id="6">
+          <domain>MATH</domain>
+        </conditionExpression>
+        <stageExpression id="7">
+          <domain>MATH</domain>
+        </stageExpression>
+        <isRepeat>false</isRepeat>
+      </defaultTransition>
+      <skipTransitions id="8"/>
+      <stageTransitions id="9"/>
+      <hints id="10"/>
+      <variableUpdatesBeforeCheck id="11"/>
+      <variableUpdatesAfterCheck id="12"/>
+      <variableUpdatesOnNormalExit id="13"/>
+      <variableUpdatesOnRepeat id="14"/>
+      <variableUpdatesOnSkip id="15"/>
+      <weight>1</weight>
+      <orderIndex>0</orderIndex>
+      <allowSkip>false</allowSkip>
+      <resources id="16"/>
+      <initialCode>daten &lt;- c([var=v], [var=w], [var=x], [var=y], [var=z])</initialCode>
+      <finalResultComputationString></finalResultComputationString>
+      <testCasetuples id="17">
+        <TestCaseTuple id="18">
+          <testCases id="19">
+            <DynamicRTestCase id="20">
+              <points>60</points>
+              <pointsMode>GAIN</pointsMode>
+              <name>Korrekte numerische Antwort?</name>
+              <feedbackIfFailed>Sie haben ein anderes als das erwartete Ergebnis berechnet, es sollte  ([var=v], [var=w], [var=x], [var=y], [var=z])/5 berechnet werden!</feedbackIfFailed>
+              <ruleMode>PRESENCE</ruleMode>
+              <postCode></postCode>
+              <expectedOutput>mean(c([var=v], [var=w], [var=x], [var=y], [var=z]))</expectedOutput>
+              <postprocessingFunction></postprocessingFunction>
+              <tolerance>-4</tolerance>
+            </DynamicRTestCase>
+            <StaticRTestCase id="21">
+              <points>40</points>
+              <pointsMode>GAIN</pointsMode>
+              <name>&quot;mean()&quot;-Funktion benutzt?</name>
+              <feedbackIfFailed>Bitte benutzen Sie die von R bereitgestellte Funktion &quot;mean&quot; mit der Variable &quot;daten&quot;!</feedbackIfFailed>
+              <ruleMode>PRESENCE</ruleMode>
+              <query>from mean:V{FunctionCall}, data:V{Variable} 
+with mean.name=&quot;mean&quot; 
+and mean --&gt;* data 
+and data.name=&quot;daten&quot; 
+report 0 end </query>
+            </StaticRTestCase>
+          </testCases>
+          <checkerConfiguration id="22">
+            <name></name>
+            <isActive>true</isActive>
+            <hasVisibleResult>false</hasVisibleResult>
+            <hasVisibleFeedback>false</hasVisibleFeedback>
+            <isAsync>true</isAsync>
+            <weight>1</weight>
+          </checkerConfiguration>
+        </TestCaseTuple>
+      </testCasetuples>
+    </RStage>
+  </stages>
+  <startStage class="RStage" reference="4"/>
+  <variableDeclarations id="23">
+    <VariableDeclaration id="24">
+      <name>v</name>
+      <initializationCode id="25">
+        <code>randomIntegerBetween(1,10)</code>
+        <domain>MATH</domain>
+      </initializationCode>
+    </VariableDeclaration>
+    <VariableDeclaration id="26">
+      <name>w</name>
+      <initializationCode id="27">
+        <code>randomIntegerBetween(1,10)</code>
+        <domain>MATH</domain>
+      </initializationCode>
+    </VariableDeclaration>
+    <VariableDeclaration id="28">
+      <name>x</name>
+      <initializationCode id="29">
+        <code>randomIntegerBetween(1,10)</code>
+        <domain>MATH</domain>
+      </initializationCode>
+    </VariableDeclaration>
+    <VariableDeclaration id="30">
+      <name>y</name>
+      <initializationCode id="31">
+        <code>randomIntegerBetween(1,10)</code>
+        <domain>MATH</domain>
+      </initializationCode>
+    </VariableDeclaration>
+    <VariableDeclaration id="32">
+      <name>z</name>
+      <initializationCode id="33">
+        <code>randomIntegerBetween(1,10)</code>
+        <domain>MATH</domain>
+      </initializationCode>
+    </VariableDeclaration>
+  </variableDeclarations>
+  <jSXGraphs id="34"/>
+  <resultFeedbackMappings id="35"/>
+</ExportedExercise>

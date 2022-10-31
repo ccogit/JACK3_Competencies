@@ -1,0 +1,28 @@
+# Execute unit and integration tests (project "jack3-tests")
+Tests:
+  stage: test
+  script:
+#     Setup Wildfly for Arquillian
+    - chmod +x test-setup/setup-arquillian-wildfly.sh; test-setup/setup-arquillian-wildfly.sh
+#     Run all tests
+    - cd jack3-product
+    - mvn $MAVEN_CLI_OPTS -f jack3-tests/pom.xml test
+#     Generate test coverage output
+    - mvn $MAVEN_CLI_OPTS org.jacoco:jacoco-maven-plugin:report-aggregate
+    - cat jack3-tests/target/site/jacoco-aggregate/index.html | grep -o '<tfoot>.*</tfoot>'
+  artifacts:
+    when: always
+    expire_in: 1 week
+    paths:
+#     Store test data for downloading and code analysis
+    - jack3-product/jack3-tests/target
+    - jack3-product/arquillian-wildfly/wildfly-current/standalone/log
+    reports:
+#     Reports from Maven Surefire
+      junit:
+        - jack3-product/jack3-tests/target/surefire-reports/TEST-*.xml
+# Skip normal tests on selenium branches for better performance
+  except:
+    - /^selenium-development.*$/
+    - fix_javadoc
+  needs: ["Build"]

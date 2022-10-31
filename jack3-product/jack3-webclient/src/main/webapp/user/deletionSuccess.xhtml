@@ -1,0 +1,15 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:p="http://primefaces.org/ui"
+  template="/WEB-INF/templates/template.xhtml">
+  
+  <ui:define name="content"> 
+  <h:form id="courseRecordSubmissionsMainForm">
+      <p:breadCrumb model="#{userSession.model}" />
+  </h:form> 
+    <h2><h:outputText value="#{msg['courseRecordSubmissions.successDeletion']}"/></h2>
+  </ui:define>
+
+</ui:composition>

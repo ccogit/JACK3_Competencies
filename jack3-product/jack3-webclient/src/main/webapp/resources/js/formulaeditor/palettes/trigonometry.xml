@@ -1,0 +1,51 @@
+<OMOBJ version='2.0' xmlns='http://www.openmath.org/OpenMath'>
+  <OMA>
+  	<OMS cd='editor1' name='palette'/>
+    <OMA>
+    	<OMS cd='editor1' name='palette_row'/>
+    	<OMA>
+          <OMS cd='transc1' name='sin'/>
+          <OMS cd='editor1' name='input_box'/>
+        </OMA>
+		<OMA>
+          <OMS cd='arith1' name='root'/>
+          <OMS cd='editor1' name='input_box'/>
+          <OMI>2</OMI>
+        </OMA>
+        <OMA>
+          <OMS cd='arith1' name='divide'/>
+          <OMS cd='editor1' name='input_box'/>
+          <OMS cd='editor1' name='input_box'/>
+        </OMA> 
+    </OMA>
+    <OMA>
+    	<OMS cd='editor1' name='palette_row'/>
+    	<OMA>
+          <OMS cd='transc1' name='cos'/>
+          <OMS cd='editor1' name='input_box'/>
+        </OMA>
+        <OMA>
+          <OMS cd='arith1' name='root'/>
+          <OMS cd='editor1' name='input_box'/>
+          <OMS cd='editor1' name='input_box'/>
+        </OMA>
+       	<OMA>
+          <OMS cd='arith1' name='power'/>
+          <OMS cd='editor1' name='input_box'/>
+          <OMS cd='editor1' name='input_box'/>
+        </OMA>
+    </OMA>
+    <OMA>
+    	<OMS cd='editor1' name='palette_row'/>
+    	<OMA>
+          <OMS cd='transc1' name='tan'/>
+          <OMS cd='editor1' name='input_box'/>
+        </OMA>
+        <OMS cd='nums1' name='pi'/>
+        <OMA>
+          <OMS cd='arith1' name='abs'/>
+          <OMS cd='editor1' name='input_box'/>
+       </OMA>
+    </OMA>
+  </OMA>
+</OMOBJ>

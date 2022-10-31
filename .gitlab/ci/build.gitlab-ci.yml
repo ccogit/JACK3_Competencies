@@ -1,0 +1,17 @@
+# Build all projects without running tests
+Build:
+  stage: build
+  script:
+    - cd jack3-product
+    - mvn -U $MAVEN_CLI_OPTS -DskipTests clean install
+#     Note: "mvn install" copies all JACK3 artifacts to the local repository.
+#     To prevent loading old artifacts from earlier builds, the newly built files
+#     at the local Maven repository are stored as job artifacts. Job artifacts are
+#     restored after caches, so the "new" artifacts overwrite stored caches.
+#     See https://docs.gitlab.com/ee/ci/caching/#cache-vs-artifacts for further information
+  artifacts:
+    expire_in: 1 week
+    paths:
+    - "jack3-product/*/target"
+    - .m2/repository/de/uni-due/s3/jack3
+  needs: []

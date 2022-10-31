@@ -1,0 +1,68 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+	<p:panel header="Load Tests">
+
+		<p:panelGrid id="stresstestGrid" columns="3"
+			styleClass="ui-panelgrid-blank">
+			<!-- 800 Testnutzer -->
+			<h:outputLabel for="@next" value="Erzeugt Nutzer: testuser1-800" />
+
+			<p:progressBar widgetVar="progressBarStresstest" ajax="true"
+				value="#{developmentView.stresstestProgress}"
+				labelTemplate="{value}%" styleClass="animated" global="false"
+				interval="500" style="width:300px">
+				<p:ajax event="complete" update="globalGrowl"
+					oncomplete="PF('stresstestButton').enable()" />
+			</p:progressBar>
+
+			<p:commandButton update="globalGrowl" id="createStresstestUsers"
+				widgetVar="stresstestButton" value="Stresstestnutzer erstellen"
+				action="#{developmentView.setupStresstestEnviroment()}"
+				onclick="PF('progressBarStresstest').start();PF('stresstestButton').disable()" />
+
+			<!-- 100 Testaufgaben -->
+			<h:outputLabel for="@next" value="Erzeugt 100 Aufgaben" />
+
+			<p:progressBar widgetVar="createLoadTestExercisesProgressbar"
+				ajax="true" value="#{developmentView.loadTestExercisesProgress}"
+				labelTemplate="{value}%" styleClass="animated" global="false"
+				interval="500" style="width:300px">
+				<p:ajax event="complete" update="globalGrowl"
+					oncomplete="PF('createLoadTestExercisesButton').enable()" />
+			</p:progressBar>
+
+			<p:commandButton update="globalGrowl"
+				widgetVar="createLoadTestExercisesButton"
+				value="Erzeuge 100 Testaufgaben"
+				action="#{developmentView.createLoadTestExercises()}"
+				onclick="PF('createLoadTestExercisesProgressbar').start();PF('createLoadTestExercisesButton').disable()" />
+
+			<!-- Create 1000 CourseRecords and submits the first stage of exercise "JACK"
+				 BEWARE: Button "Umgebung erzeugen" has to be pressed first!
+			 -->
+			<h:outputLabel for="@next" value="Erzeugt 1_000 Courserecords zum Beispielkurs" />
+
+			<p:progressBar widgetVar="createLoadTestSubmissionsProgressbar"
+				ajax="true" value="#{developmentView.loadTestSubmissionsProgress}"
+				labelTemplate="{value}%" styleClass="animated" global="false"
+				interval="500" style="width:300px">
+				<p:ajax event="complete" update="globalGrowl"
+					oncomplete="PF('createLoadTestSubmissionsButton').enable()" />
+			</p:progressBar>
+
+			<p:commandButton update="globalGrowl"
+				widgetVar="createLoadTestSubmissionsButton"
+				value="Erzeuge 1k Einreichungen zum Testkurs"
+				action="#{developmentView.createLoadTestSubmissions()}"
+				onclick="PF('createLoadTestSubmissionsProgressbar').start();PF('createLoadTestSubmissionsButton').disable()" />
+
+		</p:panelGrid>
+
+
+	</p:panel>
+
+</ui:composition>

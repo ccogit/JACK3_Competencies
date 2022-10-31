@@ -1,0 +1,158 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:j="http://jack.s3.uni-due.de/ui-elements"
+	template="/WEB-INF/templates/template.xhtml">
+
+	<ui:define name="metadata">
+		<f:metadata>
+			<f:viewParam name="submission"
+				value="#{submissionDetailsView.submissionId}" />
+			<f:viewParam name="course" value="#{submissionDetailsView.courseId}" />
+			<f:viewParam name="courseOffer"
+				value="#{submissionDetailsView.courseOfferId}" />
+			<f:viewAction action="#{submissionDetailsView.loadSubmission}" />
+            <f:event type="preRenderView" listener="#{submissionDetailsView.updateBreadCrumb()}"/>
+		</f:metadata>
+	</ui:define>
+
+	<ui:define name="content">
+		<h:form id="submissionDetails">
+			<p:breadCrumb id="breadCrumbSubmissionDetails"
+				model="#{userSession.model}" />
+
+			<p:remoteCommand name="updateSubmissionViewHeader"
+				update="pgSubmissionDetailsGeneral"
+				action="#{submissionDetailsView.reloadSubmission()}" />
+
+			<h3>#{msg['submissionDetails.generalInformation']}</h3>
+			<p:panelGrid id="pgSubmissionDetailsGeneral" columns="2"
+				styleClass="ui-panelgrid-blank">
+				<h:outputLabel for="student"
+					value="#{msg['submissionDetails.student']}:" />
+				<h:panelGroup>
+					<j:publicUserName
+						id="student"
+						publicUserName="#{submissionDetailsView.getPublicUserName(submissionDetailsView.submission.author)}" />
+				</h:panelGroup>
+				<h:outputLabel for="courseOffer"
+					rendered="#{submissionDetailsView.courserecord.courseOffer.present and submissionDetailsView.hasRightsToSeeExtendedStatistics()}"
+					value="#{msg['courseRecordSubmissions.courseOffer']}:" />
+                <p:breadCrumb
+                    rendered="#{submissionDetailsView.courserecord.courseOffer.present and submissionDetailsView.hasRightsToSeeExtendedStatistics()}"
+                    id="courseOfferBreadCrumb"
+                    styleClass="ui-breadcrumb small"
+                    homeDisplay="text"
+                    model="#{submissionDetailsView.getPathOfCourseOffer()}" />
+				<h:outputLabel for="course"
+					rendered="#{not empty submissionDetailsView.courserecord and submissionDetailsView.hasRightsToSeeExtendedStatistics()}"
+					value="#{msg['submissionDetails.course']}:" />
+                <h:panelGroup rendered="#{not empty submissionDetailsView.courserecord and submissionDetailsView.hasRightsToSeeExtendedStatistics()}">
+                  <h:panelGrid columns="2">
+                    <p:breadCrumb
+                              id="courseBreadCrumb"
+                              styleClass="ui-breadcrumb small"
+                              homeDisplay="text"
+                              model="#{submissionDetailsView.getPathOfCourse()}" />
+                    <h:outputText styleClass="fas fa-star fa-sm" rendered="#{submissionDetailsView.courserecord.course.frozen}" title="#{msg['exerciseEdit.frozenVersion']}" style="margin-left:5px; display:inline-block;" />
+                  </h:panelGrid>
+                </h:panelGroup>
+                <h:outputLabel for="exercise"
+                  rendered="#{not empty submissionDetailsView.exercise and submissionDetailsView.hasRightsToSeeExtendedStatistics()}"
+                  value="#{msg['submissionDetails.exercise']}:" />
+                  <h:panelGroup rendered="#{not empty submissionDetailsView.exercise and submissionDetailsView.hasRightsToSeeExtendedStatistics()}">
+                    <h:panelGrid columns="2">
+                      <p:breadCrumb
+                        id="exerciseBreadCrumb"
+                        styleClass="ui-breadcrumb small"
+                        homeDisplay="text"
+                        model="#{submissionDetailsView.getPathOfExercise()}" />
+                    <h:outputText styleClass="fas fa-star fa-sm" rendered="#{submissionDetailsView.frozenExercise}" title="#{msg['exerciseEdit.frozenVersion']}" style="margin-left:5px; display:inline-block;" />
+                  </h:panelGrid>
+                </h:panelGroup>
+				<h:outputLabel for="submissionType"
+					value="#{msg['submissionDetails.type']}:"
+					rendered="#{submissionDetailsView.hasRightsToSeeSubmissionType()}" />
+				<h:outputText id="submissionType"
+					value="#{submissionDetailsView.submissionType}"
+					rendered="#{submissionDetailsView.hasRightsToSeeSubmissionType()}" />
+				<h:outputLabel for="startTime"
+					value="#{msg['submissionDetails.startTime']}:" />
+				<j:outputTimestamp id="startTime"
+					value="#{submissionDetailsView.submission.creationTimestamp}"
+					converter="longTimestampConverter" />
+				<h:outputLabel for="result" value="#{msg['global.result']}:"
+					rendered="#{submissionDetailsView.showResult}" />
+				<h:outputText id="result"
+					value="#{submissionDetailsView.submission.resultPoints} %"
+					rendered="#{submissionDetailsView.showResult}" />
+				<h:panelGroup id="submissionDeletion">
+					<p:commandButton id="deleteSubmission"
+						value="#{msg['submissionDetails.deleteSubmission']}"
+						action="#{submissionDetailsView.deleteSubmission()}"
+						disabled="#{!submissionDetailsView.userAllowedToDeleteSubmission}"
+						rendered="#{submissionDetailsView.hasRightsToSeeExtendedStatistics()}" />
+					<p:tooltip for="submissionDeletion" value="#{msg['global.deletionInfoCourseTestSubmission']}" escape="false" rendered="#{submissionDetailsView.submission.courseRecord.testSubmission and submissionDetailsView.hasUserRightsForDeletion() and !submissionDetailsView.userAllowedToDeleteSubmission}" />
+          			<p:tooltip for="submissionDeletion" value="#{msg['global.deletionInfoNoRights']}" escape="false" rendered="#{!submissionDetailsView.hasUserRightsForDeletion()}" />
+          			<p:tooltip for="submissionDeletion" value="#{msg['global.deletionInfoStudentSubmission']}" escape="false" rendered="#{not submissionDetailsView.submission.courseRecord.testSubmission and submissionDetailsView.hasUserRightsForDeletion() and !submissionDetailsView.userAllowedToDeleteSubmission}" />
+				</h:panelGroup>
+			</p:panelGrid>
+
+			<ui:include page="/WEB-INF/includes/stages/exercisePlayer.xhtml" />
+
+			<c:if test="#{not empty(submissionDetailsView.submission.comments)}">
+				<h3>#{msg['submissionDetails.comments']}</h3>
+				<p:dataTable id="commentTable" var="comment"
+					value="#{submissionDetailsView.submission.comments}"
+					tableStyle="table-layout:auto;">
+
+					<p:column id="commentData"
+						headerText="#{msg['submissionDetails.commentInfo']}">
+						<j:outputTimestamp value="#{comment.timestamp}"
+							converter="longTimestampConverter"
+							style="font-weight:bold;opacity:0.5"
+							rendered="#{submissionDetailsView.showVariablesAndLogs and comment.read}" />
+						<j:outputTimestamp value="#{comment.timestamp}"
+							converter="longTimestampConverter" style="font-weight:bold"
+							rendered="#{not submissionDetailsView.showVariablesAndLogs or not comment.read}" />
+						<br />
+						<h:outputText value="#{comment.text}"
+							style="margin-left:20px;opacity:0.5"
+							rendered="#{submissionDetailsView.showVariablesAndLogs and comment.read}" />
+						<h:outputText value="#{comment.text}" style="margin-left:20px"
+							rendered="#{not submissionDetailsView.showVariablesAndLogs or not comment.read}" />
+					</p:column>
+
+					<p:column id="emailAddress"
+						headerText="#{msg['submissionDetails.emailAddress']}"
+						rendered="#{submissionDetailsView.extendedRead}">
+						<h:outputLink value="mailto:#{comment.commentAuthor.email}"
+							rendered="#{comment.showEmail}">
+							<h:outputText value="#{comment.commentAuthor.email}" />
+						</h:outputLink>
+						<h:outputText
+							value="#{msg['submissionDetails.commentNoEmailAddress']}"
+							rendered="#{!comment.showEmail}" />
+					</p:column>
+
+					<p:column id="commentControls" style="text-align:center"
+						rendered="#{submissionDetailsView.showVariablesAndLogs}">
+						<p:selectBooleanButton id="commentButton" value="#{comment.read}"
+							onLabel="#{msg['submissionDetails.commentRead']}"
+							offLabel="#{msg['submissionDetails.commentUnread']}"
+							onIcon="far fa-envelope-open fa-sm"
+							offIcon="far fa-envelope fa-sm">
+							<p:ajax update="globalGrowl commentTable"
+								listener="#{submissionDetailsView.updateComment(comment)}" />
+						</p:selectBooleanButton>
+					</p:column>
+				</p:dataTable>
+			</c:if>
+
+		</h:form>
+	</ui:define>
+
+</ui:composition>

@@ -1,0 +1,18 @@
+.navigation-bar li.ui-menuitem.current,
+.navigation-bar li.ui-menuitem.current > .ui-state-hover {
+	background-color: #2399e5;
+}
+
+.navigation-bar li.ui-menuitem.current > a.ui-menuitem-link {
+	color: white;
+}
+
+.navigation-bar li.ui-menuitem.ui-menu-parent.current > a.ui-menuitem-link > .ui-icon {
+	background-image: url("/javax.faces.resource/images/ui-icons_ffffff_256x240.png.xhtml?ln=primefaces-omega");
+}
+
+.navigation-bar li .ui-menuitem-icon.ui-icon {
+	margin-right: 5px;
+	overflow: visible;
+	width: auto;
+}

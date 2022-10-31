@@ -1,0 +1,6 @@
+# Wildfly for Arquillian is downloaded automatically
+/arquillian-wildfly/wildfly-current
+/arquillian-wildfly/_wildfly-current*
+# Prevents unintentional commits
+**/src/test/resources/arquillian.xml
+.flattened-pom.xml

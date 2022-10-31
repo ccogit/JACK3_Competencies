@@ -1,0 +1,90 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:j="http://jack.s3.uni-due.de/ui-elements">
+
+	<!-- addDynamicTestCaseOverlay -->
+	<p:overlayPanel
+		widgetVar="addDynamicTestCaseOverlay#{stageBean.stage.orderIndex}">
+		<p:panel header="#{msg['rStage.testCaseOverlay.addTestcase']}">
+			<p:panelGrid columns="2">
+
+				<h:outputText value="#{msg['global.name']}" />
+				<p:inputText value="#{testCaseParam.name}"
+					disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+					style="width:97%" id="testCaseName" />
+
+				<p:outputLabel value="#{msg['rStage.testCaseOverlay.postcode']}" />
+				<p:inputTextarea
+					disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+					autoResize="true" value="#{testCaseParam.postCode}"
+					onchange="processChange()" id="testCasePostCode" rows="5" cols="70" />
+
+				<h:panelGroup>
+					<p:outputLabel
+						value="#{msg['rStage.testCaseOverlay.postprocessingFunction']}" />
+					<j:helperTooltip id="addPostprocessingFunctionHelp"
+						tooltip="#{msg['rStage.testCaseOverlay.postprocessingFunctionHelp']}" />
+				</h:panelGroup>
+				<p:inputText
+					value="#{testCaseParam.postprocessingFunction}"
+					rendered="#{stageBean.currentDynamicTestcaseToUpdate != null}"
+					style="width:97%" id="testCasePostprocessingFunction" onchange="processChange()" />
+
+				<h:outputText
+					value="#{msg['rStage.testCaseOverlay.expectedOutput']}" />
+				<p:inputText
+					disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+					value="#{testCaseParam.expectedOutput}" id="testCaseExpectedOutput" rows="5" cols="70"
+					style="width:97%" />
+
+				<h:outputText value="#{msg['rStage.testCaseOverlay.tolerance']}" />
+				<p:inputText
+					disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+					value="#{testCaseParam.tolerance}" id="testCaseTolerance" style="width:97%" />
+
+			<h:outputText value="#{msg['rStage.staticRuleMode']}" />
+				<h:selectOneMenu
+					disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+					value="#{testCaseParam.ruleMode}" id="testCaseStaticRuleMode">
+					<f:selectItems value="#{stageBean.ruleModes}" var="mode"
+						itemLabel="#{mode}" itemValue="#{mode}" />
+				</h:selectOneMenu>
+
+				<h:outputText value="#{msg['rStage.pointsMode']}" />
+				<h:selectOneMenu
+					disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+					value="#{testCaseParam.pointsMode}" id="testCastePointsMode">
+					<f:selectItems value="#{stageBean.pointModes}" var="mode"
+						itemLabel="#{mode}" itemValue="#{mode}" />
+				</h:selectOneMenu>
+
+				<h:outputText value="#{msg['global.points']}" />
+				<p:inputText
+					disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+					value="#{testCaseParam.points}" id="testCasePoints" style="width:97%" />
+
+				<h:outputText
+					value="#{msg['rStage.testCaseOverlay.feedbackIfFailed']}" />
+				<p:inputTextarea
+					disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+					value="#{testCaseParam.feedbackIfFailed}" id="testCaseFeebackIfFailed"
+					onchange="processChange()" />
+			</p:panelGrid>
+
+		</p:panel>
+
+
+		<p:commandButton action="#{stageBean.addDynamicTestcase()}"
+            id="addDynamicTestcase"
+			disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+			value="#{msg['rStage.testCaseOverlay.addTestcase']}"
+			oncomplete="processChange();PF('addDynamicTestCaseOverlay#{stageBean.stage.orderIndex}').hide();"
+			update="testCaseGroupsPanel" />
+
+		<p:commandButton value="#{msg['rStage.testCaseOverlay.closeDontAdd']}"
+			oncomplete="PF('addDynamicTestCaseOverlay#{stageBean.stage.orderIndex}').hide()" />
+	</p:overlayPanel>
+</ui:composition>

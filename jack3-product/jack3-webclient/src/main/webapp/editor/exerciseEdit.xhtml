@@ -1,0 +1,1758 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:j="http://jack.s3.uni-due.de/ui-elements"
+	template="/WEB-INF/templates/template.xhtml">
+	<ui:define name="metadata">
+		<f:metadata>
+			<f:viewParam name="exercise" value="#{exerciseEditView.exerciseId}" />
+			<f:viewParam name="revision"
+				value="#{exerciseEditView.currentRevisionId}" />
+			<f:viewAction action="#{exerciseEditView.loadExercise}" />
+            <f:event type="preRenderView" listener="#{exerciseEditView.updateBreadCrumb()}"/> 
+		</f:metadata> 
+	
+    <script>
+                function copyTextToClipboard(id) {
+                    var pwdField = document.getElementById(id)
+                    pwdField.select()
+                    document.execCommand("copy")
+                }
+   </script>	
+    
+		<ui:include src="exerciseEditJs.xhtml" />
+
+	</ui:define>
+	<ui:define name="content">
+  <!-- The JS module for the kekule.js molecule editor. -->
+  <h:outputScript library="js" name="kekule.js/kekule.min.js" target="head" />
+  
+  <!-- The style for the kekule.js molecule editor. -->
+  <h:outputStylesheet library="js" name="kekule.js/themes/default/kekule.css" target="head" />
+
+  <!-- The function to create InChI strings from user input to the molecule editor. -->
+  <h:outputScript>
+  var InChI = {
+    onRuntimeInitialized: function () {
+          var cwrap = InChI.cwrap('molfile_to_inchi', 'number', ['number', 'number']);
+          
+          InChI.fromMolfile = function (molfile) {
+            var input = InChI._malloc(molfile.length + 1);
+            // TODO: catch if inchi length exceeds buffer length
+            var output = InChI._malloc(1024);
+            
+            InChI.writeStringToMemory(molfile.replace(/[^\x00-\x7F]/g, ''), input);
+            
+            let status = cwrap(input, output);
+            let result = InChI.Pointer_stringify(output);
+            
+            InChI._free(input);
+            InChI._free(output);
+            
+            if (status &lt; 0) {
+              throw new Error(result);
+            }
+            
+            return result;
+          };
+        }
+  };
+  </h:outputScript>
+
+  <!-- The JS module that can create InChI strings. -->
+  <h:outputScript library="js" name="inchi-js/inchi-node.js" target="body" />
+		<h:form id="exerciseEdit">
+            <div style="display:flex">
+    			<p:breadCrumb id="breadCrumbModel"
+    				model="#{exerciseEditView.updateMenuModel(userSession)}"
+    				rendered="#{exerciseEditView.newestRevision}"
+					style="flex-grow: 1; margin-bottom: 2px;">
+                    <f:facet name="options">
+						<ul>
+							<li>
+								<p:link outcome="#{viewId.getEditorFor(exerciseEditView.previousItemInFolder)}"
+									styleClass="ui-menuitem-link ui-corner-all"
+									disabled="#{empty exerciseEditView.previousItemInFolder}">
+									<i class="fas fa-arrow-left"/>
+								</p:link>
+							</li>
+							<li>
+								<h:outputText value="&#x00a0;"/></li>
+							<li>
+								<p:link outcome="#{viewId.getEditorFor(exerciseEditView.nextItemInFolder)}"
+									styleClass="ui-menuitem-link ui-corner-all"
+									disabled="#{empty exerciseEditView.nextItemInFolder}">
+									<i class="fas fa-arrow-right"/>
+								</p:link>
+							</li>
+						</ul>
+					</f:facet>
+				</p:breadCrumb>
+            </div>
+
+			<!-- toolbar -->
+			<p:toolbar id="tb" styleClass="sticky-toolbar">
+				<f:facet id="facetLeft" name="left">
+                    <h:outputText
+                      styleClass="fas fa-circle-notch fa-spin fa-lg"
+                      style="margin: 3px auto;"
+                      rendered="#{exerciseEditView.newestRevision and !exerciseEditView.lazyDataLoaded}"/>
+                    <h:outputText
+                      style="margin-left: 10px;"
+                      rendered="#{exerciseEditView.newestRevision and !exerciseEditView.lazyDataLoaded}"
+                      value="#{msg['exerciseEdit.waitLoading']}" />
+                      
+					<p:commandButton id="saveExercise" widgetVar="saveExerciseButton"
+						action="#{exerciseEditView.saveExercise()}"
+						onstart="PF('globalSpinner').show(); preventUnload(false);"
+						value="#{msg['global.save']}" icon="far fa-save fa-sm"
+						disabled="#{!exerciseEditView.lazyDataLoaded or !exerciseEditView.userAllowedToEdit}"
+						rendered="#{exerciseEditView.newestRevision and exerciseEditView.lazyDataLoaded}"
+						oncomplete="PF('globalSpinner').hide(); if(args &amp;&amp; !args.validationFailed){ savingExercise(); } else { exerciseCouldNotBeSaved(); }"
+						update="exerciseEdit:breadCrumbModel exerciseEdit:tb exerciseEdit:settings exerciseEdit:varConfig exerciseEdit:step exerciseEdit:files exerciseEdit:statistics globalGrowl">
+						<f:actionListener
+							binding="#{userSession.createYouAreHereMenuForExercise(exerciseEditView.exercise)}" />
+					</p:commandButton>
+					<p:commandButton id="validateExercise"
+						rendered="#{exerciseEditView.newestRevision and exerciseEditView.lazyDataLoaded}"
+						value="#{msg['exerciseEdit.validate']}"
+						icon="far fa-lightbulb fa-sm"
+						disabled="true" />
+					<p:commandButton id="testExercise" oncomplete="if(args &amp;&amp; !args.validationFailed){ saveAndTest();} else { exerciseCouldNotBeSaved();}"
+						rendered="#{exerciseEditView.newestRevision and exerciseEditView.lazyDataLoaded}"
+                        update="globalGrowl"
+						value="#{msg['exerciseEdit.test']}" icon="fas fa-play fa-sm">
+					</p:commandButton>
+					<p:remoteCommand name="saveBeforeTesting"
+						action="#{exerciseEditView.saveExercise()}" style="display: none;" />
+					<p:remoteCommand name="redirectToTest"
+						action="#{exerciseEditView.redirectToTestExercise()}"
+						style="display: none;" />
+				</f:facet>
+				<f:facet id="facetRight" name="right">
+					<p:commandButton id="resetToRevision"
+						action="#{exerciseEditView.resetToRevision()}"
+						value="#{msg['global.takeOver']}" icon="fas fa-level-up-alt fa-sm"
+						update="exerciseEdit exerciseEdit:settings exerciseEdit:revisionPanel globalGrowl"
+						disabled="#{!exerciseEditView.userAllowedToEdit}"
+						rendered="#{!exerciseEditView.newestRevision and exerciseEditView.lazyDataLoaded}" />
+					<p:commandButton id="jumpToCurrentRevision"
+						action="#{exerciseEditView.jumpToNewestRevision()}"
+						value="#{msg['exerciseEdit.toNewestRevision']}"
+						icon="fas fa-sign-in-alt fa-sm" update="exerciseEdit"
+						rendered="#{!exerciseEditView.newestRevision and exerciseEditView.lazyDataLoaded}" />
+					<p:button id="discardChanges" outcome="#{viewId.exerciseEditor}"
+						onclick="preventUnload(false)"
+						rendered="#{exerciseEditView.newestRevision and exerciseEditView.lazyDataLoaded}"
+						value="#{msg['global.discard']}" icon="fas fa-trash-alt fa-sm">
+						<f:param name="exercise" value="#{exerciseEditView.exerciseId}" />
+					</p:button>
+				</f:facet>
+			</p:toolbar>
+			<!-- end of toolbar -->
+
+			<!-- explain what a revision is -->
+			<p:panel
+				rendered="#{not exerciseEditView.newestRevision and not exerciseEditView.frozen}"
+				style="text-align: center; font-size: large; font-weight: normal;">
+				<h:outputFormat escape="false"
+					value="#{msg['global.revisionViewExplanationMessage']}">
+					<f:param
+						value="#{exerciseEditView.getRevisionIndexForRevisionId(exerciseEditView.currentRevisionId)}" />
+				</h:outputFormat>
+			</p:panel>
+
+			<!-- explain what a frozen version is -->
+			<p:panel rendered="#{exerciseEditView.frozen}"
+				style="text-align: center; font-size: large; font-weight: normal;">
+				<h:outputFormat escape="false"
+					value="#{msg['global.frozenViewExplanationMessage']}">
+					<f:param
+						value="#{exerciseEditView.getCurrentProxiedExerciseRevisionIndex()}" />
+				</h:outputFormat>
+			</p:panel>
+          
+			<!-- settings -->
+			<p:panel id="settings" header="#{msg['exerciseEdit.settings']}">              
+				<p:panelGrid id="pgSettings" cellpadding="5"
+					styleClass="ui-panelgrid-blank" style="width:100%;">
+
+					<!-- Frozen versions -->
+					<p:row
+						rendered="#{not empty exerciseEditView.availableFrozenExercises
+						 and not exerciseEditView.frozen
+						 and exerciseEditView.newestRevision}">
+						<p:column>
+							<h:outputLabel for="frozenRevisionsDropDown"
+								value="#{msg['exerciseEdit.frozenVersion']}:" />
+						</p:column>
+            
+
+						<p:column>
+							<p:selectOneMenu id="frozenRevisionsDropDown"
+								value="#{exerciseEditView.selectedFrozenExercise}"
+								converter="frozenExerciseConverter">
+
+								<p:ajax listener="#{exerciseEditView.loadFrozenExercise}"
+									update="exerciseEdit" onstart="PF('globalSpinner').show()"
+									oncomplete="PF('globalSpinner').hide()" />
+
+								<f:selectItem itemValue="#{null}"
+									itemLabel="#{msg['global.noneSelected']} " />
+								<f:selectItems id="referencedFrozenExercise"
+									value="#{exerciseEditView.availableFrozenExercises}"
+									var="revision"
+									itemLabel="#{exerciseEditView.getRevisionIndexForRevisionId(revision.proxiedExerciseRevisionId)}: #{revision.frozenTitle} (#{revision.name})"
+									itemValue="#{revision}" />
+							</p:selectOneMenu>
+						</p:column>
+					</p:row>
+          
+                    <p:row rendered="#{!exerciseEditView.newestRevision}">
+                      <p:column id="path">
+                        <h:outputLabel for="path" value="#{msg['global.path']}:" />
+                      </p:column>
+                      <p:column>
+                        <h:outputText value="#{userSession.getPathAsString(exerciseEditView.exercise)}"/>
+                      </p:column>
+                    </p:row>
+
+					<p:row>
+						<p:column id="columnSettingsTitle" style="width: 250px">
+							<h:outputLabel for="title" value="#{msg['exerciseEdit.title']}: " />
+						</p:column>
+						<p:column id="columnSettingsName" colspan="2">
+							<p:inplace id="exerciseName"
+								disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+								editor="true" widgetVar="exerciseNameInput"
+                                class="inplaceIcon">
+								<p:ajax event="save" oncomplete="processChange()" update="@this"
+									onstart="document.getElementById('exerciseEdit:exerciseNameInputProgress').style.display = 'inline-block'"
+									onsuccess="document.getElementById('exerciseEdit:exerciseNameInputProgress').style.display = 'none'" />
+								<p:inputText id="exerciseNameInput"
+									value="#{exerciseEditView.exercise.name}"
+									validator="#{exerciseEditView.validateExerciseName}"
+									onkeydown="onkeydownExerciseName()">
+									<f:attribute name="oldValue"
+										value="#{exerciseEditView.exercise.name}" />
+								</p:inputText>
+								<h:outputText id="exerciseNameInputProgress"
+									styleClass="fas fa-circle-notch fa-spin"
+									style="margin-left:5px;display:none;" />
+								<p:message for="exerciseNameInput" />
+							</p:inplace>
+						</p:column>
+					</p:row>
+                    <p:row>
+                      <p:column>
+                            <h:outputLabel for="exerciseId" value="#{msg['global.id']}:" />
+                        </p:column>
+                        <p:column>
+                            <h:outputText id="exerciseId" value="#{exerciseEditView.exercise.id}" />
+                        </p:column>
+                    </p:row>
+					<!-- Titel for frozen versions -->
+					<p:row rendered="#{exerciseEditView.frozen}">
+						<p:column>
+							<h:outputLabel for="titelFrozenVersion"
+								value="#{msg['exerciseEdit.frozenTitle']}: " />
+						</p:column>
+						<p:column>
+							<!-- We can ignore the warning here, this property is available in the 
+							rendered="#{courseEditView.frozen}" case! -->
+							<p:inputText id="titelFrozenVersion"
+								value="#{exerciseEditView.exercise.frozenTitle}"
+								onkeydown="checkUserInputForActivationOfSaveButton()"
+								onchange="processChange()"
+								disabled="#{not exerciseEditView.userAllowedToEdit}" />
+
+							<p:commandButton value="#{msg['global.save']}" id="ajax"
+								action="#{exerciseEditView.saveFrozenRevision}"
+								style="margin-right:20px;" styleClass="ui-priority-primary"
+								icon="far fa-save fa-sm"
+								update="globalGrowl frozenRevisionsDropDown exerciseEdit:settings"
+								rendered="#{exerciseEditView.userAllowedToEdit}" />
+						</p:column>
+					</p:row>
+					<p:row>
+						<p:column id="columnSettingsAuthor">
+							<h:outputLabel for="author"
+								value="#{msg['exerciseEdit.author']}: " />
+						</p:column>
+						<p:column id="columnSettingsAuthorLabel" colspan="2">
+							<h:outputLabel id="author"
+								value="#{exerciseEditView.originalAuthor}" />
+						</p:column>
+					</p:row>
+					<p:row>
+						<p:column id="columnSettingsLanguage">
+							<h:outputLabel for="language"
+								value="#{msg['exerciseEdit.language']}: " />
+						</p:column>
+						<p:column id="columnSettingsLanguageLabel">
+							<p:selectOneMenu id="language"
+								disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+								value="#{exerciseEditView.exercise.language}" editable="false"
+								onchange="processChange()">
+								<f:selectItems value="#{userSession.countriesInMap}" />
+							</p:selectOneMenu>
+						</p:column>
+					</p:row>
+					<p:row>
+						<!-- Revisionslink -->
+						<p:column id="columnSettingsRevision"
+							rendered="#{exerciseEditView.newestRevision}">
+							<h:outputLabel for="revision"
+								value="#{msg['courseEdit.Revision_ID']}: " />
+						</p:column>
+						<p:column id="columnSettingsRevisionLabel"
+							rendered="#{exerciseEditView.newestRevision}">
+							<h:panelGroup id="revision">
+                                <h:outputText
+                                  styleClass="fas fa-circle-notch fa-spin fa-lg"
+                                  style="margin: 10px auto;"
+                                  rendered="#{!exerciseEditView.lazyDataLoaded}"/>
+								<p:commandLink id="rev"
+								    value="#{exerciseEditView.revisionCount}"
+									rendered="#{exerciseEditView.lazyDataLoaded}" />
+							</h:panelGroup>
+							<!-- Revisions Overlay -->
+							<p:overlayPanel
+								id="revisionPanel"
+								for="revision"
+								hideEffect="fade"
+								styleClass="nopadding-panel"
+								style="width:600px;font-size:90%"
+								dynamic="true"
+								my="center top">
+								<p:dataTable
+									id="dtRevisionPanel"
+									var="exRev"
+									value="#{exerciseEditView.exerciseRevisionsLazyDataModel}"
+									rows="10"
+									paginator="true"
+									rowIndexVar="rowIndex"
+									lazy="true"
+									styleClass="ui-panelgrid-blank-datatable">
+									<f:facet name="header">#{msg['global.versions']}</f:facet>
+									<p:column
+										id="headerTextRevision"
+										width="50"
+										headerText="#{msg['global.revision']}">
+										<h:outputText value="#{rowIndex}" />
+									</p:column>
+									<p:column id="headerTextChangedBy"
+										headerText="#{msg['global.changedBy']}">
+										<h:outputText value="#{exRev.updatedBy}" />
+									</p:column>
+									<p:column id="headerTextChangedAt"
+										headerText="#{msg['global.alterationTime']}">
+										<j:outputTimestamp value="#{exRev.updateTimeStamp}"
+											converter="fullTimestampConverter" />
+									</p:column>
+									<p:column id="columnRevisionId"
+										style="width:32px;text-align: center">
+										<p:commandButton id="cbShowRevision"
+											icon="fas fa-search"
+											styleClass="weaker-button button-white"
+											title="#{msg['global.view']}"
+											action="#{exerciseEditView.showRevision(rowIndex)}"
+											update="@form"
+											rendered="#{not exerciseEditView.isRevisionCurrentRevision(rowIndex)}" />
+										<h:panelGroup rendered="#{exerciseEditView.isRevisionCurrentRevision(rowIndex)}" styleClass="fa-stack fa-sm" style="color:#555555;">
+											<h:outputText styleClass="fas fa-search fa-stack-1x" />
+											<h:outputText styleClass="fas fa-ban fa-inverse fa-stack-2x fa-rotate-90" title="#{msg['global.currentVersion']}" style="color:var(--ude-red);" />
+										</h:panelGroup>
+									</p:column>
+
+									<p:column id="exerciseEditfreezeRevision"
+										style="width:32px;text-align: center">
+										<p:commandButton id="cbfreezeRevision"
+											icon="fas fa-star"
+											styleClass="weaker-button button-white"
+											title="#{msg['global.freezeRevision']}"
+											action="#{exerciseEditView.freezeRevision(rowIndex)}"
+											onstart="PF('globalSpinner').show()"
+											oncomplete="PF('globalSpinner').hide()" update="@form"
+											disabled="#{not exerciseEditView.userAllowedToEdit}"
+											rendered="#{not exerciseEditView.revisionIsFrozen(rowIndex)}" />
+										<h:outputText styleClass="fas fa-star" title="#{msg['exerciseEdit.frozenVersion']}" style="color:var(--ude-green);" rendered="#{exerciseEditView.revisionIsFrozen(rowIndex)}" />
+									</p:column>
+
+								</p:dataTable>
+							</p:overlayPanel>
+						</p:column>
+					</p:row>
+                    <p:row>
+                      <p:column id="columnlinkToExerciseLabel">
+                        <h:outputLabel for="link"
+                            value="#{msg['exerciseEdit.publicLink']}: " />
+                      </p:column>
+                      <p:column id="columnlinkToExercise" colspan="2" >
+                      <div class="ui-inputgroup">
+                        <p:inputText
+                          id="publicLink"
+                          styleClass="small-monospace"
+                          readonly="true"
+                          value="#{exerciseEditView.hyperlinkToExercise}"
+                          size="60" />
+                        <h:panelGroup
+                          id="copyPublicLinkInfo"
+                          class="ui-inputgroup-addon"
+                          style="border: 1px solid #1f89ce;color: #fff;background: #2399e5;">
+                         <h:outputText styleClass="fas fa-question" />
+                         <p:tooltip
+                            for="copyPublicLinkInfo"
+                            style="max-width:600px;"
+                            position="top"
+                            value="#{msg['exerciseEdit.publicLink.info']}"
+                            escape="false" />
+                       </h:panelGroup>
+                       <p:commandButton
+                            id="copyPublicLink"
+                            type="button"
+                            icon="fas fa-copy"
+                            onclick="copyTextToClipboard('exerciseEdit:publicLink')" />
+                       <p:tooltip
+                            for="copyPublicLink"
+                            value="#{msg['global.copyToClipboard']}"
+                            position="top" />
+                      </div>
+                      </p:column>
+                    </p:row>
+					<p:row>
+						<p:column id="columnSettingsDifficulty">
+							<h:outputLabel for="difficulty"
+								value="#{msg['exerciseEdit.difficulty']}: " />
+						</p:column>
+						<p:column id="columnExerciseDifficulty" colspan="2">
+							<h:panelGrid>
+								<p:spinner id="difficulty"
+									disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+									value="#{exerciseEditView.exercise.difficulty}" min="0"
+									max="100" size="15" onchange="processChange()" required="true"
+									onkeydown="checkUserInputForActivationOfSaveButton()" />
+								<p:slider id="difficultySlider"
+									disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+									for="difficulty" minValue="0" maxValue="100" />
+							</h:panelGrid>
+						</p:column>
+					</p:row>
+					<p:row>
+						<p:column id="columnRevisionValid">
+							<h:outputLabel for="valid" value="#{msg['exerciseEdit.valid']}: " />
+						</p:column>
+						<p:column id="columnRevisionValidInfo" colspan="2">
+							<!-- TODO Validation is not implemented yet -->
+							<p:selectBooleanCheckbox
+								id="revisionIsValidCheckbox"
+								value="#{exerciseEditView.exercise.valid}"
+								disabled="true" />
+							<j:helperTooltip
+								id="validationNotImplementedYet"
+								tooltip="#{msg['global.functionNotImplementedYet']}" />
+						</p:column>
+					</p:row>
+					<p:row>
+						<p:column id="columnExerciseTagsLabel">
+							<h:outputLabel for="newTagName"
+								value="#{msg['exerciseEdit.tags']}: " />
+						</p:column>
+						<p:column id="columnExerciseTags">
+							<p:repeat value="#{exerciseEditView.exercise.tagsAsStrings}"
+								var="tag"
+								id="tagList">
+								<div class="ui-inputgroup"
+									style="float: left; margin: 0 1px 1px 0;">
+									<p:commandButton value="#{tag}"
+										actionListener="#{exerciseEditView.loadExercisesWithThisTag(tag)}"
+										oncomplete="PF('showExercisesForThisTag').show(); return false;"
+										update="exerciseEdit:exerciseTags"
+										action="#{exerciseEditView.removeTag(tag)}"/> 
+									<p:commandButton id="deleteTag" 
+										icon="fas fa-times-circle fa-sm"
+										disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+										update="exerciseEdit:settings"
+										action="#{exerciseEditView.removeTag(tag)}"/>     
+								</div>
+							</p:repeat>
+							<div style="float: left;">
+								<p:autoComplete id="newTagName"
+									disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+									value="#{exerciseEditView.newTagName}"
+									completeMethod="#{exerciseEditView.completeTags}"
+									queryDelay="50"
+									minQueryLength="3"
+									itemLabel="#{exerciseEditView.tag.name}"
+									itemValue="#{exerciseEditView.tag}"
+									placeholder="#{msg['exerciseEdit.newTag']}"
+									onkeypress="if (event.keyCode == 13) { tempNewTag(); return false; }" />
+								<p:remoteCommand id="rcAddNewTag" name="tempNewTag"
+									actionListener="#{exerciseEditView.addNewTag()}"
+									oncomplete="processChange()" update="exerciseEdit:settings globalGrowl" />
+							</div>
+						</p:column>
+					</p:row>
+					<p:row>
+						<p:column id="columnInternalNotes">
+							<h:outputLabel for="internalNotes"
+								value="#{msg['exerciseEdit.internalDescription']}: " />
+						</p:column>
+						<p:column id="columnInternalNotesText" colspan="2">
+							<p:inputTextarea id="internalNotes" autoResize="true"
+								disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+								value="#{exerciseEditView.exercise.internalNotes}"
+								style="width:100%;" onkeydown="processChange()" />
+						</p:column>
+					</p:row>
+					<p:row>
+                        <p:column id="columnPublicDescription">
+                            <h:outputLabel for="publicDescription"
+                                value="#{msg['exerciseEdit.publicDescription']}: " />
+                        </p:column>
+                        <p:column id="columnpublicDescriptionText" colspan="2">
+							<pe:ckEditor
+								id="publicDescription"
+                                value="#{exerciseEditView.exercise.publicDescription}"
+								readonly="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+								widgetVar="publicDescriptionWidget"
+								width="100%"
+								height="150px"
+								language="#{msg['ckEditor.language']}"
+								advancedContentFilter="false"
+								toolbar="[['Bold','Italic','Underline','-','NumberedList','BulletedList','JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock','-','Table','Link','Unlink','HorizontalRule','-','TextColor','BGColor','RemoveFormat']]"
+								customConfig="#{resource['js/ckEditorConfig.js']}">
+								<p:ajax event="dirty" onstart="processChange()" />
+							</pe:ckEditor>
+                        </p:column>
+                        
+                    </p:row>
+					<p:row>
+						<p:column id="columnHintMalusType">
+							<h:outputLabel for="malusTypes"
+								value="#{msg['exerciseEdit.hintMalus']}: " />
+						</p:column>
+						<p:column id="columnHintMalusTypeSelect" colspan="2">
+							<p:selectOneMenu id="malusTypes"
+								value="#{exerciseEditView.exercise.hintMalusType}"
+								disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}">
+								<p:ajax event="change" update="@(.hintList)"
+									oncomplete="processChange()" />
+								<f:selectItem id="selectMalusNone"
+									itemLabel="#{msg['global.none']}" />
+								<f:selectItems id="selectedMalus"
+									value="#{exerciseEditView.availableHintMali}" var="malusType"
+									itemLabel="#{msg['enum.EStageHintMalus.' += malusType.name()]}"
+									itemValue="#{malusType.name()}" />
+							</p:selectOneMenu>
+						</p:column>
+					</p:row>
+                </p:panelGrid>
+			</p:panel>
+			<!-- end of settings -->
+
+			<!-- variableConfig -->
+			<p:panel id="varConfig"
+				header="#{msg['exerciseEdit.variableConfiguration']}"
+				toggleable="true" collapsed="#{exerciseEditView.panelCollapsed(component)}">
+                <p:ajax event="toggle" listener="#{exerciseEditView.onToggle}"/>
+				<p:dataTable id="dtVarConfigVariableDeclarations"
+					value="#{exerciseEditView.exercise.getVariableDeclarationForReoder()}"
+					var="variable" emptyMessage="#{msg['exerciseEdit.noVariables']}"
+					draggableRows="#{exerciseEditView.newestRevision and exerciseEditView.userAllowedToEdit}">
+					<p:ajax event="rowReorder"
+						listener="#{exerciseEditView.variableDeclarationReorder}"
+						update="@this" oncomplete="processChange()" />
+					<p:column id="headerTextVarName" headerText="#{msg['global.name']}"
+						style="width:200px;">
+						<p:inplace id="editorVarConfig"
+							disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+							editor="true"
+                            class="inplaceIcon">
+							<p:ajax event="save"
+								update="@this @parent exerciseEdit:step globalGrowl" />
+							<f:facet id="facetVarConfigOutput" name="output">
+								<h:outputText value="#{variable.name}" />
+							</f:facet>
+							<f:facet id="facetVarConfigInput" name="input">
+								<p:inputText id="inputVarConfigVariableName"
+									validator="#{exerciseEditView.validateVariableName}"
+									value="#{variable.name}"
+									disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+									onkeydown="checkUserInputForActivationOfSaveButton()"
+									onchange="processChange()">
+									<f:validator id="validatorFillInName"
+										validatorId="variableNameValidator" />
+								</p:inputText>
+							</f:facet>
+						</p:inplace>
+					</p:column>
+					<p:column headerText="#{msg['evaluator.expressionAndDomain']}">
+						<j:evaluatorInputField
+							id="variableInitializationExpression"			
+							evaluatorExpression="#{variable.initializationCode}"
+							disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+							onKeyDown="checkUserInputForActivationOfSaveButtonNoReturnSurpession()"
+							onChange="processChange()"
+							width="55" />
+					</p:column>
+					<p:column id="columnVarConfigActions"
+						style="width:60px;text-align: right;">
+						<p:commandButton id="cbVarConfigRemoveVariable"
+							icon="fas fa-trash-alt fa-sm"
+							disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+							action="#{exerciseEditView.removeVariable(variable)}"
+							update="exerciseEdit:varConfig exerciseEdit:step"
+							oncomplete="processChange()" />
+					</p:column>
+				</p:dataTable>
+				<p:panelGrid id="pgVarConfigAddVariable">
+					<p:commandButton id="cbVarConfigAddVariable"
+						value="#{msg['exerciseEdit.createVariable']}"
+						actionListener="#{exerciseEditView.addNewVariable}"
+						disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+						oncomplete="processChange()"
+						update="exerciseEdit:varConfig exerciseEdit:step" />
+				</p:panelGrid>
+			</p:panel>
+			<!-- end of variableConfig -->
+
+			<!-- JSXGraphConfig -->
+			<p:panel id="jSXGraphConfig"
+				header="#{msg['exerciseEdit.jsxGraphConfiguration']}"
+				toggleable="true" collapsed="#{exerciseEditView.panelCollapsed(component)}">
+                <p:ajax event="toggle" listener="#{exerciseEditView.onToggle}"/>
+				<p:dataTable id="jSXGraphs"
+					value="#{exerciseEditView.getJSXGraphsDataModel()}" 
+					var="jSXGraph" emptyMessage="#{msg['exerciseEdit.noJSXGraphs']}"
+					rowIndexVar="jSXGraphsIndex"><!-- hier noch mal schauen bei getJSXGraphsDataModel()-->
+					<p:column id="headerTextJSXGraphs" headerText="#{msg['global.name']}"
+						style="width:150px;">
+						<p:inplace id="editorJSXGraphName" editor="true"
+							disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+                            class="inplaceIcon">
+							<p:ajax event="save"
+								update="@this @parent exerciseEdit:step globalGrowl" />
+							<f:facet id="facetJSXGraphConfigOutput" name="output">
+								<h:outputText value="#{jSXGraph.name}" />
+							</f:facet>
+							<f:facet id="facetJSXGraphConfigInput" name="input">
+								<p:inputText id="inputJSXGraphConfigJSXGraphName"
+									validator="#{exerciseEditView.validateJSXGraphName}"
+									value="#{jSXGraph.name}"
+									disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+									onkeydown="checkUserInputForActivationOfSaveButton()"
+									onchange="processChange()"> <!-- oncomplete="processChange()" update="@this @parent:jSXGraphs" -->
+									<f:validator id="validatorJSXGraphName"
+										validatorId="variableNameValidator" />
+								</p:inputText>
+							</f:facet>
+						</p:inplace>
+					</p:column>
+					<p:column id="headerTextJSXGraphWidth"
+						headerText="#{msg['exerciseEdit.jSXGraphWidth']}" style="width:80px;">
+						<p:inputTextarea id="inputJSXGraphWidth"
+							value="#{jSXGraph.width}"
+							disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}" rows="2" cols="55"
+							onkeydown="checkUserInputForActivationOfSaveButton()"
+							onchange="processChange()" style="width:95%;">
+							<p:message for="inputJSXGraphWidth" />
+						</p:inputTextarea>
+					</p:column>
+					<p:column id="headerTextJSXGraphHeight"
+						headerText="#{msg['exerciseEdit.jSXGraphHeight']}" style="width:80px;">
+						<p:inputTextarea id="inputJSXGraphHeight"
+							value="#{jSXGraph.height}"
+							disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}" rows="2" cols="55"
+							onkeydown="checkUserInputForActivationOfSaveButton()"
+							onchange="processChange()" style="width:95%;">
+							<p:message for="inputJSXGraphHeight" />
+						</p:inputTextarea>
+					</p:column>
+					<p:column id="headerTextJSXGraphInputText"
+						headerText="#{msg['exerciseEdit.jSXGraphInputText']}">
+						<p:panelGrid style="width:100%;">
+							<p:column colspan="2" style="border-style: none;">
+								<h:outputText id="jSXGraphinputText" value="#{jSXGraph.text}"
+									style="width:100%;align:left;" escape="false" />
+							</p:column>
+							<p:column colspan="1"
+								style="border-style: none;text-align: right;">
+								<p:commandButton 
+									id="load_jSXGraph_InRawEditor"
+									icon="fas fa-pencil-alt fa-sm"
+									type="button" 
+									disabled="#{readOnlyParam}" />
+								<p:overlayPanel 
+									id="overlayPanel_jSXGraph_RawEditor"
+									for="load_jSXGraph_InRawEditor"
+									hideEffect="fade"
+									style="width:620px;" 
+									my="right bottom" 
+									at="left top">
+									<p:inputTextarea id="rawEditor_jSXGraph"
+										value="#{jSXGraph.text}"
+										disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+										onkeypress="processChange()" 
+										rows="2" 
+										style="width:99%;align:left;">
+										<p:ajax event="blur"
+											update="@parent:@parent:jSXGraphinputText"
+											oncomplete="processChange()">
+										</p:ajax>
+									</p:inputTextarea>
+									<ui:param name="textSource" value="jSXGraphinputText" />
+									<ui:param name="readOnlyParam"
+										value="#{!exerciseEditView.newestRevision 
+										or !exerciseEditView.userAllowedToEdit}" />
+									<ui:param name="valueParam" value="#{jSXGraph.text}" />
+									<ui:param name="editorWidgetVarId"
+										value="hintTextWidgetVar+#{hintRowNumber}" />
+								</p:overlayPanel>
+							</p:column>
+						</p:panelGrid>
+					</p:column>
+					<p:column id="columnJSXGraphConfigActions"
+						style="width:43px;text-align: right;">
+						<p:commandButton id="cbRemoveJSXGraph"
+							icon="fas fa-trash-alt fa-sm"
+							disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+							action="#{exerciseEditView.removeJSXGraph(jSXGraph)}"
+							update="exerciseEdit:jSXGraphConfig exerciseEdit:step"
+							oncomplete="processChange()" />
+					</p:column>
+				</p:dataTable>
+				<p:panelGrid id="pgJSXGraphConfigAddJSXGraph">
+					<p:commandButton id="cbAddJSXGraph"
+						value="#{msg['exerciseEdit.createJSXGraph']}"
+						actionListener="#{exerciseEditView.addNewJSXGraph('box')}"
+						disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+						oncomplete="processChange()"
+						update="exerciseEdit:jSXGraphConfig exerciseEdit:step" />
+				</p:panelGrid>
+                
+			</p:panel>
+			<!-- end of JSXGraphConfig-->
+
+			<!-- Evaluator shell -->
+			<ui:include page="/WEB-INF/includes/evaluatorShell.xhtml">
+				<ui:param name="id" value="0" />
+				<ui:param name="collapsed" value="#{exerciseEditView.panelCollapsed(component)}" />
+			</ui:include>
+
+			<!-- stages -->
+			<p:panel id="step" header="#{msg['exerciseEdit.exerciseStages']}"
+				toggleable="true" collapsed="false">
+                <p:ajax event="toggle" listener="#{exerciseEditView.onToggle}"/>
+
+				<c:forEach items="#{exerciseEditView.stageViewBeans}"
+					var="stageBean" varStatus="stageLoop">
+					<p:panel header="#{stageBean.stage.internalName}"
+						id="stage#{stageLoop.index}" collapsed="#{exerciseEditView.panelCollapsed(component)}"
+						toggleable="true" toggleableHeader="true">
+                        <p:ajax event="toggle" listener="#{exerciseEditView.onToggle}"/>
+						<f:facet name="header">
+							<p:inplace
+								disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+								id="editorStageInternalName" editor="true"
+                                class="inplaceIcon">
+								<p:inputText id="stageInternalName"
+									validator="requiredValidator"
+									value="#{stageBean.stage.internalName}"
+									onkeydown="checkUserInputForActivationOfSaveButton()"
+									onchange="processChange()" />
+							</p:inplace>
+							<h:outputText value=" (#{msg['exerciseEdit.stageType']}: #{exerciseEditView.getStageTypeName(stageBean.stage.class)}" />
+							<h:outputText
+								rendered="#{stageBean.stage eq exerciseEditView.exercise.startStage}"
+								value=", #{msg['exerciseEdit.isStartStage']}" />
+							<h:outputText value=")" />
+						</f:facet>
+
+						<f:facet name="options">
+							<p:menu>
+								<p:submenu label="#{msg['exerciseEdit.options']}">
+									<p:menuitem value="#{msg['exerciseEdit.setAsStart']}"
+										icon="fas fa-play fa-sm"
+										disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+										action="#{exerciseEditView.exercise.setStartStage(stageBean.stage)}"
+										update="exerciseEdit:step" oncomplete="processChange()" />
+                                    <p:menuitem value="#{msg['exerciseEdit.copy']}"
+                                        icon="fas fa-copy fa-sm"
+                                        disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+                                        action="#{exerciseEditView.duplicateStage(stageBean.stage)}"
+                                        update="exerciseEdit:step exerciseEdit:files"
+                                        oncomplete="processChange()" />
+									<p:menuitem value="#{msg['exerciseEdit.delete']}"
+										icon="fas fa-trash-alt fa-sm"
+										disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+										action="#{exerciseEditView.removeStage(stageBean.stage)}"
+										update="exerciseEdit:step exerciseEdit:files"
+										oncomplete="processChange()" />                   
+								</p:submenu>
+							</p:menu>
+						</f:facet>
+
+                        <h:outputText
+                          styleClass="fas fa-circle-notch fa-spin fa-lg"
+                          style="margin: 10px auto;"
+                          rendered="#{!exerciseEditView.lazyDataLoaded}" />
+                          
+						<p:tabView id="tabs#{stageLoop.index}" rendered="#{exerciseEditView.lazyDataLoaded}">
+							<p:tab id="content" title="#{msg['exerciseEdit.stageContent']}">
+								<h4>
+									<h:outputText value="#{msg['exerciseEdit.externalStageName']}" />
+								</h4>
+								<p:inputText id="stageExternalNameInput"
+									value="#{stageBean.stage.externalName}"
+									placeholder="#{msg['exerciseEdit.noExternalStageName']}"
+									onkeydown="checkUserInputForActivationOfSaveButton()"
+									onchange="processChange()"
+									disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+									style="width:400px;"/>
+							    <ui:include page="/WEB-INF/includes/stages/#{stageBean.stage.type}/contentConfig.xhtml">
+	                                <ui:param name="stageIndex" value="#{stageLoop.index}" />
+								</ui:include>
+							</p:tab>
+							<p:tab id="feedback" title="#{msg['exerciseEdit.stageFeedback']}">
+								<br/>
+								<h:outputLabel for="stageWeight"
+									value="#{msg['exerciseEdit.stageWeight']}: " />
+								<p:spinner id="stageWeight"
+									disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+									value="#{stageBean.stage.weight}" min="0" size="1"
+									required="true"
+									onkeydown="checkUserInputForActivationOfSaveButton()"
+									onchange="processChange()" />
+								<ui:include
+									page="/WEB-INF/includes/stages/#{stageBean.stage.type}/feedbackConfig.xhtml" />
+
+								<!-- Allow skipping -->
+								<h4>
+									<h:outputText value="#{msg['exerciseEdit.skipMessage']}" />
+								</h4>
+								<h:outputText for="allowSkip"
+									value="#{msg['exerciseEdit.allowSkip']}: " />
+								<p:selectBooleanCheckbox id="allowSkip"
+									disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+									value="#{stageBean.stage.allowSkip}">
+									<p:ajax event="change"
+										update="@this skipTransitionContainer skipFeedbackPanel variableUpdatesOnSkip"
+										oncomplete="processChange()" />
+								</p:selectBooleanCheckbox>
+								
+								<!-- Feedback for skipping the stage -->
+								<p:panelGrid
+									id="skipFeedbackPanel"
+									columns="2"
+									columnClasses="ckEdtiorOutputPanelcolumn1,ckEdtiorOutputPanelcolumn2"
+									style="width:100%;">
+									<p:column>
+										<h:outputText
+											id="skipFeedback"
+											value="#{stageBean.stage.skipMessage}"
+											style="width:100%;align:left;"
+											escape="false" />
+									</p:column>
+									<p:column>
+										<ui:include src="/WEB-INF/includes/stages/editorOverlay.xhtml">
+											<ui:param
+												name="textSource"
+												value="skipFeedback" />
+											<ui:param
+												name="readOnlyParam"
+												value="#{not stageBean.stage.allowSkip or !exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}" />
+											<ui:param
+												name="valueParam"
+												value="#{stageBean.stage.skipMessage}" />
+											<ui:param
+												name="editorWidgetVarId"
+												value="skipFeedbackWidgetVar" />
+										</ui:include>
+									</p:column>
+								</p:panelGrid>
+							</p:tab>
+							<p:tab id="hints" title="#{msg['exerciseEdit.stageHints']}">
+								<p:dataTable id="hintList"
+									value="#{stageBean.stage.getHintsForReorder()}" var="hint"
+									emptyMessage="#{msg['exerciseEdit.noStageHints']}"
+									draggableRows="#{exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+									style="width:100%;" styleClass="hintList"
+									rowIndexVar="hintRowNumber">
+									<p:ajax event="rowReorder"
+										listener="#{stageBean.onHintReorder}"
+										oncomplete="processChange()" update="hintList" />
+									<p:column id="headerTextHintText"
+										headerText="#{msg['exerciseEdit.hintText']}">
+										<p:panelGrid style="width:100%;">
+											<p:column colspan="2" style="border-style: none;">
+												<h:outputText id="facetHintTextOutput" value="#{hint.text}"
+													style="width:100%;align:left;" escape="false" />
+											</p:column>
+											<p:column colspan="1"
+												style="border-style: none;text-align: right;">
+												<ui:include
+													page="/WEB-INF/includes/stages/editorOverlay.xhtml">
+													<ui:param name="textSource" value="facetHintTextOutput" />
+													<ui:param name="readOnlyParam"
+														value="#{!exerciseEditView.newestRevision 
+																or !exerciseEditView.userAllowedToEdit}" />
+													<ui:param name="valueParam" value="#{hint.text}" />
+													<ui:param name="editorWidgetVarId"
+														value="hintTextWidgetVar+#{hintRowNumber}" />
+												</ui:include>
+											</p:column>
+										</p:panelGrid>
+									</p:column>
+									<p:column id="columnHintMalus"
+										headerText="#{msg['exerciseEdit.hintMalus']}">
+										<p:spinner id="malusValue" value="#{hint.malus}" suffix="%"
+											min="0" max="100" size="3" required="true"
+											onchange="processChange()"
+											onkeydown="checkUserInputForActivationOfSaveButton()"
+											disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+											rendered="#{exerciseEditView.exercise.hintMalusType!=null}" />
+										<h:outputText
+											rendered="#{exerciseEditView.exercise.hintMalusType!=null}"
+											value="#{msg['enum.EStageHintMalus.' += exerciseEditView.exercise.hintMalusType.name()]}" />
+										<h:outputText
+											rendered="#{exerciseEditView.exercise.hintMalusType==null}"
+											value="#{msg['global.none']}" />
+									</p:column>
+									<p:column id="columnRemoveHint" style="width:43px;">
+										<p:commandButton id="cbRemoveHint"
+											icon="fas fa-trash-alt fa-sm"
+											disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+											action="#{stageBean.removeHint(hint)}" update="hintList"
+											oncomplete="processChange()" />
+									</p:column>
+								</p:dataTable>
+								<p:commandButton id="cbAddHint"
+									value="#{msg['exerciseEdit.addHint']}"
+									action="#{stageBean.addNewHint()}"
+									disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+									update="hintList" oncomplete="processChange()" />
+							</p:tab>
+							<p:tab id="transitions"
+								title="#{msg['exerciseEdit.transitions']}">
+								<h4>
+									<h:outputText value="#{msg['exerciseEdit.defaultTransition']}" />
+								</h4>
+								<h:selectOneMenu id="defaultTransition"
+									disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+									value="#{stageBean.stage.defaultTransition.target}"
+									converter="stageSelectOneMenuConverter">
+									<f:selectItem id="defaultSkipEndStage"
+										itemLabel="#{msg['exerciseEdit.endStage']}"
+										itemValue="#{null}" />
+									<f:selectItem id="defaultSkipRepeatStage"
+										itemLabel="#{msg['exerciseEdit.repeatStage']}"
+										itemValue="#{exerciseEditView.repeatStage}" />
+									<f:selectItems id="defaultSkipStageAsList"
+										value="#{exerciseEditView.exercise.stagesAsList}"
+										var="targetStage" itemLabel="#{targetStage.internalName}"
+										itemValue="#{targetStage}" />
+									<p:ajax event="change" oncomplete="processChange()"/>
+								</h:selectOneMenu>
+
+								<ui:include
+									page="/WEB-INF/includes/stages/#{stageBean.stage.type}/targetConfig.xhtml" />
+
+								<h:panelGroup id="skipTransitionContainer">
+									<h:panelGroup id="pgSkipAllowed"
+										rendered="#{stageBean.stage.allowSkip}">
+										<h4>
+											<h:outputText value="#{msg['exerciseEdit.skipTransitions']}" />
+										</h4>
+										<p:dataTable id="skipTransitions"
+											value="#{stageBean.stage.getSkipTransitionsForReorder()}"
+											var="transition"
+											emptyMessage="#{msg['exerciseEdit.noSkipTransitions']}"
+											draggableRows="#{exerciseEditView.newestRevision}"
+											style="width:100%;">
+											<p:ajax event="rowReorder"
+												listener="#{stageBean.onSkipReorder}"
+												oncomplete="processChange()" update="skipTransitions" />
+											<p:column id="headerTextSkipCondition"
+												headerText="#{msg['evaluator.expressionAndDomain']}">
+												<j:evaluatorInputField
+													id="editTransitCondition"
+													evaluatorExpression="#{transition.conditionExpression}"
+													width="50"
+													disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+													onChange="processChange()"
+													onKeyDown="checkUserInputForActivationOfSaveButtonNoReturnSurpession()" />
+											</p:column>
+											<p:column id="headerTextSkipTarget"
+												headerText="#{msg['exerciseEdit.target']}"
+												width="200">
+												<h:selectOneMenu id="skipTarget"
+													value="#{transition.target}"
+													disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+													onchange="processChange()"
+													converter="stageSelectOneMenuConverter">
+													<p:ajax event="change"
+														update="@this @parent:@parent:skipTransitions" />
+													<f:selectItem id="skipTransitionEnd"
+														itemLabel="#{msg['exerciseEdit.endStage']}" itemValue="#{null}" />
+													<f:selectItems id="skipTransitionStagesAsList"
+														value="#{exerciseEditView.exercise.stagesAsList}"
+														var="skipTargetStage"
+														itemLabel="#{skipTargetStage.internalName}"
+														itemValue="#{skipTargetStage}" />
+												</h:selectOneMenu>
+											</p:column>
+											<p:column id="columnRemoveSkipTransition" style="width:43px;">
+												<p:commandButton id="cbRemoveSkipTransition"
+													icon="fas fa-trash-alt fa-sm"
+													disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+													action="#{stageBean.removeSkipTransition(transition)}"
+													update="skipTransitions" oncomplete="processChange()" />
+											</p:column>
+										</p:dataTable>
+									</h:panelGroup>
+									<p:commandButton id="cbAddNewSkipTransition"
+										rendered="#{stageBean.stage.allowSkip}"
+										disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+										value="#{msg['exerciseEdit.addTransitionTarget']}"
+										action="#{stageBean.addNewSkipTransition()}"
+										update="skipTransitions" oncomplete="processChange()" />
+								</h:panelGroup>
+							</p:tab>
+							<p:tab id="updates"
+								title="#{msg['exerciseEdit.variableUpdates']}"
+								rendered="#{not (exerciseEditView.exercise.getVariableDeclarations().isEmpty())}">
+
+                                <h4>
+                                  <h:outputText
+                                    value="#{msg['exerciseEdit.variableUpdatesOnEnter']}" />
+                                                    <j:helperTooltip id="variableUpdatesOnEnterToolTip" tooltip="#{msg['variableUpdates.onEnterToolTip']}" />
+                                </h4>
+                                <p:dataTable id="dtStageConfigVariableUpdatesOnEnter"
+                                  value="#{stageBean.stage.variableUpdatesOnEnterForReorder}"
+                                  var="varUpdate"
+                                  draggableRows="#{exerciseEditView.newestRevision}"
+                                  emptyMessage="#{msg['exerciseEdit.noVariables']}">
+                                  <p:ajax event="rowReorder"
+                                    listener="#{stageBean.onVariableUpdateOnEnterReorder}"
+                                    oncomplete="processChange()"
+                                    update="dtStageConfigVariableUpdatesOnEnter" />
+                                  <p:column id="headerTextVarUpdateName"
+                                    headerText="#{msg['global.name']}" style="width:200px;">
+                                    <h:outputText value="#{varUpdate.variableReference.name}" />
+                                  </p:column>
+                                  <p:column id="headerTextVarUpdateCode"
+                                    headerText="#{msg['evaluator.expressionAndDomain']}">
+                                    <j:evaluatorInputField
+                                      id="variableUpdateOnEnterCode"
+                                      disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+                                      evaluatorExpression="#{varUpdate.updateCode}"
+                                      onChange="processChange()"
+                                      onKeyDown="checkUserInputForActivationOfSaveButtonNoReturnSurpession()"
+                                      width="50" />
+                                  </p:column>
+                                  <p:column id="columnVarConfigActions" style="width:60px;">
+                                    <p:commandButton id="cbVarUpdateRemoveVariable"
+                                      icon="fas fa-trash-alt fa-sm"
+                                      disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+                                      action="#{stageBean.removeVariableUpdate(varUpdate)}"
+                                      update="dtStageConfigVariableUpdatesOnEnter"
+                                      oncomplete="processChange()" />
+                                  </p:column>
+                                </p:dataTable>
+                                <h:panelGroup id="pgVarUpdateAddVariableUpdateOnEnter"
+                                  rendered="#{exerciseEditView.newestRevision}"
+                                  layout="block"
+                                  style="margin-top: 5px;">
+                                  <h:outputLabel for="somVarUpdateAddVariableUpdateOnEnter"
+                                    value="#{msg['exerciseEdit.updateVariableName']}: " />
+                                  <h:panelGroup styleClass="ui-inputgroup" style="display: inline;">
+                                    <p:selectOneMenu id="somVarUpdateAddVariableUpdateOnEnter"
+                                      value="#{stageBean.variableIdToUpdateOnEnter}">
+                                      <f:selectItems id="selectedVariableForUpdateOnEnter"
+                                        value="#{exerciseEditView.exercise.variableDeclarations}"
+                                        itemLabel="#{variableDeclaration.name}"
+                                        itemValue="#{variableDeclaration.id}"
+                                        var="variableDeclaration" />
+                                    </p:selectOneMenu>
+                                    <p:commandButton id="cbVarUpdateAddVariableUpdateOnEnter"
+                                      disabled="#{!exerciseEditView.userAllowedToEdit}"
+                                      value="#{msg['exerciseEdit.updateVariable']}"
+                                      actionListener="#{stageBean.addVariableUpdateOnEnter}"
+                                      oncomplete="processChange()"
+                                      update="dtStageConfigVariableUpdatesOnEnter" />
+                                  </h:panelGroup>
+                                </h:panelGroup>
+
+								<h4>
+									<h:outputText
+										value="#{msg['exerciseEdit.variableUpdatesBeforeCheck']}" />
+                                    <j:helperTooltip id="variableUpdatesBeforeCheckToolTip" tooltip="#{msg['variableUpdates.beforeCheckToolTip']}" />
+								</h4>
+								<p:dataTable id="dtStageConfigVariableUpdatesBeforeCheck"
+									value="#{stageBean.stage.variableUpdatesBeforeCheckForReorder}"
+									var="varUpdate"
+									draggableRows="#{exerciseEditView.newestRevision}"
+									emptyMessage="#{msg['exerciseEdit.noVariables']}">
+									<p:ajax event="rowReorder"
+										listener="#{stageBean.onVariableUpdateBeforeCheckReorder}"
+										oncomplete="processChange()"
+										update="dtStageConfigVariableUpdatesBeforeCheck" />
+									<p:column id="headerTextVarUpdateName"
+										headerText="#{msg['global.name']}" style="width:200px;">
+										<h:outputText value="#{varUpdate.variableReference.name}" />
+									</p:column>
+									<p:column id="headerTextVarUpdateCode"
+										headerText="#{msg['evaluator.expressionAndDomain']}">
+										<j:evaluatorInputField
+											id="variableUpdateBeforeCheckCode"
+											disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+											evaluatorExpression="#{varUpdate.updateCode}"
+											onChange="processChange()"
+											onKeyDown="checkUserInputForActivationOfSaveButtonNoReturnSurpession()"
+											width="50" />
+									</p:column>
+									<p:column id="columnVarConfigActions" style="width:60px;">
+										<p:commandButton id="cbVarUpdateRemoveVariable"
+											icon="fas fa-trash-alt fa-sm"
+											disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+											action="#{stageBean.removeVariableUpdate(varUpdate)}"
+											update="dtStageConfigVariableUpdatesBeforeCheck"
+											oncomplete="processChange()" />
+									</p:column>
+								</p:dataTable>
+								<h:panelGroup id="pgVarUpdateAddVariableUpdateBeforeCheck"
+									rendered="#{exerciseEditView.newestRevision}"
+									layout="block"
+									style="margin-top: 5px;">
+									<h:outputLabel for="somVarUpdateAddVariableUpdateBeforeCheck"
+										value="#{msg['exerciseEdit.updateVariableName']}: " />
+									<h:panelGroup styleClass="ui-inputgroup" style="display: inline;">
+										<p:selectOneMenu id="somVarUpdateAddVariableUpdateBeforeCheck"
+											value="#{stageBean.variableIdToUpdateBeforeCheck}">
+											<f:selectItems id="selectedVariableForUpdateBeforeCheck"
+												value="#{exerciseEditView.exercise.variableDeclarations}"
+												itemLabel="#{variableDeclaration.name}"
+												itemValue="#{variableDeclaration.id}"
+												var="variableDeclaration" />
+										</p:selectOneMenu>
+										<p:commandButton id="cbVarUpdateAddVariableUpdateBeforeCheck"
+											disabled="#{!exerciseEditView.userAllowedToEdit}"
+											value="#{msg['exerciseEdit.updateVariable']}"
+											actionListener="#{stageBean.addVariableUpdateBeforeCheck}"
+											oncomplete="processChange()"
+											update="dtStageConfigVariableUpdatesBeforeCheck" />
+									</h:panelGroup>
+								</h:panelGroup>
+
+								<h4>
+									<h:outputText
+										value="#{msg['exerciseEdit.variableUpdatesAfterCheck']}" />
+                                    <j:helperTooltip id="variableUpdatesAfterCheckToolTip" tooltip="#{msg['variableUpdates.afterCheckToolTip']}" />
+								</h4>
+								<p:dataTable id="dtStageConfigVariableUpdatesAfterCheck"
+									value="#{stageBean.stage.variableUpdatesAfterCheckForReorder}"
+									var="varUpdate"
+									draggableRows="#{exerciseEditView.newestRevision}"
+									emptyMessage="#{msg['exerciseEdit.noVariables']}">
+									<p:ajax event="rowReorder"
+										listener="#{stageBean.onVariableUpdateAfterCheckReorder}"
+										oncomplete="processChange()"
+										update="dtStageConfigVariableUpdatesAfterCheck" />
+									<p:column id="headerTextVarUpdateName"
+										headerText="#{msg['global.name']}" style="width:200px;">
+										<h:outputText value="#{varUpdate.variableReference.name}" />
+									</p:column>
+									<p:column id="headerTextVarUpdateCode"
+										headerText="#{msg['evaluator.expressionAndDomain']}">
+										<j:evaluatorInputField
+											id="variableUpdateAfterCheckCode"
+											disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+											evaluatorExpression="#{varUpdate.updateCode}"
+											onChange="processChange()"
+											onKeyDown="checkUserInputForActivationOfSaveButtonNoReturnSurpession()"
+											width="50" />
+									</p:column>
+									<p:column id="columnVarConfigActions" style="width:60px;">
+										<p:commandButton id="cbVarUpdateRemoveVariable"
+											icon="fas fa-trash-alt fa-sm"
+											disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+											action="#{stageBean.removeVariableUpdate(varUpdate)}"
+											update="dtStageConfigVariableUpdatesAfterCheck"
+											oncomplete="processChange()" />
+									</p:column>
+								</p:dataTable>
+								<h:panelGroup id="pgVarUpdateAddVariableUpdateAfterCheck"
+									rendered="#{exerciseEditView.newestRevision}"
+									layout="block"
+									style="margin-top: 5px;">
+									<h:outputLabel for="somVarUpdateAddVariableUpdateAfterCheck"
+										value="#{msg['exerciseEdit.updateVariableName']}: " />
+									<h:panelGroup styleClass="ui-inputgroup" style="display: inline;">
+										<p:selectOneMenu id="somVarUpdateAddVariableUpdateAfterCheck"
+											value="#{stageBean.variableIdToUpdateAfterCheck}">
+											<f:selectItems id="selectedVariableForUpdateAfterCheck"
+												value="#{exerciseEditView.exercise.variableDeclarations}"
+												itemLabel="#{variableDeclaration.name}"
+												itemValue="#{variableDeclaration.id}"
+												var="variableDeclaration" />
+										</p:selectOneMenu>
+										<p:commandButton id="cbVarUpdateAddVariableUpdateAfterCheck"
+											disabled="#{!exerciseEditView.userAllowedToEdit}"
+											value="#{msg['exerciseEdit.updateVariable']}"
+											actionListener="#{stageBean.addVariableUpdateAfterCheck}"
+											oncomplete="processChange()"
+											update="dtStageConfigVariableUpdatesAfterCheck" />
+									</h:panelGroup>
+								</h:panelGroup>
+
+								<h4>
+									<h:outputText
+										value="#{msg['exerciseEdit.variableUpdatesOnNormalExit']}" />
+                                    <j:helperTooltip id="variableUpdatesOnNormalExitToolTip" tooltip="#{msg['variableUpdates.onNormalExitToolTip']}" />
+								</h4>
+								<p:dataTable id="dtStageConfigVariableUpdatesOnNormalExit"
+									value="#{stageBean.stage.variableUpdatesOnNormalExitForReorder}"
+									var="varUpdate"
+									draggableRows="#{exerciseEditView.newestRevision}"
+									emptyMessage="#{msg['exerciseEdit.noVariables']}">
+									<p:ajax event="rowReorder"
+										listener="#{stageBean.onVariableUpdateOnNormalExitReorder}"
+										oncomplete="processChange()"
+										update="dtStageConfigVariableUpdatesOnNormalExit" />
+									<p:column id="headerTextVarUpdateName"
+										headerText="#{msg['global.name']}" style="width:200px;">
+										<h:outputText value="#{varUpdate.variableReference.name}" />
+									</p:column>
+									<p:column
+										id="headerTextVarUpdateCode"
+										headerText="#{msg['evaluator.expressionAndDomain']}">
+										<j:evaluatorInputField
+											id="variableUpdateOnNormalExitCode"
+											disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+											evaluatorExpression="#{varUpdate.updateCode}"
+											onChange="processChange()"
+											onKeyDown="checkUserInputForActivationOfSaveButtonNoReturnSurpession()"
+											width="50" />
+									</p:column>
+									<p:column id="columnVarConfigActions" style="width:60px;">
+										<p:commandButton id="cbVarUpdateRemoveVariable"
+											icon="fas fa-trash-alt fa-sm"
+											disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+											action="#{stageBean.removeVariableUpdate(varUpdate)}"
+											update="dtStageConfigVariableUpdatesOnNormalExit"
+											oncomplete="processChange()" />
+									</p:column>
+								</p:dataTable>
+								<h:panelGroup id="pgVarUpdateAddVariableUpdateOnNormalExit"
+									rendered="#{exerciseEditView.newestRevision}"
+									layout="block"
+									style="margin-top: 5px;">
+									<h:outputLabel for="somVarUpdateAddVariableUpdateOnNormalExit"
+										value="#{msg['exerciseEdit.updateVariableName']}: " />
+									<h:panelGroup styleClass="ui-inputgroup" style="display: inline;">
+										<p:selectOneMenu id="somVarUpdateAddVariableUpdateOnNormalExit"
+											value="#{stageBean.variableIdToUpdateOnNormalExit}">
+											<f:selectItems id="selectedVariableForUpdateOnNormalExit"
+												value="#{exerciseEditView.exercise.variableDeclarations}"
+												itemLabel="#{variableDeclaration.name}"
+												itemValue="#{variableDeclaration.id}"
+												var="variableDeclaration" />
+										</p:selectOneMenu>
+										<p:commandButton id="cbVarUpdateAddVariableUpdateOnNormalExit"
+											disabled="#{!exerciseEditView.userAllowedToEdit}"
+											value="#{msg['exerciseEdit.updateVariable']}"
+											actionListener="#{stageBean.addVariableUpdateOnNormalExit}"
+											oncomplete="processChange()"
+											update="dtStageConfigVariableUpdatesOnNormalExit" />
+									</h:panelGroup>
+								</h:panelGroup>
+
+								<h4>
+									<h:outputText
+										value="#{msg['exerciseEdit.variableUpdatesOnRepeat']}" />
+                                    <j:helperTooltip id="variableUpdatesOnRepeatToolTip" tooltip="#{msg['variableUpdates.onRepeatToolTip']}" />
+								</h4>
+								<p:dataTable id="dtStageConfigVariableUpdatesOnRepeat"
+									value="#{stageBean.stage.variableUpdatesOnRepeatForReorder}"
+									var="varUpdate"
+									draggableRows="#{exerciseEditView.newestRevision}"
+									emptyMessage="#{msg['exerciseEdit.noVariables']}">
+									<p:ajax event="rowReorder"
+										listener="#{stageBean.onVariableUpdateOnRepeatReorder}"
+										oncomplete="processChange()"
+										update="dtStageConfigVariableUpdatesOnRepeat" />
+									<p:column id="headerTextVarUpdateName"
+										headerText="#{msg['global.name']}" style="width:200px;">
+										<h:outputText value="#{varUpdate.variableReference.name}" />
+									</p:column>
+									<p:column
+										id="headerTextVarUpdateCode"
+										headerText="#{msg['evaluator.expressionAndDomain']}">
+										<j:evaluatorInputField
+											id="variableUpdateOnRepeatCode"
+											disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+											evaluatorExpression="#{varUpdate.updateCode}"
+											onChange="processChange()"
+											onKeyDown="checkUserInputForActivationOfSaveButtonNoReturnSurpession()"
+											width="50" />
+									</p:column>
+									<p:column id="columnVarConfigActions" style="width:60px;">
+										<p:commandButton id="cbVarUpdateRemoveVariable"
+											icon="fas fa-trash-alt fa-sm"
+											disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+											action="#{stageBean.removeVariableUpdate(varUpdate)}"
+											update="dtStageConfigVariableUpdatesOnRepeat"
+											oncomplete="processChange()" />
+									</p:column>
+								</p:dataTable>
+								<h:panelGroup id="pgVarUpdateAddVariableUpdateOnRepeat"
+									rendered="#{exerciseEditView.newestRevision}"
+									layout="block"
+									style="margin-top: 5px;">
+									<h:outputLabel for="somVarUpdateAddVariableUpdateOnRepeat"
+										value="#{msg['exerciseEdit.updateVariableName']}: " />
+									<h:panelGroup styleClass="ui-inputgroup" style="display: inline;">
+										<p:selectOneMenu id="somVarUpdateAddVariableUpdateOnRepeat"
+											value="#{stageBean.variableIdToUpdateOnRepeat}">
+											<f:selectItems id="selectedVariableForUpdateOnRepeat"
+												value="#{exerciseEditView.exercise.variableDeclarations}"
+												itemLabel="#{variableDeclaration.name}"
+												itemValue="#{variableDeclaration.id}"
+												var="variableDeclaration" />
+										</p:selectOneMenu>
+										<p:commandButton id="cbVarUpdateAddVariableUpdateOnRepeat"
+											disabled="#{!exerciseEditView.userAllowedToEdit}"
+											value="#{msg['exerciseEdit.updateVariable']}"
+											actionListener="#{stageBean.addVariableUpdateOnRepeat}"
+											oncomplete="processChange()"
+											update="dtStageConfigVariableUpdatesOnRepeat" />
+									</h:panelGroup>
+								</h:panelGroup>
+
+								<h:panelGroup id="variableUpdatesOnSkip">
+									<h:panelGroup rendered="#{stageBean.stage.allowSkip}">
+										<h4>
+											<h:outputText
+												value="#{msg['exerciseEdit.variableUpdatesOnSkip']}" />
+                                            <j:helperTooltip id="variableUpdatesOnSkipToolTip" tooltip="#{msg['variableUpdates.onSkipToolTip']}" />
+										</h4>
+										<p:dataTable id="dtStageConfigVariableUpdatesOnSkip"
+											value="#{stageBean.stage.variableUpdatesOnSkipForReorder}"
+											var="varUpdate"
+											draggableRows="#{exerciseEditView.newestRevision}"
+											emptyMessage="#{msg['exerciseEdit.noVariables']}">
+											<p:ajax event="rowReorder"
+												listener="#{stageBean.onVariableUpdateOnSkipReorder}"
+												oncomplete="processChange()"
+												update="dtStageConfigVariableUpdatesOnSkip" />
+											<p:column id="headerTextVarUpdateName"
+												headerText="#{msg['global.name']}" style="width:200px;">
+												<h:outputText value="#{varUpdate.variableReference.name}" />
+											</p:column>
+											<p:column
+												id="headerTextVarUpdateCode"
+												headerText="#{msg['evaluator.expressionAndDomain']}">
+												<j:evaluatorInputField
+													id="variableUpdateOnSkipCode"
+													disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+													evaluatorExpression="#{varUpdate.updateCode}"
+													onChange="processChange()"
+													onKeyDown="checkUserInputForActivationOfSaveButtonNoReturnSurpession()"
+													width="50" />
+											</p:column>
+											<p:column id="columnVarConfigActions" style="width:60px;">
+												<p:commandButton id="cbVarUpdateRemoveVariable"
+													icon="fas fa-trash-alt fa-sm"
+													disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+													action="#{stageBean.removeVariableUpdate(varUpdate)}"
+													update="dtStageConfigVariableUpdatesOnSkip"
+													oncomplete="processChange()" />
+											</p:column>
+										</p:dataTable>
+										<h:panelGroup id="pgVarUpdateAddVariableUpdateOnSkip"
+											rendered="#{exerciseEditView.newestRevision}"
+											layout="block"
+											style="margin-top: 5px;">
+											<h:outputLabel for="somVarUpdateAddVariableUpdateOnSkip"
+												value="#{msg['exerciseEdit.updateVariableName']}: " />
+											<h:panelGroup styleClass="ui-inputgroup" style="display: inline;">
+												<p:selectOneMenu id="somVarUpdateAddVariableUpdateOnSkip"
+													value="#{stageBean.variableIdToUpdateOnSkip}">
+													<f:selectItems id="selectedVariableForUpdateOnSkip"
+														value="#{exerciseEditView.exercise.variableDeclarations}"
+														itemLabel="#{variableDeclaration.name}"
+														itemValue="#{variableDeclaration.id}"
+														var="variableDeclaration" />
+												</p:selectOneMenu>
+												<p:commandButton id="cbVarUpdateAddVariableUpdateOnSkip"
+													disabled="#{!exerciseEditView.userAllowedToEdit}"
+													value="#{msg['exerciseEdit.updateVariable']}"
+													actionListener="#{stageBean.addVariableUpdateOnSkip}"
+													oncomplete="processChange()"
+													update="dtStageConfigVariableUpdatesOnSkip" />
+											</h:panelGroup>
+										</h:panelGroup>
+									</h:panelGroup>
+								</h:panelGroup>
+							</p:tab>
+							<p:tab id="stageFiles" title="#{msg['global.files']}"
+								rendered="#{not empty exerciseEditView.exercise.exerciseResources}">
+								<h4>
+									<h:outputText
+										value="#{msg['exerciseEdit.stageFilesSelection']}" />
+								</h4>
+								<p:dataTable id="dtSelectedStageFiles"
+									editable="#{exerciseEditView.newestRevision}"
+									value="#{stageBean.stage.getStageResources()}" var="file">
+									<p:column id="columnFilename" width="200"
+										headerText="#{msg['global.filename']}">
+										<h:outputText value="#{file.exerciseResource.filename}" />
+									</p:column>
+									<p:column id="columnSize" width="70"
+										headerText="#{msg['global.size']}">
+										<h:outputText
+											value="#{exerciseEditView.getResourceSize(file.exerciseResource)}" />
+									</p:column>
+									<p:column id="columnDescription"
+										headerText="#{msg['global.description']}">
+										<p:inplace id="editorDescription" editor="true" class="inplaceIcon">
+											<f:facet name="output">
+												<h:outputText value="#{file.description}"
+													rendered="#{not empty file.description}" />
+												<h:outputText
+													value="#{msg['exerciseEdit.noFileDescription']}"
+													style="font-style:italic;font-size:smaller"
+													rendered="#{empty file.description}" />
+											</f:facet>
+											<f:facet name="input">
+												<p:inputText value="#{file.description}" maxlength="255"
+													disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+													style="width:95%"
+													onkeydown="checkUserInputForActivationOfSaveButton()"
+													onchange="processChange()" />
+											</f:facet>
+										</p:inplace>
+									</p:column>
+									<p:column id="stageResourceRemove"
+										style="width:40px;text-align:center">
+										<p:commandButton id="cbAddStageFile"
+											icon="fas fa-minus fa-sm"
+											disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+											update="@this:@parent:@parent:@parent:dtAllStageFiles @this:@parent:@parent"
+											actionListener="#{stageBean.removeStageResource(file)}"
+											oncomplete="processChange()" title="#{msg['global.remove']}" />
+									</p:column>
+								</p:dataTable>
+								<h4>
+									<h:outputText value="#{msg['exerciseEdit.stageFiles']}" />
+								</h4>
+								<p:dataTable id="dtAllStageFiles"
+									value="#{stageBean.filterExerciseResources(exerciseEditView.exercise.exerciseResources)}"
+									var="file">
+									<p:column id="columnFilename"
+										headerText="#{msg['global.filename']}" width="200">
+										<h:outputText value="#{file.filename}" />
+									</p:column>
+									<p:column id="columnSize" width="70"
+										headerText="#{msg['global.size']}">
+										<h:outputText
+											value="#{exerciseEditView.getResourceSize(file)}" />
+									</p:column>
+									<p:column id="columnDescription"
+										headerText="#{msg['global.description']}">
+										<h:outputText value="#{file.description}" />
+									</p:column>
+									<p:column id="columnActions"
+										style="width:40px;text-align:center">
+										<p:commandButton id="cbAddStageFile" icon="fas fa-plus fa-sm"
+											disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+											update="@this:@parent:@parent:@parent:dtSelectedStageFiles @this:@parent:@parent"
+											actionListener="#{stageBean.addResourceToStage(file)}"
+											oncomplete="processChange()" title="#{msg['global.add']}" />
+									</p:column>
+								</p:dataTable>
+							</p:tab>
+							<!-- Programming stage specific tab -->
+							<p:tab id="checkerTab" title="#{msg['exerciseEdit.checker']}"
+								rendered="#{stageBean.stage.hasTestcaseTuples}">
+								<c:if test="#{stageBean.stage.hasTestcaseTuples}">
+									<!-- Rendered attribute didn't prevent Primefaces from throwing an exception 
+									"path couldn't be found", but with an additional c:if this works.
+								 	-->
+									<ui:include
+										page="/WEB-INF/includes/stages/#{stageBean.stage.type}/checker.xhtml" />
+								</c:if>
+							</p:tab>
+						</p:tabView>
+					</p:panel>
+				</c:forEach>
+				<h:panelGroup id="pgStageActions"
+					rendered="#{exerciseEditView.newestRevision}"
+					style="margin: 10px;"
+					layout="block">
+					<h:outputLabel for="addStageType"
+						value="#{msg['exerciseEdit.stageType']}: " />
+					<h:panelGroup
+						styleClass="ui-inputgroup"
+						style="display: inline;">
+						<p:selectOneMenu id="addStageType"
+							value="#{exerciseEditView.newStageType}">
+							<f:selectItems
+								id="selectedStageType"
+								value="#{exerciseEditView.availableStageTypes}"
+								disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}" />
+						</p:selectOneMenu>
+						<p:commandButton id="cbCreateStage"
+							value="#{msg['global.create']}"
+							action="#{exerciseEditView.addNewStage}"
+							disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+							update="exerciseEdit:step exerciseEdit:files"
+							oncomplete="processChange()" />
+					</h:panelGroup>
+				</h:panelGroup>
+				<p:panel id="stageGraphPanel"
+					header="#{msg['exerciseEdit.stageGraphHeader']}" toggleable="true"
+					collapsed="true" rendered="#{exerciseEditView.isStageExisting()}">
+					<f:facet name="actions">   
+						<p:commandLink
+							styleClass="ui-panel-titlebar-icon ui-corner-all ui-state-default"
+							update="stageGraphPanel">
+							<h:outputText styleClass="ui-icon pi pi-refresh" />
+						</p:commandLink>
+					</f:facet>
+					<p:diagram id="stageGraph"
+						value="#{exerciseEditView.stageGraphModel}" style="height:400px"
+						styleClass="ui-widget-content" />
+				</p:panel>
+			</p:panel>
+			<!-- end of stages -->
+
+			<!-- files -->
+			<p:panel id="files" header="#{msg['global.files']}" toggleable="true" collapsed="#{exerciseEditView.panelCollapsed(component)}">
+                <p:ajax event="toggle" listener="#{exerciseEditView.onToggle}"/>
+				<p:fileUpload id="fileUploadForm" mode="advanced" auto="true"
+					dragDropSupport="true" multiple="true" oncomplete="processChange()"
+					disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+					listener="#{exerciseEditView.handleFileUpload}"
+					update="exerciseEdit:files exerciseEdit:step" sequential="true"
+					label="#{msg['global.upload']}" />
+				<p:dataTable id="exerciseResources"
+					widgetVar="exerciseResources"
+					value="#{exerciseEditView.sortedResources}" var="file"
+					emptyMessage="#{msg['exerciseEdit.noExerciseResources']}"
+					editable="#{exerciseEditView.newestRevision}">
+					<p:column id="columnId" headerText="#{msg['exerciseEdit.id']}"
+						width="50"
+						sortBy="#{file.id}">
+						<p:commandLink id="cbExerciseFileSetFile" value="#{file.id}"
+							disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+							action="#{exerciseEditView.setCurrentFile(file)}"
+							update="exerciseEdit:fileDialog"
+							oncomplete="PF('fileDialog').show();" />
+					</p:column>
+					<p:column id="columnFilename"
+						headerText="#{msg['global.file']}" width="200"
+						sortBy="#{file}"
+						filterBy="#{file.filename}"
+						filterMatchMode="contains">
+                      <p:inplace id="linkExerciseResourceElement" editor="true" class="inplaceIcon">
+                        <f:facet id="facetOutputExerciseName" name="output">
+                          <h:outputText value="#{file.filename}"/>
+                        </f:facet>
+                        <f:facet id="facetInputExerciseName" name="input">
+                          <p:inputText id="inputFileName"
+                            value="#{file.filename}" maxlength="255"
+                            onchange="processChange()"
+                            disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+                            onkeypress="return event.keyCode != 13" style="width:95%"
+                            validator="#{exerciseEditView.validateResourceName}"
+                            update="exerciseEdit:step globalGrowl" />
+
+                        </f:facet>
+                      </p:inplace>
+					</p:column>
+					<p:column id="columnDescription"
+						headerText="#{msg['global.description']}">
+						<p:inplace id="editorDescription" editor="true" class="inplaceIcon">
+							<f:facet id="facetOutputDescription" name="output">
+								<h:outputText value="#{file.description}"
+									rendered="#{file.description!=null and file.description!=''}" />
+								<h:outputText value="#{msg['exerciseEdit.noFileDescription']}"
+									style="font-style:italic;font-size:smaller"
+									rendered="#{file.description==null or file.description==''}" />
+							</f:facet>
+							<f:facet id="facetInputDescription" name="input">
+								<p:inputText id="inputFileDescription"
+									value="#{file.description}" maxlength="255"
+									onchange="processChange()"
+									disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+									onkeypress="return event.keyCode != 13" style="width:95%"
+									update="exerciseEdit:step" />
+							</f:facet>
+						</p:inplace>
+					</p:column>
+					<p:column id="columnUploadDate"
+						headerText="#{msg['global.uploadTimestamp']}" width="130"
+						sortBy="#{file.uploadTimestamp}">
+						<j:outputTimestamp value="#{file.uploadTimestamp}"
+							converter="shortTimestampConverter" />
+					</p:column>
+					<p:column id="columnUploadedBy"
+						headerText="#{msg['global.fileUploadedByUser']}" width="100"
+						sortBy="#{file.lastEditor}">
+						<h:outputText value="#{file.lastEditor.loginName}" />
+					</p:column>
+                    <p:column id="columnPlaceholders" width="120"
+                        rendered="#{not (exerciseEditView.exercise.getVariableDeclarations().isEmpty())}">
+                      <f:facet name="header">
+                      <h:outputText value="#{msg['exerciseEdit.fileReplacePlaceholders']}" />
+                        <j:helperTooltip
+                          id="fileReplacePlaceholdersHint"
+                          tooltip="#{msg['exerciseEdit.fileReplacePlaceholders.hint']}" />
+                      </f:facet>
+                      <p:selectBooleanCheckbox
+                        id="replacePlaceholdersCheckbox"
+                        value="#{file.replacePlaceholder}"
+                        disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+                        onchange="processChange()" />
+                    </p:column>
+					<p:column id="columnActions" headerText="#{msg['global.actions']}"
+             	        exportable="false"
+                        width="70"
+                        style="text-align:center;">
+
+                        <p:menuButton
+                            id="actions"
+                            icon="fas fa-ellipsis-h"
+                            styleClass="flat-button"
+                            menuStyleClass="ui-menu-nolinebreakfix">
+                  
+						<p:menuitem id="cbRemoveResource"
+							update="exerciseResources exerciseEdit:step" icon="fa fa-trash-o fa-xs"
+							disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+							actionListener="#{exerciseEditView.removeExerciseResource(file)}"
+							value="#{msg['global.remove']}" oncomplete="processChange()" />
+						<p:menuitem id="cbDownloadResource" icon="fa fa-download fa-xs"
+							ajax="false" value="#{msg['global.download']}">
+							<p:fileDownload
+								value="#{exerciseEditView.getExerciseResource(file)}" />
+						</p:menuitem>
+                        <p:menuitem id="cbReplaceResource" icon="fas fa-pen fa-xs"
+                             value="#{msg['global.replace']}" actionListener="#{exerciseEditView.setSelectedFile(file)}"
+                             onclick="PF('fileReplaceForm').chooseButton.click()"
+                             disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}">
+                        </p:menuitem>
+                        </p:menuButton>
+					</p:column>
+				</p:dataTable>
+                <p:fileUpload id="fileReplaceForm" mode="advanced" auto="true"
+                      widgetVar="fileReplaceForm"
+                      styleClass="hidden-file-replace"
+                      oncomplete="processChange()"
+                      listener="#{exerciseEditView.handleFileReplacement}"
+                      update="exerciseEdit:files exerciseEdit:step globalGrowl" />
+			</p:panel>
+			<!-- end of files -->
+
+      <!-- statistics -->
+      <p:panel
+        id="statistics"
+        header="#{msg['statistics']}"
+        toggleable="true" collapsed="false">
+        <h:outputText
+          styleClass="fas fa-circle-notch fa-spin fa-lg"
+          style="margin: 10px auto;"
+          rendered="#{!exerciseEditView.lazyDataLoaded}" />
+
+        <h:panelGrid
+          id="statisticsTable"
+          columns="2"
+          rendered="#{exerciseEditView.lazyDataLoaded}">
+          <h:panelGrid
+            id="statisticsGrid"
+            columns="2"
+            styleClass="align-top">
+            <p:panelGrid
+              id="statisticsParticipants"
+              columns="2"
+              styleClass="ui-panelgrid-blank">
+              <h:outputLabel value="#{msg['statistics.submissions']}:" />
+              <h:outputText id="submissionCount" value="#{exerciseEditView.nonTestingsubmissionCount}" />
+              <!-- TODO Add more statistics -->
+            </p:panelGrid>
+            <p:panelGrid
+              id="statisticsAverage"
+              columns="2"
+              styleClass="ui-panelgrid-blank">
+              <h:outputLabel
+                style="font-weight:bold"
+                value="#{msg['statistics.unreadComments']}:"
+                rendered="#{exerciseEditView.numberOfUnreadComments > 0}" />
+              <h:outputText
+                style="font-weight:bold"
+                value="#{exerciseEditView.numberOfUnreadComments}"
+                rendered="#{exerciseEditView.numberOfUnreadComments > 0}" />
+              <!-- TODO Add more statistics -->
+            </p:panelGrid>
+          </h:panelGrid>
+          <p:linkButton
+            id="toExerciseSubmissions"
+            outcome="#{viewId.exerciseSubmissions}"
+            value="#{msg['statistics.showDetails']}"
+            disabled="#{!exerciseEditView.newestRevision}"
+            icon="fas fa-poll-h fa-sm">
+            <f:param
+              name="exercise"
+              value="#{exerciseEditView.exerciseId}" />
+          </p:linkButton>
+        </h:panelGrid>
+        <h:outputFormat
+          id="testSubmissionsHint"
+          value="#{msg['statistics.testSubmissionsPresent']}"
+          rendered="#{exerciseEditView.testingSubmissionCount > 0}"
+          style="margin: 0 16px;">
+          <f:param value="#{exerciseEditView.testingSubmissionCount}" />
+        </h:outputFormat>
+      </p:panel>
+      <!-- end of statistics -->
+			<!-- tags dialog -->
+			<p:dialog id="exerciseTags" header="#{msg['global.exercises']}"
+				widgetVar="showExercisesForThisTag" minHeight="40" resizable="false"
+				width="500px">
+				<p:dataTable id="dtExercisesForTag"
+					value="#{exerciseEditView.exercisesForThisTag}" var="exerciseTag">
+					<p:column id="headerTextExercises"
+						headerText="#{msg['global.exercises']}">
+						<p:link id="linkExerciseEdit" outcome="#{viewId.exerciseEditor}"
+							value="#{exerciseTag.name}">
+							<f:param name="exercise" value="#{exerciseTag.id}" />
+						</p:link>
+					</p:column>
+					<p:column id="headerTextFolder"
+						headerText="#{msg['global.folder']}">
+						<h:outputText value="#{exerciseEditView.getExercisebreadcrumbAsString(exerciseTag)}" />
+					</p:column>
+				</p:dataTable>
+			</p:dialog>
+			<!-- end of tags dialog -->
+
+			<!-- file dialog -->
+			<p:dialog id="fileDialog" header="#{exerciseEditView.currentFile.id}"
+				widgetVar="fileDialog" minHeight="40">
+			</p:dialog>
+			<!-- end of file dialog -->
+
+			<p:remoteCommand global="false"
+				actionListener="#{exerciseEditView.loadLazyExerciseData}"
+				name="loadLazyData" id="lld" autoRun="true"
+				update="exerciseEdit:revision exerciseEdit:revisionPanel exerciseEdit:step exerciseEdit:statistics exerciseEdit:tb"
+                oncomplete="if (document.getElementById('exerciseEdit:saveExercise')) {PF('saveExerciseButton').disable();}"
+				process="@this" />
+		</h:form>
+	</ui:define>
+</ui:composition>

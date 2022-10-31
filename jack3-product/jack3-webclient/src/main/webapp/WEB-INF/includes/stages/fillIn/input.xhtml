@@ -1,0 +1,81 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:c="http://java.sun.com/jsp/jstl/core">
+
+  <h:head />
+
+  <c:forEach
+    items="#{exercisePlayerView.getStageSubmissionViewBean(stageSubmission).getFillInSubmissionViewFields()}"
+    var="fillInSubmissionViewField"
+    varStatus="loopStatus">
+    <p:outputLabel
+      style="vertical-align:middle"
+      value="#{fillInSubmissionViewField.getTaskDescription()}"
+      rendered="#{fillInSubmissionViewField.getFieldType() == 'TYPE_TASK_DESCRIPTION'}"
+      escape="false" />
+
+    <h:inputTextarea
+      id="stage_#{stageIndex}_textarea_#{loopStatus.index}"
+      value="#{fillInSubmissionViewField.submissionField.userInput}"
+      rendered="#{fillInSubmissionViewField.getFieldType() == 'TYPE_MATHDOX_FIELD'}"
+      class="mathdoxformula mathdoxnopalette"
+      disabled="#{(exercisePlayerView.isReviewMode()) 
+      or not (exercisePlayerView.isCurrentStage(stageSubmission)) 
+      or (exercisePlayerView.submission.isCompleted()) 
+      or not (exerciseEditView.newestRevision)}"/>
+
+    <p:inputText
+      id="stage_#{stageIndex}_text_#{loopStatus.index}"
+      style="vertical-align:middle"
+	  size="#{fillInSubmissionViewField.submissionField.getSize()}"
+      value="#{fillInSubmissionViewField.submissionField.userInput}"
+      rendered="#{fillInSubmissionViewField.getFieldType() == 'TYPE_FILL_IN_FIELD'}"
+      disabled="#{(exercisePlayerView.isReviewMode()) 
+      or not (exercisePlayerView.isCurrentStage(stageSubmission)) 
+      or (exercisePlayerView.submission.isCompleted()) 
+      or not (exerciseEditView.newestRevision)}"
+      onkeypress="if (event.keyCode == 13) { return false; }"/>
+
+    <p:selectOneMenu
+      effectSpeed="fast"
+      style="vertical-align:middle"
+      value="#{fillInSubmissionViewField.submissionField.userInput}"
+      rendered="#{fillInSubmissionViewField.getFieldType() == 'TYPE_DROP_DOWN_FIELD'}"
+      disabled="#{(exercisePlayerView.isReviewMode()) 
+      or not (exercisePlayerView.isCurrentStage(stageSubmission)) 
+      or (exercisePlayerView.submission.isCompleted()) 
+      or not (exerciseEditView.newestRevision)}"
+      height="100vh"
+      onkeypress="if (event.keyCode == 13) { return false; }">
+      <f:selectItem
+        itemValue="#{null}"
+        itemLabel=""
+        noSelectionOption="true" />
+      <f:selectItems
+        value="#{fillInSubmissionViewField.submissionField.getItems()}"
+        itemEscaped="false"
+        itemLabelEscaped="false" />
+    </p:selectOneMenu>
+  </c:forEach>
+
+  <!-- This script configures the editor's palette in the current stage. -->
+  <c:if test="#{exercisePlayerView.isCurrentStage(stageSubmission)}">
+    <c:set var="formulaEditorPalette" value="/js/formulaeditor/palettes/#{exercisePlayerView.getStageSubmissionViewBean(stageSubmission).getFormularEditorPalette()}"/>
+    <h:outputScript>
+      org.mathdox.formulaeditor.options.paletteURL = "#{resource[formulaEditorPalette]}";
+      org.mathdox.formulaeditor.options.useBar =#{exercisePlayerView.getStageSubmissionViewBean(stageSubmission).isFormularEditorPaletteInUse()};
+    </h:outputScript>
+  </c:if>
+  
+  <!-- This script triggers reinitialization of all formula editor fields. -->
+  <h:outputScript>
+    if (org.mathdox.formulaeditor.FormulaEditor) {
+      org.mathdox.formulaeditor.FormulaEditor.updateByTextAreas(true);
+    }
+  </h:outputScript>
+
+</ui:composition>

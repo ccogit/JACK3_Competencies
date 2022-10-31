@@ -1,0 +1,14 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="jack3-webclient:war">
+    <output-path>$PROJECT_DIR$/jack3-product/jack3-webclient/target</output-path>
+    <properties id="maven-jee-properties">
+      <options>
+        <module>jack3-webclient</module>
+        <packaging>war</packaging>
+      </options>
+    </properties>
+    <root id="archive" name="jack3-webclient.war">
+      <element id="artifact" artifact-name="jack3-webclient:war exploded" />
+    </root>
+  </artifact>
+</component>

@@ -1,0 +1,97 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:c="http://java.sun.com/jsp/jstl/core"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:p="http://primefaces.org/ui"
+  template="../WEB-INF/templates/template.xhtml">
+
+  <ui:define name="content">
+    <f:metadata>
+      <f:viewAction
+        action="#{setupView.doFirstTimeSetup}"
+        immediate="true" />
+      <f:viewAction
+        action="#{registerView.ensureRegistrationIsEnabled()}"
+        immediate="true" />
+    </f:metadata>
+
+    <ui:include page="/WEB-INF/includes/loggedIn.xhtml"/>
+
+    <c:if test="#{empty userSession.currentUser}">
+
+      <p:panel id="loginPanel" header="#{msg['global.login']}">
+        <h:outputFormat escape="false"
+          value="#{msg['registrationView.loginHint']}">
+          <f:param value="#{viewId.login.toActionUrl()}"/>
+        </h:outputFormat>
+      </p:panel> 
+
+      <p:panel id="registerPanel" header="#{msg['global.register']}">
+        <h:form id="registerForm">
+          <h:panelGrid
+            columns="2"
+            cellpadding="5">
+            <p:outputLabel id="registerEmailLabel"
+              for="registerEmail"
+              value="#{msg['global.email']}:"/>
+            <p:inputText
+              id="registerEmail"
+              value="#{registerView.email}"
+              placeholder="#{msg['global.email']}"
+              autocomplete="email"
+              required="true"
+              requiredMessage="#{msg['registrationView.requiredMail']}"
+              validator="custom.emailValidator"
+              validatorMessage="#{msg['registrationView.invalidMail']}">
+              <f:validateRegex pattern="#{registerView.emailPattern}"/>
+           </p:inputText>
+              
+
+          <c:forEach items="#{registerView.mandatoryProfileFields}" var="field" varStatus="status">
+          	<p:outputLabel for="profileField#{status.index}"
+          	  value="#{field.name}:"/>
+          	<p:inputText id="profileField#{status.index}"
+          	  label="#{field.name}"
+          	  value="#{registerView.profileFieldValues[field]}"
+          	  placeholder="#{field.name}"
+          	  required="true"
+          	  requiredMessage="#{field.name}: #{msg['registrationView.requiredField']}"
+          	  validatorMessage="#{field.name}: #{msg['registrationView.invalidField']}">
+          	  <c:if test="#{not empty field.validationRegex}">
+          	  	<f:validateRegex pattern="#{field.validationRegex}"/>
+          	  </c:if>
+          	</p:inputText>
+          </c:forEach>
+
+          <h:outputText/>
+          <h:panelGrid columns="2">
+            <p:selectBooleanCheckbox id="privacyPolicyConsent"
+              required="true"
+              validator="custom.acceptanceValidator"
+              validatorMessage="#{msg['registrationView.acceptanceRequired']}"/>
+            <p:outputLabel for="privacyPolicyConsent" > 
+              <h:outputFormat value="#{msg['registrationView.privacyPolicyConsent']}" escape="false">
+                <f:param value="#{viewId.privacyPolicy.toActionUrl()}" />
+              </h:outputFormat>
+            </p:outputLabel>
+          </h:panelGrid>
+
+          <h:outputText/>
+          <p:commandButton
+          	ajax="false"
+            id="registerButton"
+            value="#{msg['global.login']}"
+            action="#{registerView.doRegister}"
+            update="globalGrowl"/>
+          </h:panelGrid>
+
+        </h:form>
+        <p:blockUI block="registerPanel" trigger="registerForm:registerButton"/>
+      </p:panel>
+
+    </c:if>
+
+  </ui:define>
+</ui:composition>

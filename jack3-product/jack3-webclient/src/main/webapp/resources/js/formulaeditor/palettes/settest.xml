@@ -1,0 +1,10 @@
+<OMOBJ version='2.0' xmlns='http://www.openmath.org/OpenMath'>
+  <OMA>
+    <OMS cd='editor1' name='palette'/>
+    <OMA>
+    	<OMS cd='editor1' name='palette_row'/>
+    	<OMS cd='set1' name='in'/>
+    	<OMS cd='set1' name='notin'/>
+    </OMA>
+  </OMA>
+</OMOBJ>

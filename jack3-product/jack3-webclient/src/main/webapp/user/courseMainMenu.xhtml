@@ -1,0 +1,442 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:j="http://jack.s3.uni-due.de/ui-elements"
+  template="/WEB-INF/templates/template.xhtml">
+
+  <ui:define name="metadata">
+    <f:metadata>
+      <f:viewParam
+        name="courseOffer"
+        value="#{courseMainMenuView.courseOfferId}" />
+      <f:viewParam
+        name="redirect"
+        value="#{courseMainMenuView.redirectEnabled}" />
+      <f:viewParam
+        name="exerciseId"
+        value="#{courseMainMenuView.maybeExerciseId}" />
+      <f:viewAction action="#{courseMainMenuView.init}" />
+    </f:metadata>
+  </ui:define>
+
+  <ui:define name="content">
+
+    <h:outputStylesheet
+      library="jack"
+      name="css/enrollmentInfo.css" />
+
+    <h:form
+      id="headerForm"
+      styleClass="ui-widget">
+      <p:breadCrumb model="#{userSession.model}" />
+
+      <h3>#{courseMainMenuView.courseOffer.name}</h3>
+      <p>
+        <h:outputText
+          value="#{courseMainMenuView.courseOffer.publicDescription}"
+          escape="false"
+          rendered="#{courseMainMenuView.interactable}" />
+      </p>
+
+      <h:outputText
+        value="#{msg['courseMainMenu.notInteractable']} "
+        rendered="#{not courseMainMenuView.interactable}" />
+      <p:link
+        outcome="#{viewId.availableCourses}"
+        rendered="#{not courseMainMenuView.interactable}">#{msg['global.backToStart']}
+      </p:link>
+
+    </h:form>
+
+    <!-- Information about the enrollment, shown if explicit enrollment is enabled -->
+    <h:form id="enrollmentForm">
+      <p:panel
+        id="enrollmentPanel"
+        header="#{msg['courseMainMenu.enrollment']}"
+        style="margin-bottom:1em;"
+        rendered="#{courseMainMenuView.interactable and courseMainMenuView.courseOffer.explicitEnrollment}">
+        <h:panelGroup
+          id="enrollmentInfoBarEnrolled"
+          layout="block"
+          styleClass="enrollment-info big-info enrolled"
+          rendered="#{courseMainMenuView.enrolled}">
+          <h:outputText styleClass="fas fa-check-circle" />
+          <h:outputText value="#{msg['enum.EEnrollmentStatus.long.ENROLLED']}" />
+        </h:panelGroup>
+        <h:panelGroup
+          id="enrollmentInfoBarDisenrolled"
+          layout="block"
+          styleClass="enrollment-info big-info disenrolled"
+          rendered="#{courseMainMenuView.manuallyDisenrolled}">
+          <h:outputText styleClass="fas fa-times-circle" />
+          <h:outputText value="#{msg['enum.EEnrollmentStatus.long.DISENROLLED']}" />
+        </h:panelGroup>
+        <h:panelGroup
+          id="enrollmentInfoBarWaitingList"
+          layout="block"
+          styleClass="enrollment-info big-info onWaitingList"
+          rendered="#{courseMainMenuView.waiting}">
+          <h:outputText styleClass="fas fa-pause-circle" />
+          <h:outputText value="#{msg['enum.EEnrollmentStatus.long.ON_WAITINGLIST']}" />
+        </h:panelGroup>
+        <!-- Special case: The user is disenrolled because he/she has never interacted with the course-->
+        <h:panelGroup
+          id="enrollmentInfoBarNotInteracted"
+          layout="block"
+          styleClass="enrollment-info big-info notInteracted"
+          rendered="#{courseMainMenuView.disenrolled and not courseMainMenuView.manuallyDisenrolled}">
+          <h:outputText value="#{msg['courseMainMenu.enrollmentInfo.notInteracted']}" />
+        </h:panelGroup>
+
+        <!-- Basic information -->
+        <p:commandButton
+          id="showLogAction"
+          rendered="#{courseMainMenuView.enrollment.present}"
+          value="#{msg['courseMainMenu.enrollmentAction.showLog']}"
+          icon="fas fa-list"
+          oncomplete="PF('enrollmentLogDialog').show()"
+          update="enrollmentForm:enrollmentLogDialogWrapper"
+          style="float:right;"
+          styleClass="weaker-button button-white"
+          action="#{courseMainMenuView.loadEnrollmentLog()}" />
+        <p:panelGrid
+          id="details"
+          columns="2"
+          styleClass="ui-panelgrid-blank"
+          style="margin-bottom:16px">
+
+          <!-- Free places display -->
+          <h:outputText
+            rendered="#{not courseMainMenuView.hasUnlimitedFreePlaces()}"
+            value="#{msg['courseMainMenu.enrollmentInfo.freePlaces']}" />
+          <h:outputText
+            id="freePlacesDisplayy"
+            rendered="#{not courseMainMenuView.hasUnlimitedFreePlaces()}"
+            value="#{courseMainMenuView.freePlaces}" />
+
+          <!-- Enrollment start -->
+          <h:outputText
+            rendered="#{not empty courseMainMenuView.courseOffer.enrollmentStart}"
+            value="#{msg['courseMainMenu.enrollmentInfo.enrollmentStart']}" />
+          <j:outputTimestamp
+            id="enrollmentStartDisplay"
+            rendered="#{not empty courseMainMenuView.courseOffer.enrollmentStart}"
+            value="#{courseMainMenuView.courseOffer.enrollmentStart}"
+            converter="shortTimestampConverter" />
+
+          <!-- Enrollment deadline -->
+          <h:outputText
+            rendered="#{not empty courseMainMenuView.courseOffer.enrollmentDeadline}"
+            value="#{msg['courseMainMenu.enrollmentInfo.enrollmentDeadline']}" />
+          <j:outputTimestamp
+            id="enrollmentDeadlineDisplay"
+            rendered="#{not empty courseMainMenuView.courseOffer.enrollmentDeadline}"
+            value="#{courseMainMenuView.courseOffer.enrollmentDeadline}"
+            converter="shortTimestampConverter" />
+
+          <!-- Disenrollment deadline -->
+          <h:outputText
+            rendered="#{not empty courseMainMenuView.courseOffer.disenrollmentDeadline}"
+            value="#{msg['courseMainMenu.enrollmentInfo.disenrollmentDeadline']}" />
+          <j:outputTimestamp
+            id="disenrollmentDeadlineDisplay"
+            rendered="#{not empty courseMainMenuView.courseOffer.disenrollmentDeadline}"
+            value="#{courseMainMenuView.courseOffer.disenrollmentDeadline}"
+            converter="shortTimestampConverter" />
+
+          <!-- Enrolled / Disenrolled at / Waiting since -->
+          <h:outputText
+            rendered="#{courseMainMenuView.enrolled}"
+            value="#{msg['courseMainMenu.enrollmentInfo.enrolledAt']}" />
+          <h:outputText
+            rendered="#{courseMainMenuView.waiting}"
+            value="#{msg['courseMainMenu.enrollmentInfo.waitingSince']}" />
+          <h:outputText
+            rendered="#{courseMainMenuView.manuallyDisenrolled}"
+            value="#{msg['courseMainMenu.enrollmentInfo.disenrolledAt']}" />
+          <h:panelGroup
+            rendered="#{courseMainMenuView.enrolled or courseMainMenuView.waiting or courseMainMenuView.manuallyDisenrolled}">
+            <j:outputTimestamp
+              id="lastChangeDisplay"
+              value="#{courseMainMenuView.lastEnrollmentChange}"
+              converter="relativeTimestampConverter" />
+            <h:outputText
+              id="lastChangedManuallyDisplay"
+              styleClass="small-enrollment-info"
+              value=" #{courseMainMenuView.additionalEnrollmentMsg}"
+              escape="false" />
+          </h:panelGroup>
+
+        </p:panelGrid>
+
+        <!-- Further information -->
+        <p>
+          <h:outputText
+            id="enrollmentErrorMessage"
+            value="#{courseMainMenuView.enrollmentErrorMsg}" />
+          <h:outputText
+            id="disenrollmentErrorMessage"
+            value="#{courseMainMenuView.disenrollmentErrorMsg}" />
+        </p>
+        <p>
+          <h:outputText
+            id="disenrollmentOpenSubmissionWarning"
+            rendered="#{courseMainMenuView.openCourseRecord.present and courseMainMenuView.allowDisenroll}"
+            value="#{msg['courseMainMenu.enrollmentInfo.disenrollOpenSubmissionWarning']}" />
+        </p>
+        <p>
+          <h:outputText
+            id="waitingMoveUpMessage"
+            rendered="#{courseMainMenuView.waiting and not courseMainMenuView.enrollmentDeadlineOver}"
+            value="#{msg['courseMainMenu.enrollmentInfo.onWaitingListMoveUpPossible']}" />
+          <h:outputText
+            id="waitingNoMoveUpMessage"
+            rendered="#{courseMainMenuView.waiting and courseMainMenuView.enrollmentDeadlineOver}"
+            value="#{msg['courseMainMenu.enrollmentInfo.onWaitingListMoveUpNotPossible']}" />
+        </p>
+
+        <!-- Actions -->
+        <p:password
+          id="globalPasswortInput"
+          rendered="#{courseMainMenuView.globalPasswordRequired and (courseMainMenuView.allowEnroll or courseMainMenuView.allowJoinWaitingList)}"
+          value="#{courseMainMenuView.globalPassword}"
+          placeholder="#{msg['courseMainMenu.enrollmentAction.password']}"
+          style="margin-right: 16px; width: 300px" />
+
+        <p:commandButton
+          id="enrollAction"
+          rendered="#{courseMainMenuView.allowEnroll}"
+          value="#{msg['courseMainMenu.enrollmentAction.enroll']}"
+          update="headerForm enrollmentForm submissionForm reviewForm globalGrowl"
+          action="#{courseMainMenuView.enroll}"
+          onstart="PF('globalSpinner').show()"
+          oncomplete="PF('globalSpinner').hide()" />
+        <p:commandButton
+          id="joinWaitingListAction"
+          rendered="#{courseMainMenuView.allowJoinWaitingList}"
+          value="#{msg['courseMainMenu.enrollmentAction.joinWaitingList']}"
+          update="headerForm enrollmentForm submissionForm reviewForm globalGrowl"
+          action="#{courseMainMenuView.joinWaitingList}"
+          onstart="PF('globalSpinner').show()"
+          oncomplete="PF('globalSpinner').hide()" />
+        <p:commandButton
+          id="disenrollAction"
+          rendered="#{courseMainMenuView.allowDisenroll}"
+          value="#{msg['courseMainMenu.enrollmentAction.disenroll']}"
+          update="headerForm enrollmentForm submissionForm reviewForm globalGrowl"
+          action="#{courseMainMenuView.disenroll}"
+          onstart="PF('globalSpinner').show()"
+          oncomplete="PF('globalSpinner').hide()" />
+      </p:panel>
+
+      <h:panelGroup id="enrollmentLogDialogWrapper">
+        <ui:include src="/WEB-INF/includes/dialogs/enrollmentLog.xhtml">
+          <ui:param
+            name="log"
+            value="#{courseMainMenuView.enrollmentLog}" />
+          <ui:param
+            name="lecturerMode"
+            value="false" />
+        </ui:include>
+      </h:panelGroup>
+    </h:form>
+
+    <!-- Information about submission, shown if submission is enabled -->
+    <h:form id="submissionForm">
+      <p:panel
+        id="submissionPanel"
+        header="#{msg['courseMainMenu.submission']}"
+        style="margin-bottom:1em;"
+        rendered="#{courseMainMenuView.interactable and courseMainMenuView.showSubmissionForm}">
+
+        <!-- Basic information -->
+        <p:panelGrid
+          id="details"
+          columns="2"
+          styleClass="ui-panelgrid-blank"
+          style="margin-bottom:16px">
+
+          <!-- Submission start -->
+          <h:outputText
+            rendered="#{not empty courseMainMenuView.courseOffer.submissionStart}"
+            value="#{msg['courseMainMenu.submissionInfo.start']}" />
+          <j:outputTimestamp
+            id="submissionStartDisplay"
+            rendered="#{not empty courseMainMenuView.courseOffer.submissionStart}"
+            value="#{courseMainMenuView.courseOffer.submissionStart}"
+            converter="shortTimestampConverter" />
+
+          <!-- Submission deadline (global or individual) -->
+          <h:outputText
+            rendered="#{not empty courseMainMenuView.submissionDeadline}"
+            value="#{msg['courseMainMenu.submissionInfo.deadline']}" />
+          <j:outputTimestamp
+            id="submissionDeadlineDisplay"
+            rendered="#{not empty courseMainMenuView.submissionDeadline}"
+            value="#{courseMainMenuView.submissionDeadline}"
+            converter="shortTimestampConverter" />
+
+          <!-- Time limit -->
+          <h:outputText
+            rendered="#{not courseMainMenuView.courseOffer.timeLimit.zero}"
+            value="#{msg['courseMainMenu.submissionInfo.timelimit']}" />
+          <h:outputText
+            id="timeLimitDisplay"
+            rendered="#{not courseMainMenuView.courseOffer.timeLimit.zero}"
+            value="#{courseMainMenuView.courseOffer.timeLimitInMinutes} #{msg['global.minutes']}" />
+
+          <!-- Open submission started -->
+          <h:outputText
+            rendered="#{courseMainMenuView.openCourseRecord.present}"
+            value="#{msg['courseMainMenu.submissionInfo.started']}" />
+          <j:outputTimestamp
+            id="openSubmissionStartDisplay"
+            rendered="#{courseMainMenuView.openCourseRecord.present}"
+            value="#{courseMainMenuView.openCourseRecord.get().startTime}"
+            converter="relativeTimestampConverter" />
+
+          <!-- Last visited -->
+          <h:outputText
+            rendered="#{courseMainMenuView.openCourseRecord.present}"
+            value="#{msg['courseMainMenu.submissionInfo.lastVisit']}" />
+          <j:outputTimestamp
+            id="openSubmissionLastVisitDisplay"
+            rendered="#{courseMainMenuView.openCourseRecord.present}"
+            value="#{courseMainMenuView.openCourseRecord.get().lastVisit}"
+            converter="relativeTimestampConverter"
+            showNever="true" />
+
+        </p:panelGrid>
+
+        <!-- Further information -->
+        <p>
+          <h:outputText
+            id="submissionStartErrorMessage"
+            value="#{courseMainMenuView.submissionStartErrorMsg}" />
+        </p>
+        <p>
+          <h:outputText
+            id="startMessage"
+            rendered="#{courseMainMenuView.allowStart}"
+            value="#{msg['courseMainMenu.submissionInfo.startMessage']}" />
+          <h:outputFormat
+            id="startMessageDeadline"
+            rendered="#{courseMainMenuView.allowStart and not courseMainMenuView.courseOffer.timeLimit.zero}"
+            value=" #{msg['courseMainMenu.submissionInfo.startMessageTimeLimit']}">
+            <f:param value="#{courseMainMenuView.courseOffer.timeLimitInMinutes}" />
+          </h:outputFormat>
+        </p>
+        <p>
+          <h:outputText
+            id="continueMessage"
+            rendered="#{courseMainMenuView.allowContinue}"
+            value="#{msg['courseMainMenu.submissionInfo.continueMessage']}" />
+        </p>
+        <p>
+          <h:outputText
+            id="personalPasswordMessage"
+            rendered="#{courseMainMenuView.personalPasswordRequired and (courseMainMenuView.allowStart or courseMainMenuView.allowContinue)}"
+            value="#{msg['courseMainMenu.submissionInfo.passwordRequired']}" />
+        </p>
+
+        <!-- Actions -->
+        <p:password
+          id="personalPasswordInput"
+          rendered="#{courseMainMenuView.personalPasswordRequired and (courseMainMenuView.allowStart or courseMainMenuView.allowContinue)}"
+          value="#{courseMainMenuView.personalPassword}"
+          placeholder="#{msg['courseMainMenu.submissionAction.password']}"
+          style="margin-right: 16px; width: 300px" />
+
+        <p:commandButton
+          id="startAction"
+          rendered="#{courseMainMenuView.allowStart}"
+          value="#{msg['courseMainMenu.submissionAction.start']}"
+          icon="fas fa-play fa-sm"
+          update="headerForm enrollmentForm submissionForm reviewForm globalGrowl"
+          action="#{courseMainMenuView.startCourse}"
+          onstart="PF('globalSpinner').show()"
+          oncomplete="PF('globalSpinner').hide()" />
+        <p:commandButton
+          id="continueAction"
+          rendered="#{courseMainMenuView.allowContinue}"
+          value="#{msg['courseMainMenu.submissionAction.continue']}"
+          icon="fas fa-arrow-right fa-sm"
+          iconPos="right"
+          update="headerForm enrollmentForm submissionForm reviewForm globalGrowl"
+          action="#{courseMainMenuView.continueCourse}"
+          onstart="PF('globalSpinner').show()"
+          oncomplete="PF('globalSpinner').hide()" />
+
+      </p:panel>
+    </h:form>
+
+    <!-- Information about old participations -->
+    <h:form id="reviewForm">
+      <p:dataTable
+        id="reviewTable"
+        var="record"
+        value="#{courseMainMenuView.oldCourseRecords}"
+        rendered="#{courseMainMenuView.interactable and not empty courseMainMenuView.oldCourseRecords}"
+        scrollable="true"
+        scrollHeight="500">
+        <f:facet name="header">#{msg['courseMainMenu.oldParticipations']}</f:facet>
+        <p:column
+          id="startedColumn"
+          headerText="#{msg['courseMainMenu.oldParticipations.begun']}">
+          <j:outputTimestamp
+            id="submissionStarted"
+            value="#{record.startTime}"
+            converter="relativeTimestampConverter" />
+          <h:outputText
+            id="submissionStartedAdditionalMessage"
+            styleClass="small-enrollment-info"
+            value=" #{courseMainMenuView.getAdditionalSubmissionMsg(record)}"
+            escape="false" />
+        </p:column>
+        <p:column
+          id="lastVisitColumn"
+          headerText="#{msg['courseOffer.lastVisit']}"
+          width="200">
+          <j:outputTimestamp
+            id="lastVisited"
+            value="#{record.lastVisit}"
+            converter="relativeTimestampConverter"
+            showNever="true" />
+        </p:column>
+        <p:column
+          id="scoreColumn"
+          headerText="#{msg['global.score']}"
+          rendered="#{courseMainMenuView.courseOffer.showResultInCourseResults}"
+          width="100">
+          <div style="text-align: right">
+            <h:outputText
+              id="score"
+              value="#{record.resultPoints} %" />
+          </div>
+        </p:column>
+        <p:column
+          id="reviewColumn"
+          style="text-align: center"
+          width="100">
+          <p:linkButton
+            id="courseRecordReviewButton"
+            icon="fas fa-search fa-sm"
+            value="#{msg['global.details']}"
+            outcome="#{viewId.courseRecordSubmissions}">
+            <f:param
+              name="courseRecord"
+              value="#{record.id}" />
+            <f:param
+              name="courseOffer"
+              value="#{courseMainMenuView.courseOfferId}" />
+          </p:linkButton>
+        </p:column>
+      </p:dataTable>
+
+    </h:form>
+
+  </ui:define>
+</ui:composition>

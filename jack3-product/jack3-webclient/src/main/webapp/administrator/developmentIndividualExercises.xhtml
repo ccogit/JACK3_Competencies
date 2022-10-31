@@ -1,0 +1,119 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+	<h3>Beispielaufgaben und -kurse</h3>
+
+	<p:commandButton id="createAllSampleExercises"
+		value="Alle Beispielaufgaben erzeugen"
+		action="#{developmentView.createAllSampleExercises()}"
+		style="margin-bottom:20px" update="globalGrowl"
+		onstart="PF('globalSpinner').show()"
+		oncomplete="PF('globalSpinner').hide()" />
+
+	<p:panelGrid columns="2" styleClass="ui-panelgrid-blank">
+		<h:outputText value="Zugeordneter Benutzer" />
+		<p:selectOneMenu id="sampleExerciseUserMenu"
+			value="#{developmentView.sampleExerciseAuthor}"
+			converter="userConverter">
+			<f:selectItem itemLabel="Aktuell angemeldeter Benutzer"
+				noSelectionOption="true" itemValue="#{userSession.currentUser}" />
+			<f:selectItems value="#{developmentView.allUsersWithEditRights}"
+				itemLabel="#{user.loginName}" var="user" />
+		</p:selectOneMenu>
+	</p:panelGrid>
+
+	<p:fieldset id="pgDevelopmentSampleExercise1" legend="Beispielaufgaben"
+		toggleable="true" collapsed="true">
+
+		<h4>JACK</h4>
+		<p>Eine simple Beispielaufgabe, bestehend aus einer
+			Multiple-Choice-Frage und einer einfachen Addition mit zwei
+			Zufallszahlen, jeweils mit Feedback.</p>
+		<p:commandButton id="createSampleExercise1" value="Aufgabe erzeugen"
+			action="#{developmentView.createSampleExercise(1)}"
+			update="globalGrowl" onstart="PF('globalSpinner').show()"
+			oncomplete="PF('globalSpinner').hide()" />
+		<hr />
+
+		<h4>Einfache Mengenlehre</h4>
+		<p>Einfache Fragen zur Mengenlehre (leere Menge und Potenzmengen).</p>
+		<p:commandButton id="createSampleExercise2" value="Aufgabe erzeugen"
+			action="#{developmentView.createSampleExercise(2)}"
+			update="globalGrowl" onstart="PF('globalSpinner').show()"
+			oncomplete="PF('globalSpinner').hide()" />
+		<hr />
+
+		<h4>Rechentabellen</h4>
+		<p>Multiplikation, Addition und Restklassenaddition in Tabellen.</p>
+		<p:commandButton id="createSampleExercise3" value="Aufgabe erzeugen"
+			action="#{developmentView.createSampleExercise(3)}"
+			update="globalGrowl" onstart="PF('globalSpinner').show()"
+			oncomplete="PF('globalSpinner').hide()" />
+		<hr />
+
+		<h4>Städte &amp; Länder</h4>
+		<p>Eine Beispielaufgabe für nicht-lineare Aufgaben: Zuerst muss
+			ein Bundesland ausgewählt werden, auf das sich die Fragen beziehen.
+			Zur Auswahl stehen Nordrhein-Westfalen, Bayern und Bremen.
+			Anschließend wird in Multiple-Choice-Stufen nach Städten in dem
+			Bundesland und der Hauptstadt gefragt.</p>
+		<p:commandButton id="createSampleExercise4" value="Aufgabe erzeugen"
+			action="#{developmentView.createSampleExercise(4)}"
+			update="globalGrowl" onstart="PF('globalSpinner').show()"
+			oncomplete="PF('globalSpinner').hide()" />
+
+		<h4>(R) Mittelwert berechnen</h4>
+		<p>
+			In dieser Aufgabe soll die R-Funktion <strong>mean</strong> auf den
+			angegebenen Datensatz anwendet werden, um den Mittelwert der Daten zu
+			finden.
+		</p>
+		<p:commandButton id="createSampleExercise5" value="Aufgabe erzeugen"
+			action="#{developmentView.createSampleExercise(5)}"
+			update="globalGrowl" onstart="PF('globalSpinner').show()"
+			oncomplete="PF('globalSpinner').hide()" />
+        <hr />
+        
+        <h4>Add Numbers (Python)</h4>
+        <p>
+          Eine Beispielaufgabe in Python. Es soll eine simple <strong>add</strong> Funktion definiert werden.
+        </p>
+        <p:commandButton id="createSampleExercise6" value="Aufgabe erzeugen"
+          action="#{developmentView.createSampleExercise(6)}"
+          update="globalGrowl" onstart="PF('globalSpinner').show()"
+          oncomplete="PF('globalSpinner').hide()" />
+        <hr />
+        
+        <h4>Demoprojekt (Java)</h4>
+        <p>
+          Eine Beispielaufgabe in Java.
+        </p>
+        <p:commandButton id="createSampleExercise7" value="Aufgabe erzeugen"
+          action="#{developmentView.createSampleExercise(7)}"
+          update="globalGrowl" onstart="PF('globalSpinner').show()"
+          oncomplete="PF('globalSpinner').hide()" />
+        <hr />
+        
+        <h4>UML Test</h4>
+        <p>
+          Eine UML Beispielaufgabe.
+        </p>
+        <p:commandButton id="createSampleExercise8" value="Aufgabe erzeugen"
+          action="#{developmentView.createSampleExercise(8)}"
+          update="globalGrowl" onstart="PF('globalSpinner').show()"
+          oncomplete="PF('globalSpinner').hide()" />
+          <hr />
+          
+        <h4>Essigsäure</h4>
+        <p>
+          Eine Molecule-Stage Beispielaufgabe. Es soll die Skelettformel von Essigsäure angegeben werden. 
+        </p>
+        <p:commandButton id="createSampleExercise98" value="Aufgabe erzeugen"
+          action="#{developmentView.createSampleExercise(9)}"
+          update="globalGrowl" onstart="PF('globalSpinner').show()"
+          oncomplete="PF('globalSpinner').hide()" />
+	</p:fieldset>
+</ui:composition>

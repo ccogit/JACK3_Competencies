@@ -1,0 +1,111 @@
+<!-- A tree with all ContentFolders and Exercises -->
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:p="http://primefaces.org/ui">
+
+  <p:importConstants
+    type="de.uni_due.s3.jack3.beans.courseedit.ExerciseTreeView"
+    var="Constants" />
+
+  <h:panelGroup
+    style="text-align: center; margin: 4px 4px 0 4px; display: block;"
+    layout="block">
+    <p:selectBooleanButton
+      id="#{id}tagSwitch"
+      value="#{userSession.showContentTags}"
+      onLabel="#{msg['start.showTags']}"
+      offLabel="#{msg['start.showTags']}">
+      <p:ajax update="#{id}" />
+    </p:selectBooleanButton>
+  </h:panelGroup>
+
+  <p:tree
+    id="#{id}"
+    value="#{exerciseTreeView.root}"
+    var="doc"
+    draggable="false"
+    droppable="false"
+    dragdropScope="content"
+    selectionMode="checkbox"
+    style="border:none; width:100%"
+    disabled="#{courseEditView.readOnly}"
+    styleClass="fixed-tree-checkboxes"
+    showUnselectableCheckbox="false"
+    filterBy="#{exerciseTreeView.getSearchString(doc)}"
+    filterMatchMode="contains">
+
+    <!-- Reduced types, see ExerciseTreeView -->
+    <p:treeNode
+      id="exerciseNode"
+      type="#{Constants.TYPE_EXERCISE}"
+      icon="fas fa-pencil-alt fa-sm">
+      <h:outputText
+        id="exerciseName"
+        value="#{doc.name}" />
+      <h:panelGroup rendered="#{userSession.showContentTags and not exerciseTreeView.getTagsForExercise(doc).isEmpty()}">
+        <br />
+        <h:panelGroup style="max-width:100%; display:flex; flex-wrap: wrap;">
+          <p:repeat
+            value="#{exerciseTreeView.getTagsForExercise(doc)}"
+            var="tag"
+            id="tagList">
+            <h:outputText
+              value="#{tag}"
+              styleClass="colored-tag shortened"
+              title="#{tag}" />
+          </p:repeat>
+        </h:panelGroup>
+      </h:panelGroup>
+    </p:treeNode>
+
+    <p:treeNode
+      id="personalFolderNode"
+      type="#{Constants.TYPE_PERSONAL_FOLDER}"
+      expandedIcon="far fa-user-circle fa-sm"
+      collapsedIcon="fas fa-user-circle fa-sm">
+      <h:outputText
+        id="personalFolderName"
+        value="#{exerciseTreeView.getPersonalFolderName(doc)}" />
+    </p:treeNode>
+
+    <p:treeNode
+      id="sharedFolderNode"
+      type="#{Constants.TYPE_SHARED_FOLDER}"
+      expandedIcon="far fa-user fa-sm"
+      collapsedIcon="fas fa-user fa-sm">
+      <h:outputText
+        id="sharedFolderName"
+        value="#{exerciseTreeView.getPersonalFolderName(doc)}" />
+    </p:treeNode>
+
+    <p:treeNode
+      id="folderNode"
+      type="#{Constants.TYPE_NORMAL_FOLDER}"
+      expandedIcon="fas fa-folder-open fa-sm"
+      collapsedIcon="fas fa-folder fa-sm">
+      <h:outputText
+        id="folderName"
+        value="#{doc.name}" />
+    </p:treeNode>
+
+    <p:ajax
+      event="select"
+      listener="#{exerciseTreeView.onSelect}"
+      onsuccess="processChange()"
+      update="globalGrowl @this #{updateComponents}" />
+    <p:ajax
+      event="unselect"
+      listener="#{exerciseTreeView.onUnselect}"
+      onsuccess="processChange()"
+      update="globalGrowl @this #{updateComponents}" />
+    <p:ajax
+      event="expand"
+      listener="#{exerciseTreeView.onExpand}" />
+    <p:ajax
+      event="collapse"
+      listener="#{exerciseTreeView.onCollapse}" />
+  </p:tree>
+</ui:composition>

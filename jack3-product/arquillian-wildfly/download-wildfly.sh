@@ -1,0 +1,6 @@
+rm -rf "wildfly-current"
+rm "wildfly-25.0.0.Final.zip"
+wget "https://github.com/wildfly/wildfly/releases/download/25.0.0.Final/wildfly-25.0.0.Final.zip"
+unzip "wildfly-25.0.0.Final.zip"
+mv "wildfly-25.0.0.Final" "wildfly-current"
+rm "wildfly-25.0.0.Final.zip"

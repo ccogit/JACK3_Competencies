@@ -1,0 +1,552 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:c="http://java.sun.com/jsp/jstl/core"
+  xmlns:j="http://jack.s3.uni-due.de/ui-elements"
+  template="/WEB-INF/templates/template.xhtml">
+
+  <ui:define name="metadata">
+    <f:metadata>
+      <f:viewParam
+        name="courseOffer"
+        value="#{courseOfferParticipantsView.courseOfferId}" />
+      <f:viewParam
+        name="presentationFolder"
+        value="#{courseOfferParticipantsView.folderId}" />
+      <f:viewAction action="#{courseOfferParticipantsView.loadFullPage()}" />
+      <f:event
+        type="preRenderView"
+        listener="#{courseOfferParticipantsView.updateBreadCrumb()}" />
+    </f:metadata>
+  </ui:define>
+
+  <ui:define name="content">
+    <h:form id="courseOfferParticipantsMainForm">
+
+      <p:breadCrumb
+        id="breadCrumb"
+        model="#{userSession.model}" />
+
+<script type="text/javascript">
+function onReloadData() {
+	var icon = document.getElementById('courseOfferParticipantsMainForm:reloadData').getElementsByClassName("ui-icon")[0]
+	icon.classList.remove("fa-sync")
+	icon.classList.add("fa-spinner")
+	icon.classList.add("fa-spin")
+	PF('reloadDataButton').disable()
+}
+function afterReloadData() {
+	PF('reloadDataButton').enable()
+	var icon = document.getElementById('courseOfferParticipantsMainForm:reloadData').getElementsByClassName("ui-icon")[0]
+	icon.classList.remove("fa-spinner")
+	icon.classList.remove("fa-spin")
+	icon.classList.add("fa-sync")
+}
+</script>
+      <p:commandButton
+        id="reloadData"
+        value="#{msg['global.update']}"
+        icon="fas fa-sync"
+        onclick="onReloadData()"
+        oncomplete="afterReloadData()"
+        style="float:right; margin-top:1em;"
+        styleClass="weaker-button"
+        widgetVar="reloadDataButton"
+        update="headerPart mainPart"
+        action="#{courseOfferParticipantsView.update()}" />
+      <h3>#{msg['courseOfferParticipants']}</h3>
+
+      <h:panelGroup
+        id="headerPart"
+        layout="block">
+
+        <!-- Table with key figures -->
+        <c:choose>
+          <c:when test="#{not courseOfferParticipantsView.dataAvailable and courseOfferParticipantsView.folderMode}">
+            <p>#{msg['courseOfferParticipants.noDataAvailableFolderMode']}</p>
+          </c:when>
+          <c:when test="#{not courseOfferParticipantsView.dataAvailable}">
+            <p>#{msg['courseOfferParticipants.noAvailableCourseOfferMode']}</p>
+          </c:when>
+          <c:when test="#{not courseOfferParticipantsView.folderMode}">
+            <p:panel
+              header="#{msg['statistics']}"
+              style="margin-bottom:.5em;"
+              collapsed="#{userSession.statisticsStateHolder.toggleKeyFigures}"
+              toggleable="true">
+              <p:ajax
+                event="toggle"
+                listener="#{userSession.statisticsStateHolder.toggleKeyFigures}" />
+              <ui:include src="/WEB-INF/includes/courseOffer/statisticsTable.xhtml" />
+            </p:panel>
+          </c:when>
+          <c:otherwise>
+            <p>
+              #{msg['courseOfferParticipants.forCourseOffers']}:<br />#{courseOfferParticipantsView.courseOffersAsString}
+            </p>
+          </c:otherwise>
+        </c:choose>
+
+        <!-- Status for one user -->
+        <p:panel
+          header="#{msg['courseOfferParticipants.statusForUser']}"
+          style="margin-bottom:.5em;"
+          rendered="#{courseOfferParticipantsView.dataAvailable and courseOfferParticipantsView.showEnrollmentStatus}"
+          collapsed="#{userSession.statisticsStateHolder.toggleUserStatus}"
+          toggleable="true">
+          <p:ajax
+            event="toggle"
+            listener="#{userSession.statisticsStateHolder.toggleUserStatus}" />
+          <p:outputLabel
+            value="#{msg['global.username']}:"
+            for="@next"
+            style="margin-right:1em;" />
+          <p:autoComplete
+            id="userStatusAutocomplete"
+            value="#{courseOfferParticipantsView.enrollmentStatus}"
+            completeMethod="#{courseOfferParticipantsView.autocompleteUserStatus}"
+            minQueryLength="3"
+            var="enrollment"
+            itemLabel="#{courseOfferParticipantsView.getCachedPublicUsername(enrollment.user)}"
+            itemValue="#{enrollment}"
+            converter="jackEntityConverter"
+            style="margin-right: 1em">
+            <p:ajax
+              event="itemSelect"
+              update="userStatusIndicator" />
+          </p:autoComplete>
+          <j:enrollmentStatusIndicator
+            id="userStatusIndicator"
+            status="#{courseOfferParticipantsView.enrollmentStatus}" />
+        </p:panel>
+
+        <p:panel
+          header="#{msg['statistics.displaySettings']}"
+          style="margin-bottom:.5em;"
+          rendered="#{courseOfferParticipantsView.dataAvailable}"
+          collapsed="#{userSession.statisticsStateHolder.toggleDisplaySettings}"
+          toggleable="true">
+          <p:ajax
+            event="toggle"
+            listener="#{userSession.statisticsStateHolder.toggleDisplaySettings}" />
+
+          <!-- Shown profile fields -->
+          <p:panelGrid
+            columns="2"
+            styleClass="ui-panelgrid-blank">
+            <p:outputLabel
+              value="#{msg['statistics.shownProfileFields']}:"
+              for="@next"
+              rendered="#{courseOfferParticipantsView.extendedRead}" />
+            <p:selectCheckboxMenu
+              id="profileFieldSelector"
+              value="#{userSession.statisticsStateHolder.selectedProfileFields}"
+              label="#{msg['global.select']}"
+              updateLabel="true"
+              rendered="#{courseOfferParticipantsView.extendedRead}">
+              <f:selectItems value="#{courseOfferParticipantsView.availableProfileFields}" />
+              <p:ajax
+                update="mainPart"
+                process="@form" />
+              <p:ajax
+                event="toggleSelect"
+                update="mainPart"
+                process="@form" />
+            </p:selectCheckboxMenu>
+          </p:panelGrid>
+
+          <!-- Group by course version -->
+          <p:panelGrid
+            columns="1"
+            styleClass="ui-panelgrid-blank"
+            rendered="#{courseOfferParticipantsView.showSubmissionData}">
+            <p:selectBooleanCheckbox
+              id="groupSwitch"
+              value="#{userSession.statisticsStateHolder.groupSubmissionsByVersion}"
+              itemLabel="#{msg['statistics.groupByCourse']}">
+              <p:ajax update="participantsDetails:courseRecordTable" />
+            </p:selectBooleanCheckbox>
+          </p:panelGrid>
+        </p:panel>
+      </h:panelGroup>
+
+      <h:panelGroup
+        id="mainPart"
+        layout="block">
+        <c:if test="#{courseOfferParticipantsView.dataAvailable}">
+          <p:tabView
+            id="participantsDetails"
+            styleClass="no-padding">
+
+            <!-- Submission data -->
+            <p:tab
+              id="submissionTab"
+              title="#{msg['statistics.submissions']}#{courseOfferParticipantsView.getShownCounter('submissions')}"
+              rendered="#{courseOfferParticipantsView.showSubmissionData}">
+              <ui:decorate template="/WEB-INF/includes/course/courseRecordDatatable.xhtml">
+                <ui:param
+                  name="id"
+                  value="courseRecordTable" />
+                <ui:param
+                  name="value"
+                  value="#{courseOfferParticipantsView.courseRecordList}" />
+                <ui:param
+                  name="exportFilename"
+                  value="#{courseOfferParticipantsView.generateDownloadFilename('submissions')}" />
+                <ui:param
+                  name="extendedRead"
+                  value="#{courseOfferParticipantsView.extendedRead}" />
+                <ui:define name="headerRow">
+                  <!-- Header for grouped course records -->
+                  <p:headerRow rendered="#{userSession.statisticsStateHolder.groupSubmissionsByVersion}">
+                    <p:column colspan="20">
+                      <h:outputText
+                        value="#{msg['courseOfferParticipants.withCourse']}: #{courseRecord.course.name}, #{msg['global.revision']} #{courseOfferParticipantsView.getCourseRevisionNumber(courseRecord)}" />
+                      <h:outputText
+                        value="(#{courseRecord.course.frozenTitle})"
+                        rendered="#{courseRecord.course.frozen and courseRecord.course.frozenTitle!=null and not courseRecord.course.frozenTitle.isEmpty()}"
+                        style="margin-left:0.5em;display:inline-block" />
+                      <h:outputText
+                        styleClass="fas fa-star fa-sm"
+                        rendered="#{courseRecord.course.frozen}"
+                        title="#{msg['exerciseEdit.frozenVersion']}"
+                        style="margin-left:5px; display:inline-block;" />
+                    </p:column>
+                  </p:headerRow>
+                </ui:define>
+                <ui:define name="additionalColumns">
+                  <!-- Course Offer -->
+                  <p:column
+                    headerText="#{msg['submissionDetails.closedBy']}"
+                    visible="false"
+                    filterBy="#{courseOfferParticipantsView.getUserNameWhoClosedTheCourseRecord(courseRecord)}"
+                    width="180">
+                    <h:outputText value="#{courseOfferParticipantsView.getUserNameWhoClosedTheCourseRecord(courseRecord)}" />
+                  </p:column>
+                  <p:column
+                    headerText="#{msg['global.courseOffer']}"
+                    rendered="#{courseOfferParticipantsView.folderMode}"
+                    filterBy="#{courseRecord.courseOffer.get()}"
+                    width="150"
+                    filterMatchMode="equals">
+                    <f:facet name="filter">
+                      <p:selectOneMenu
+                        onchange="PF('courseRecordTable').filter()"
+                        converter="jackEntityConverter">
+                        <f:selectItem
+                          itemLabel="#{msg['global.all']}"
+                          itemValue="#{null}"
+                          noSelectionOption="true" />
+                        <f:selectItems
+                          value="#{courseOfferParticipantsView.courseOffers}"
+                          var="courseOffer"
+                          itemLabel="#{courseOffer.name}" />
+                      </p:selectOneMenu>
+                    </f:facet>
+                    <h:outputText value="#{courseRecord.courseOffer.get().name}" />
+                  </p:column>
+                  
+                  <!-- Score -->
+                  <p:column
+                    headerText="#{msg['global.score']}"
+                    filterBy="#{courseRecord.resultPoints}"
+                    width="60">
+                    <h:outputText value="#{courseRecord.resultPoints} %" />
+                  </p:column>
+                  
+                  <!-- Actions -->
+                  <p:column
+                    headerText="#{msg['global.actions']}"
+                    exportable="false"
+                    width="65"
+                    style="text-align:center;"
+                    toggleable="false">
+                    <p:menuButton
+                      id="actions"
+                      icon="fas fa-ellipsis-h"
+                      styleClass="flat-button"
+                      menuStyleClass="ui-menu-nolinebreakfix">
+                      <p:menuitem
+                        id="showAction"
+                        value="#{msg['statistics.actions.toSubmission']}"
+                        icon="fas fa-search fa-xs"
+                        outcome="#{viewId.courseRecordSubmissions}"
+                        styleClass="icon-middle-align">
+                        <f:param
+                          name="courseRecord"
+                          value="#{courseRecord.id}" />
+                        <f:param
+                          name="courseOffer"
+                          value="#{courseRecord.courseOffer.get().id}" />
+                      </p:menuitem>
+                      <p:menuitem
+                        id="closeAction"
+                        value="#{msg['statistics.actions.endSubmissionManually']}"
+                        icon="fas fa-stop fa-xs"
+                        oncomplete="PF('manualCloseDialog').show();"
+                        disabled="#{not courseOfferParticipantsView.extendedRead}"
+                        rendered="#{!courseRecord.closed}"
+                        update=":manualCloseDialogForm"
+                        styleClass="icon-middle-align"
+                        action="#{courseOfferParticipantsView.selectCourseRecord(courseRecord)}" />
+                      <p:menuitem
+                        id="deleteAction"
+                        value="#{msg['statistics.actions.deleteSubmission']}"
+                        icon="fas fa-trash-alt fa-xs"
+                        oncomplete="PF('deleteDialog').show()"
+                        disabled="#{not courseOfferParticipantsView.gradeRight}"
+                        action="#{courseOfferParticipantsView.prepareCourseRecordDeletion(courseRecord)}"
+                        update=":deleteCourseRecordsForm"
+                        styleClass="icon-middle-align" />
+                    </p:menuButton>
+                  </p:column>
+                </ui:define>
+              </ui:decorate>
+            </p:tab>
+
+            <!-- Enrollment data -->
+            <p:tab
+              id="enrollmentTab"
+              title="#{msg['statistics.enrollments']}#{courseOfferParticipantsView.getShownCounter('enrollments')}"
+              rendered="#{courseOfferParticipantsView.showEnrollmentData}">
+              <ui:decorate template="/WEB-INF/includes/courseOffer/enrollmentDatatable.xhtml">
+                <ui:param
+                  name="id"
+                  value="enrollmentTable" />
+                <ui:param
+                  name="value"
+                  value="#{courseOfferParticipantsView.enrollments}" />
+                <ui:param
+                  name="exportFilename"
+                  value="#{courseOfferParticipantsView.generateDownloadFilename('enrollments')}" />
+                <ui:param
+                  name="dateTitle"
+                  value="#{msg['statistics.enrollmentDate']}" />
+                <ui:param
+                  name="defaultSortBy"
+                  value="#{courseOfferParticipantsView.getPublicUserName(enrollment.user)}" />
+                <ui:define name="additionalActions">
+                  <p:menuitem
+                    id="disenrollAction"
+                    value="#{msg['statistics.actions.disenrollManually']}"
+                    icon="fas fa-sign-out-alt fa-xs"
+                    oncomplete="PF('manualDisenrollmentDialog').show();"
+                    disabled="#{not courseOfferParticipantsView.extendedRead}"
+                    update=":manualDisenrollmentDialogForm"
+                    styleClass="icon-middle-align"
+                    action="#{courseOfferParticipantsView.selectEnrollment(enrollment)}" />
+                </ui:define>
+              </ui:decorate>
+            </p:tab>
+
+            <!-- Waitlist data -->
+            <p:tab
+              id="waitlistTab"
+              title="#{msg['statistics.waitlist']}#{courseOfferParticipantsView.getShownCounter('waitlist')}"
+              rendered="#{courseOfferParticipantsView.showEnrollmentData}">
+              <ui:decorate template="/WEB-INF/includes/courseOffer/enrollmentDatatable.xhtml">
+                <ui:param
+                  name="id"
+                  value="waitlistTable" />
+                <ui:param
+                  name="value"
+                  value="#{courseOfferParticipantsView.waitlist}" />
+                <ui:param
+                  name="exportFilename"
+                  value="#{courseOfferParticipantsView.generateDownloadFilename('waitlist')}" />
+                <ui:param
+                  name="dateTitle"
+                  value="#{msg['statistics.waitlistJoinDate']}" />
+                <ui:param
+                  name="defaultSortBy"
+                  value="#{enrollment.lastChange}" />
+                <ui:define name="additionalActions">
+                  <p:menuitem
+                    id="enrollAction"
+                    value="#{msg['statistics.actions.enrollManually']}"
+                    icon="fas fa-sign-in-alt fa-xs"
+                    oncomplete="PF('manualEnrollmentDialog').show();"
+                    disabled="#{not courseOfferParticipantsView.extendedRead}"
+                    update=":manualEnrollmentDialogForm"
+                    styleClass="icon-middle-align"
+                    action="#{courseOfferParticipantsView.selectEnrollment(enrollment)}" />
+                  <p:menuitem
+                    id="disenrollAction"
+                    value="#{msg['statistics.actions.disenrollManually']}"
+                    icon="fas fa-sign-out-alt fa-xs"
+                    oncomplete="PF('manualDisenrollmentDialog').show();"
+                    disabled="#{not courseOfferParticipantsView.extendedRead}"
+                    update=":manualDisenrollmentDialogForm"
+                    styleClass="icon-middle-align"
+                    action="#{courseOfferParticipantsView.selectEnrollment(enrollment)}" />
+                </ui:define>
+              </ui:decorate>
+            </p:tab>
+
+            <!-- Disenrollment data -->
+            <p:tab
+              id="disenrollmentTab"
+              title="#{msg['statistics.formerParticipants']}#{courseOfferParticipantsView.getShownCounter('disenrollments')}"
+              rendered="#{courseOfferParticipantsView.showEnrollmentData}">
+
+              <ui:decorate template="/WEB-INF/includes/courseOffer/enrollmentDatatable.xhtml">
+                <ui:param
+                  name="id"
+                  value="disenrollmentTable" />
+                <ui:param
+                  name="value"
+                  value="#{courseOfferParticipantsView.disenrollments}" />
+                <ui:param
+                  name="exportFilename"
+                  value="#{courseOfferParticipantsView.generateDownloadFilename('disenrollments')}" />
+                <ui:param
+                  name="dateTitle"
+                  value="#{msg['statistics.disenrollmentDate']}" />
+                <ui:param
+                  name="defaultSortBy"
+                  value="#{courseOfferParticipantsView.getPublicUserName(enrollment.user)}" />
+                <ui:define name="additionalActions">
+                  <p:menuitem
+                    id="enrollAction"
+                    value="#{msg['statistics.actions.enrollManually']}"
+                    icon="fas fa-sign-in-alt fa-xs"
+                    oncomplete="PF('manualEnrollmentDialog').show();"
+                    disabled="#{not courseOfferParticipantsView.extendedRead}"
+                    update=":manualEnrollmentDialogForm"
+                    styleClass="icon-middle-align"
+                    action="#{courseOfferParticipantsView.selectEnrollment(enrollment)}" />
+                </ui:define>
+              </ui:decorate>
+            </p:tab>
+          </p:tabView>
+        </c:if>
+      </h:panelGroup>
+    </h:form>
+  </ui:define>
+
+  <ui:define name="dialogs">
+    <!-- Dialog for deleting course records -->
+    <ui:include src="/WEB-INF/includes/dialogs/deletionDialog.xhtml">
+      <ui:param
+        name="formId"
+        value="deleteCourseRecordsForm" />
+      <ui:param
+        name="dialogTitle"
+        value="#{msg['courseOfferParticipants.courseRecordDeletion']}" />
+      <ui:param
+        name="messageOne"
+        value="#{msg['courseOfferParticipants.courseRecordDeletion.info']}" />
+      <ui:param
+        name="messageTwo"
+        value="" />
+      <ui:param
+        name="inputLabel"
+        value="#{msg['courseOfferParticipants.courseRecordDeletion.username']}" />
+      <ui:param
+        name="validatorErrorMessage"
+        value="#{msg['courseOfferParticipants.courseRecordDeletion.wrongUsername']}" />
+      <ui:param
+        name="invokeDeletionBean"
+        value="#{courseOfferParticipantsView}" />
+      <ui:param
+        name="invokeDeletionMethodName"
+        value="deleteCourseRecordAndCloseDialog" />
+    </ui:include>
+    <!-- Dialog for viewing the enrollment log for one user, has its own form -->
+    <ui:include src="/WEB-INF/includes/dialogs/enrollmentLog.xhtml">
+      <ui:param
+        name="log"
+        value="#{courseOfferParticipantsView.enrollmentLog}" />
+      <ui:param
+        name="lecturerMode"
+        value="true" />
+      <ui:param
+        name="studentName"
+        value="#{courseOfferParticipantsView.selectedStudentForEnrollmentLog}" />
+    </ui:include>
+    <!-- Dialog for manual closing submissions -->
+    <ui:include src="/WEB-INF/includes/dialogs/confirmDialogWithReason.xhtml">
+      <ui:param
+        name="id"
+        value="manualCloseDialog" />
+      <ui:param
+        name="title"
+        value="#{msg['statistics.actionDialog.closeSubmissionTitle']}" />
+      <ui:param
+        name="message"
+        value="#{msg['statistics.actionDialog.closeSubmissionMessage1'] += courseOfferParticipantsView.selectedCourseRecordUser += msg['statistics.actionDialog.closeSubmissionMessage2']}" />
+      <ui:param
+        name="reasonRequired"
+        value="false" />
+      <ui:param
+        name="reasonValue"
+        value="#{courseOfferParticipantsView.manualCloseExplanation}" />
+      <ui:param
+        name="update"
+        value=":courseOfferParticipantsMainForm" />
+      <ui:param
+        name="invokeActionBean"
+        value="#{courseOfferParticipantsView}" />
+      <ui:param
+        name="invokeActionMethodName"
+        value="closeCourseRecordManually" />
+    </ui:include>
+    <!-- Dialog for manual disenrollment -->
+    <ui:include src="/WEB-INF/includes/dialogs/confirmDialogWithReason.xhtml">
+      <ui:param
+        name="id"
+        value="manualDisenrollmentDialog" />
+      <ui:param
+        name="title"
+        value="#{msg['statistics.actionDialog.disenrollTitle']}" />
+      <ui:param
+        name="message"
+        value="#{msg['statistics.actionDialog.disenrollMessage1'] += courseOfferParticipantsView.selectedEnrollmentUser += msg['statistics.actionDialog.disenrollMessage2']}" />
+      <ui:param
+        name="reasonRequired"
+        value="false" />
+      <ui:param
+        name="reasonValue"
+        value="#{courseOfferParticipantsView.manualDisenrollExplanation}" />
+      <ui:param
+        name="update"
+        value=":courseOfferParticipantsMainForm" />
+      <ui:param
+        name="invokeActionBean"
+        value="#{courseOfferParticipantsView}" />
+      <ui:param
+        name="invokeActionMethodName"
+        value="disenrollUserManually" />
+    </ui:include>
+    <!-- Dialog for manual enrollment -->
+    <ui:include src="/WEB-INF/includes/dialogs/confirmDialogWithReason.xhtml">
+      <ui:param
+        name="id"
+        value="manualEnrollmentDialog" />
+      <ui:param
+        name="title"
+        value="#{msg['statistics.actionDialog.enrollTitle']}" />
+      <ui:param
+        name="message"
+        value="#{msg['statistics.actionDialog.enrollMessage1'] += courseOfferParticipantsView.selectedEnrollmentUser += msg['statistics.actionDialog.enrollMessage2']}" />
+      <ui:param
+        name="reasonRequired"
+        value="false" />
+      <ui:param
+        name="reasonValue"
+        value="#{courseOfferParticipantsView.manualEnrollExplanation}" />
+      <ui:param
+        name="update"
+        value=":courseOfferParticipantsMainForm" />
+      <ui:param
+        name="invokeActionBean"
+        value="#{courseOfferParticipantsView}" />
+      <ui:param
+        name="invokeActionMethodName"
+        value="enrollUserManually" />
+    </ui:include>
+  </ui:define>
+</ui:composition>

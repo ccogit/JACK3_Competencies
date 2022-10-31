@@ -1,0 +1,219 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:c="http://java.sun.com/jsp/jstl/core"
+  xmlns:p="http://primefaces.org/ui"
+  template="/WEB-INF/templates/template.xhtml">
+
+  <ui:define name="metadata">
+    <f:metadata>
+      <f:viewParam
+        name="location"
+        value="#{availableCoursesView.locationId}" />
+      <f:viewAction actionListener="#{availableCoursesView.loadLocation()}" />
+    </f:metadata>
+  </ui:define>
+
+  <ui:define name="content">
+    <c:set
+      var="current"
+      value="#{'availableCourses'}"
+      scope="request" />
+
+    <h3>#{msg['start.courseOffers']}</h3>
+
+    <h:form id="treeForm">
+      <ui:include src="/WEB-INF/includes/start/courseOfferTree.xhtml" />
+    </h:form>
+
+    <!-- Creation of new root folders -->
+    <h:form id="rootFolderCreationForm">
+      <c:if test="#{availableCoursesView.userIsAdmin}">
+        <h:panelGroup
+          id="createNewRootForAdministrators"
+          layout="block"
+          style="margin-top: 1em;">
+          <p:outputLabel
+            for="createNewRootName"
+            value="#{msg['startPresentationTabView.createNewRoot']}:"
+            style="margin-right: 0.5em;" />
+          <h:panelGroup
+            styleClass="ui-inputgroup"
+            style="display: inline;">
+            <p:inputText
+              id="createNewRootName"
+              placeholder="#{msg['startPresentationTabView.foldername']}"
+              size="30"
+              value="#{availableCoursesView.newRootFolderName}" />
+            <p:commandButton
+              id="createNewRootButton"
+              icon="fas fa-plus"
+              update="globalGrowl :treeForm:courseOfferTree :treeForm:noOffersHint createNewRootName"
+              action="#{availableCoursesView.createNewRootPresentationFolder}"
+              value="#{msg['global.create']}" />
+          </h:panelGroup>
+        </h:panelGroup>
+      </c:if>
+    </h:form>
+  </ui:define>
+
+  <ui:define name="dialogs">
+    <!-- Edit user rights dialog, has its own form -->
+    <ui:include src="/WEB-INF/includes/dialogs/userRightsDialog.xhtml" />
+
+    <!-- Rename folder dialog, has its own form -->
+    <ui:include src="/WEB-INF/includes/dialogs/folderRenameDialog.xhtml" />
+
+    <!-- Dialog for deletion of a Course Offer -->
+    <ui:include src="/WEB-INF/includes/dialogs/deletionDialog.xhtml">
+      <ui:param
+        name="formId"
+        value="deleteCourseOfferForm" />
+      <ui:param
+        name="dialogTitle"
+        value="#{msg['start.deleteCourseOffer.dialog.header']}" />
+      <ui:param
+        name="messageOne"
+        value="#{msg['start.deleteCourseOffer.dialog.message1']}" />
+      <ui:param
+        name="messageTwo"
+        value="#{msg['start.deleteCourseOffer.dialog.message2']}" />
+      <ui:param
+        name="inputLabel"
+        value="#{msg['start.deleteCourseOffer.dialog.inputText.placeholder']}" />
+      <ui:param
+        name="validatorErrorMessage"
+        value="#{msg['start.deleteCourseOffer.dialog.validatorErrorMessage']}" />
+      <ui:param
+        name="invokeDeletionBean"
+        value="#{availableCoursesView}" />
+      <ui:param
+        name="invokeDeletionMethodName"
+        value="deleteCourseOffer" />
+    </ui:include>
+
+    <!-- Dialog for duplication of a Course Offer -->
+    <h:form id="duplicateCourseOfferForm">
+      <p:dialog
+        id="duplicateCourseOfferDialog"
+        widgetVar="duplicateCourseOfferDialog"
+        closable="true"
+        closeOnEscape="true"
+        header="#{msg['start.presentation.duplicateCourseOffer']}"
+        modal="true"
+        draggable="false"
+        resizable="false"
+        styleClass="dialog-like-confirmdialog"
+        width="600">
+        <p:staticMessage
+          id="duplicateCourseOfferDialogNoRightsWarning"
+          rendered="#{not empty availableCoursesView.duplicateCourseOfferWarning}"
+          summary="#{msg['global.warn']}"
+          detail="#{availableCoursesView.duplicateCourseOfferWarning}"
+          severity="warn" />
+        <p:outputLabel
+          for="duplicateCourseOfferDialogInput"
+          value="#{msg['start.duplicateNewName']}: "
+          style="vertical-align:baseline;" />
+        <p:inputText
+          id="duplicateCourseOfferDialogInput"
+          value="#{availableCoursesView.duplicateCourseOfferName}"
+          placeholder="#{availableCoursesView.selectedNodeName}"
+          size="40"
+          validator="requiredValidator" />
+        <p:message
+          id="validationError"
+          for="duplicateCourseOfferDialogInput" />
+        <f:facet name="footer">
+          <p:commandButton
+            id="duplicateCourseOfferDialogOk"
+            value="#{msg['global.ok']}"
+            oncomplete="if (args &amp;&amp; !args.validationFailed) PF('duplicateCourseOfferDialog').hide();"
+            update="globalGrowl :treeForm:courseOfferTree validationError"
+            action="#{availableCoursesView.duplicateCourseoffer}"
+            icon="fas fa-check" />
+          <p:commandButton
+            id="duplicateCourseOfferDialogCancel"
+            value="#{msg['global.cancel']}"
+            onclick="PF('duplicateCourseOfferDialog').hide()"
+            type="button"
+            styleClass="button-white"
+            icon="fas fa-times" />
+        </f:facet>
+      </p:dialog>
+    </h:form>
+
+    <!-- Confirm dialog for moving a presentation folder -->
+    <h:form id="movePresentationFolderForm">
+      <p:confirmDialog
+        id="dialogMovePresentationFolder"
+        header="#{msg['start.moveFolder']}"
+        widgetVar="movePresentationFolder"
+        closable="false"
+        width="600">
+        <f:facet name="message">
+          <h:outputText value="#{availableCoursesView.moveOperationConfirmText}" />
+          <br />
+          <br />
+          <h:outputText value="#{msg['global.continue']}?" />
+        </f:facet>
+        <p:commandButton
+          id="buttonDialogMovePresentationFolder"
+          action="#{availableCoursesView.onPendingMoveOperationConfirm()}"
+          update=":treeForm:courseOfferTree globalGrowl"
+          value="#{msg['global.yes']}"
+          onclick="PF('movePresentationFolder').hide();"
+          icon="fas fa-check" />
+        <p:commandButton
+          id="buttonDialogMovePresentationFolderCloseDialog"
+          action="#{availableCoursesView.cancelPendingMoveOperation}"
+          update=":treeForm:courseOfferTree globalGrowl"
+          value="#{msg['global.no']}"
+          onclick="PF('movePresentationFolder').hide();"
+          icon="fas fa-times"
+          styleClass="button-white" />
+      </p:confirmDialog>
+    </h:form>
+
+    <!-- Confirm dialog for moving a course offer -->
+    <h:form id="moveCourseOfferForm">
+      <p:confirmDialog
+        id="dialogMoveCourseOffer"
+        header="#{msg['start.moveCourseOffer']}"
+        widgetVar="moveCourseOffer"
+        closable="false"
+        width="600">
+        <f:facet name="message">
+          <h:outputText value="#{availableCoursesView.moveOperationConfirmText} " />
+          <h:outputText value="#{msg['start.confirmMoveOperation.optionToDuplicate']}" />
+          <br />
+          <br />
+          <h:outputText value="#{msg['global.continue']}?" />
+        </f:facet>
+        <p:commandButton
+          id="buttonDialogMoveCourseOffer"
+          action="#{availableCoursesView.onPendingMoveOperationConfirm()}"
+          update=":treeForm:courseOfferTree globalGrowl"
+          value="#{msg['start.moveCourseOffer']}"
+          onclick="PF('moveCourseOffer').hide();" />
+        <p:commandButton
+          id="buttonDialogMoveCourseOfferDuplicate"
+          action="#{availableCoursesView.duplicateCourseOfferAfterDragAndDrop()}"
+          update=":treeForm:courseOfferTree globalGrowl"
+          value="#{msg['start.presentation.duplicateCourseOffer']}"
+          onclick="PF('moveCourseOffer').hide();" />
+        <p:commandButton
+          id="buttonDialogMoveCourseOfferCloseDialog"
+          action="#{availableCoursesView.cancelPendingMoveOperation}"
+          update=":treeForm:courseOfferTree globalGrowl"
+          value="#{msg['global.cancel']}"
+          onclick="PF('moveCourseOffer').hide();"
+          icon="fas fa-times"
+          styleClass="button-white" />
+      </p:confirmDialog>
+    </h:form>
+  </ui:define>
+</ui:composition>
+

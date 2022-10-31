@@ -1,0 +1,91 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:p="http://primefaces.org/ui">
+
+<body>
+
+	<ui:composition>
+
+        <h:form
+          	id="localeForm">
+			<h:selectOneMenu
+				id="localeSelector"
+				value="#{userSession.locale}"
+				converter="localeConverter"
+				valueChangeListener="#{userSession.countryLocaleCodeChanged}">
+				<f:selectItems value="#{userSession.countriesInMap}" />
+                <p:ajax process="@form" oncomplete="window.location.reload();"/>
+			</h:selectOneMenu>
+		</h:form>
+
+		<h:outputText value=" &middot; " />
+        &copy;2022
+		
+		<h:outputLink
+			id="linkFooterToUde" 
+			value="https://www.uni-due.de/" 
+			target="_blank">
+			<h:outputText 
+			id="labelFooterUde"
+			value="Universit&auml;t&#160;Duisburg-Essen" />
+		</h:outputLink>
+
+		<h:outputText value=" &middot; " />
+
+		<h:outputLink
+			id="linkFooterToS3"
+			value="http://www.s3.uni-due.de" 
+			target="_blank">
+			<h:outputText
+				id="labelFooterS3"
+				value="S3" />
+		</h:outputLink>
+
+		<h:outputText value=" &middot; " />
+		
+		<h:outputLink
+			id="linkFooterMail"
+			value="mailto:JACK%20Support%3Cjack-support@paluno.uni-due.de%3E?subject=JACK3%20Support%20Anfrage">
+			<h:outputText
+				id="labelFooterMailContact"
+				value="JACK&#160;Support" />
+		</h:outputLink>
+
+		<h:outputText value=" &middot; " />
+
+    <h:link
+      outcome="#{viewId.privacyPolicy}"
+      target="_blank"
+      value="#{msg['global.privacy']}" />
+
+    <h:outputText value=" &middot; " />
+
+    <h:link
+      outcome="#{viewId.licenseInformation}"
+      target="_blank"
+      value="#{msg['global.licenseInformation']}" />
+
+    <h:outputText value=" &middot; " />
+
+		<h:outputLink 
+			id="linkFooterImpressum"
+			value="https://www.uni-due.de/de/impressum.shtml"
+			target="_blank">
+			<h:outputText 
+				id="labelFooterImpressum"
+				value="Impressum" />
+		</h:outputLink>
+
+		<h:outputText value=" &middot; " />
+
+		<h:outputText 
+			id="labelFooterBuildTimestamp"
+			value="Build #{versionView.version}" />
+
+	</ui:composition>
+</body>
+
+</html>

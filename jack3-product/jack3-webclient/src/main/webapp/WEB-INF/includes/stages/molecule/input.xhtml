@@ -1,0 +1,117 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:c="http://java.sun.com/jsp/jstl/core">
+
+  <script
+    id="molResInsideElem#{logView}#{stageIndex}"
+    type="chemical/x-mdl-molfile">#{exercisePlayerView.getStageSubmissionViewBean(stageSubmission).getSubmissionMolfile()}</script>
+
+  <script>
+        var chemDisplay#{logView}#{stageIndex};
+        var chemComposer#{logView}#{stageIndex};
+        
+		var disableEditor#{logView}#{stageIndex} = #{not (exercisePlayerView.isCurrentStage(stageSubmission))
+			or (exercisePlayerView.submission.isCompleted())
+			or (exercisePlayerView.submission.hasInternalErrors())
+			or (stageSubmission.hasPendingChecks())
+			or (exercisePlayerView.isReviewMode())};
+
+		function init#{logView}#{stageIndex}(editorFormat, editorContent) {
+			if (disableEditor#{logView}#{stageIndex}) {
+				chemDisplay#{logView}#{stageIndex} = new Kekule.ChemWidget.Viewer(document.getElementById('chemDisplay#{logView}#{stageIndex}'));
+	            
+				if (editorFormat === Kekule.IO.DataFormat.MOL) {
+					Kekule.IO.loadResourceData('url(#molResInsideElem#{logView}#{stageIndex})', function(mol, success) {
+						if (success) {
+		                	chemDisplay#{logView}#{stageIndex}.setChemObj(mol);
+		                }
+		              });
+				} else {
+					chemDisplay#{logView}#{stageIndex}.setChemObj(Kekule.IO.loadFormatData(editorContent, editorFormat));
+				}
+	            
+			} else {
+              chemComposer#{logView}#{stageIndex} = new Kekule.Editor.Composer(document.getElementById('chemComposer#{logView}#{stageIndex}'));
+              chemComposer#{logView}#{stageIndex}//.setAutoResizeConstraints({width: 1, height: 1})
+                .setEnableDimensionTransform(true).setAutoSetMinDimension(true);
+              chemComposer#{logView}#{stageIndex}.editorConfigs.uiMarkerConfigs.setPropValue('flexStructureAssocMarkerFontSize', 20, false);
+              
+			}
+        }
+		
+        Kekule.X.domReady(() => init#{logView}#{stageIndex}(
+        		#{exercisePlayerView.getStageSubmissionViewBean(stageSubmission).getSubmissionEditorContentFormat()}
+        		,
+        		#{exercisePlayerView.getStageSubmissionViewBean(stageSubmission).getSubmissionEditorContent()} 
+        		));
+
+    	function handleStudentSubmission#{logView}#{stageIndex}() {
+    		const editorContent = Kekule.IO.saveFormatData(chemComposer#{logView}#{stageIndex}.getChemObj(), Kekule.IO.DataFormat.KEKULE_JSON);
+    		
+    		const allMols = chemComposer#{logView}#{stageIndex}.exportObjs(Kekule.Molecule); 
+    		const asMolData = allMols.map(m => Kekule.IO.saveFormatData(m, 'mol'));
+    		const asInchiData = asMolData.map(m => InChI.fromMolfile(m));
+			
+			// This calls de.uni_due.s3.jack3.beans.stagetypes.MoleculeSubmissionView.updateStudentMoleculeSubmissionInSubmission()
+			// using primefaces p:remoteCommand.
+			// 'studentSubmission' is set in the bean method using the FacesContext
+			updateStudentMoleculeSubmissionInSubmission#{logView}#{stageIndex}([{
+				name : 'studentMoleculeSubmissionInChIs',
+				value: JSON.stringify(asInchiData)
+			}, {
+				name : 'studentMoleculeSubmissionMols',
+				value: JSON.stringify(asMolData)
+			}, {
+				name : 'studentMoleculeSubmissionEditorContent',
+				value: JSON.stringify(editorContent)
+			}]);
+		}
+	</script>
+
+  <!-- 	
+		So Javascript can call the bean method: 
+		de.uni_due.s3.jack3.beans.stagetypes.MoleculeSubmissionView.updateStudentMoleculeSubmissionInSubmission()	
+	-->
+  <p:remoteCommand
+    rendered="#{exercisePlayerView.isCurrentStage(stageSubmission) 
+      and not (exercisePlayerView.submission.isCompleted())
+      and not (exercisePlayerView.submission.hasInternalErrors())
+      and not (stageSubmission.hasPendingChecks())
+      and not (exercisePlayerView.isReviewMode())}"
+    name="updateStudentMoleculeSubmissionInSubmission#{logView}#{stageIndex}"
+    action="#{exercisePlayerView.getStageSubmissionViewBean(stageSubmission).updateStudentMoleculeSubmissionInSubmission}" />
+
+  <p>
+    <p:outputLabel
+      style="vertical-align:middle"
+      value="#{exercisePlayerView.getStageSubmissionViewBean(stageSubmission).taskDescription}"
+      escape="false" />
+  </p>
+
+  <p:panel
+    rendered="#{exercisePlayerView.isCurrentStage(stageSubmission) 
+      and not (exercisePlayerView.submission.isCompleted())
+      and not (exercisePlayerView.submission.hasInternalErrors())
+      and not (stageSubmission.hasPendingChecks())
+      and not (exercisePlayerView.isReviewMode())}">
+    <div
+      id="chemComposer#{logView}#{stageIndex}"
+      style="width: 640px; height: 480px"></div>
+  </p:panel>
+
+  <p:panel
+    rendered="#{not (exercisePlayerView.isCurrentStage(stageSubmission)) 
+      or (exercisePlayerView.submission.isCompleted())
+      or (exercisePlayerView.submission.hasInternalErrors())
+      or (stageSubmission.hasPendingChecks())
+      or (exercisePlayerView.isReviewMode())}">
+    <div
+      id="chemDisplay#{logView}#{stageIndex}"
+      style="width: 640px; height: 480px"></div>
+  </p:panel>
+
+</ui:composition>

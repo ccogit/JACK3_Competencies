@@ -1,0 +1,187 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:c="http://java.sun.com/jsp/jstl/core"
+  xmlns:p="http://primefaces.org/ui"  
+  xmlns:j="http://jack.s3.uni-due.de/ui-elements">
+  <p:dialog
+    id="treeContentDeletionDialog"
+    header="#{msg['startContentTabView.deleteTreeContents']}"
+    widgetVar="treeContentDeletionDialog"
+    modal="true"
+    closable="false"
+    draggable="true"
+    resizable="false"
+    dynamic="true"
+    styleClass="dialog-like-confirmdialog">
+    <p:outputPanel deferrend="true">
+      <h:outputText escape="false"  id="deletionDetails" value="#{msg['startContentTabView.deleteTreeContents.info']}"/>
+      <j:helperTooltip id="deletionDetailsHint" escape="false" tooltip="#{msg['startContentTabView.deleteTreeContents.infoDetails']}" />
+    </p:outputPanel>
+    
+ 
+    <div
+       style="max-height:400px; overflow: auto" >
+      <p:tree
+        id="selectionTree"
+        value="#{treeContentDeletionDialogView.tree.getTreeRootNode()}"
+        var="doc"
+        selectionMode="checkbox"
+        selection="#{treeContentDeletionDialogView.selectedNodes}"
+        style="border:none; width:100%; display:grid"
+        propagateSelectionUp="false"
+        showUnselectableCheckbox="true"
+        styleClass="contentDeletionTree">
+        <p:treeNode
+            id="folderNode"
+            type="folder"
+            expandedIcon="fas fa-folder-open fa-sm"
+            collapsedIcon="fas fa-folder fa-sm">
+            <h:outputText 
+              id="folderName" 
+              value="#{doc.name}" />
+        </p:treeNode>
+  
+        <p:treeNode
+            id="emptyFolderNode"
+            type="emptyFolder"
+            expandedIcon="fas fa-folder-open fa-sm"
+            collapsedIcon="fas fa-folder fa-sm">
+            <h:outputText 
+              id="emptyFolderName" 
+              value="#{doc.name}" />
+        </p:treeNode>
+  
+        <p:treeNode
+            id="noActionFolderNode"
+            type="noActionFolder"
+            expandedIcon="fas fa-folder-open fa-sm"
+            collapsedIcon="fas fa-folder fa-sm">
+            <h:outputText
+                id="noActionFolderName"
+                value="#{doc.name}" />
+        </p:treeNode>
+  
+        <p:treeNode
+            id="readRightsFolderNode"
+            type="readRightsFolder"
+            expandedIcon="fas fa-folder-open fa-sm"
+            collapsedIcon="fas fa-folder fa-sm">
+            <h:outputText
+                id="readRightsFolderName"
+                value="#{doc.name}" />
+        </p:treeNode>
+  
+        <p:treeNode
+            id="noChangeFolderNode"
+            type="noChangeFolder"
+            expandedIcon="fas fa-folder-open fa-sm"
+            collapsedIcon="fas fa-folder fa-sm">
+            <h:outputText
+                id="noChangeFolderName"
+                value="#{doc.name}" />
+        </p:treeNode>
+  
+        <p:treeNode
+            id="personalFolderNode"
+            type="personalFolder"
+            expandedIcon="far fa-user-circle fa-sm"
+            collapsedIcon="fas fa-user-circle fa-sm">
+            <h:outputText
+                id="personalFolderName"
+                value="#{myWorkspaceView.getPersonalFolderName(doc)}" />
+        </p:treeNode>
+  
+        <p:treeNode
+            id="sharedFolderNode"
+            type="sharedFolder"
+            expandedIcon="far fa-user fa-sm"
+            collapsedIcon="fas fa-user fa-sm">
+            <h:outputText
+                id="sharedFolderName"
+                value="#{myWorkspaceView.getPersonalFolderName(doc)}" />
+        </p:treeNode>
+  
+        <p:treeNode
+            id="courseNode"
+            type="course"
+            icon="far fa-file fa-sm">
+            <h:outputText value="#{doc.name}" />
+        </p:treeNode>
+  
+        <p:treeNode
+            id="noDeletecourseNode"
+            type="noDeleteCourse"
+            icon="far fa-file fa-sm">
+            <h:outputText value="#{doc.name}" />
+        </p:treeNode>
+  
+        <p:treeNode
+            id="exerciseNode"
+            type="exercise"
+            icon="fas fa-pencil-alt fa-sm">
+            <h:outputText value="#{doc.name}" />
+        </p:treeNode>
+  
+        <p:treeNode
+            id="noDeleteExerciseNode"
+            type="noDeleteExercise"
+            icon="fas fa-pencil-alt fa-sm">
+            <h:outputText value="#{doc.name}" />
+        </p:treeNode>
+        
+        <p:ajax
+            event="select"
+            update="@parent:treeContentDeleteButton"/>
+        <p:ajax
+            event="unselect"
+            update="@parent:treeContentDeleteButton"/>
+      </p:tree>
+    </div>
+    <f:facet name="footer">
+      <p:commandButton
+        id="treeContentDeleteButton"
+        value="#{msg['deletionDialog.button.delete']}"
+        widgetVar="treeContentDeleteButton"
+        icon="fas fa-trash-alt"
+        disabled="#{!treeContentDeletionDialogView.isDeletionConfirm()}"
+        style="background: #d2562d;"
+        action="#{treeContentDeletionDialogView.deleteContent()}">
+        <p:confirm
+          header="#{msg['startContentTabView.deleteTreeContents.confirmationHeader']}"
+          escape="false"
+          message="#{treeContentDeletionDialogView.getConfirmMessage()}"
+          icon="fas fa-exclamation-triangle fa-2x" />
+      </p:commandButton>
+      <p:commandButton
+        id="treeContentCancelButton"
+        value="#{msg['deletionDialog.button.cancel']}"
+        onclick="PF('treeContentDeletionDialog').hide();PF('selectionTree').unselectAllNodes()"
+        immediate="true"
+        icon="fas fa-times"
+        styleClass="button-white" />
+    </f:facet>
+    <p:confirmDialog
+      class="contentDeletionConfirm"
+      global="true"
+      showEffect="fade"
+      hideEffect="fade"
+      responsive="true">
+      <p:commandButton
+        value="#{msg['global.yes']}"
+        type="button"
+        styleClass="ui-confirmdialog-yes"
+        icon="fas fa-check" />
+      <p:commandButton
+        value="#{msg['global.no']}"
+        type="button"
+        styleClass="ui-confirmdialog-no button-white"
+        icon="fas fa-times" />
+    </p:confirmDialog>
+
+  </p:dialog>
+  
+
+</ui:composition>

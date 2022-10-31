@@ -1,0 +1,164 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:j="http://jack.s3.uni-due.de/ui-elements">
+
+  <h:outputStylesheet
+    library="jack"
+    name="css/enrollmentInfo.css" />
+
+  <p:panelGrid
+    id="mainLayoutCourses"
+    style="width:100%;border:0px;">
+    <p:row style="border-width:0px;">
+      <p:column
+        id="coursesContainer"
+        style="width:100%;vertical-align:top;padding:0px;">
+        <p:toolbar
+          id="coursesMenu"
+          style="border-width:0px;">
+          <f:facet
+            id="facetCoursesMenuLeft"
+            name="left">
+            <p:outputLabel
+              id="sort"
+              for="sortString"
+              value="#{msg['global.sortBy']}: "
+              style="vertical-align: sub;" />
+            <p:selectOneMenu
+              id="sortString"
+              value="#{myParticipationsView.openSubmissionsOrder}">
+              <f:selectItems
+                value="#{myParticipationsView.availableSorting}"
+                var="sortOption"
+                itemLabel="#{msg['enum.ECourseOrder.' += sortOption.name()]}" />
+              <p:ajax
+                event="change"
+                update="courseRecordGrid"
+                listener="#{myParticipationsView.sortCourses}" />
+            </p:selectOneMenu>
+          </f:facet>
+        </p:toolbar>
+
+        <!-- The style of the field matches the tree search fields on the other pages -->
+        <h:panelGroup
+          layout="block"
+          styleClass="ui-tree-filter-container">
+          <p:inputText
+            id="searchCourses"
+            placeholder="#{msg['global.filter']}"
+            value="#{myParticipationsView.searchString}"
+            styleClass="ui-tree-filter">
+            <p:ajax
+              event="keyup"
+              update="courseRecordGrid"
+              listener="#{myParticipationsView.filterCourses}" />
+          </p:inputText>
+          <h:outputText styleClass="ui-icon ui-icon-search" />
+        </h:panelGroup>
+
+        <p:dataGrid
+          id="courseRecordGrid"
+          var="element"
+          value="#{myParticipationsView.filteredParticipations}"
+          columns="3"
+          layout="grid"
+          paginator="false"
+          style="clear:both;border-width:0px;"
+          emptyMessage="#{msg['start.emptyCourseGrid']}">
+          <p:panel
+            id="courseRecord"
+            style="text-align:center; #{not empty element.openCourseRecord ? 'background-color:#91ffc9' : ''}">
+            <f:facet
+              id="facetBreadcrumbAsStringStartCoursesTab"
+              name="header">
+              <h:outputText
+                style="font-size:80%"
+                value="#{myParticipationsView.getPathAsString(element.courseOffer)}" />
+            </f:facet>
+
+            <!-- Information for enrollment -->
+            <h:panelGroup
+              id="enrollmentInfoEnrolled"
+              layout="block"
+              styleClass="enrollment-info small-info enrolled"
+              rendered="#{element.explicitlyEnrolled and empty element.openCourseRecord}">
+              <h:outputText styleClass="fas fa-check-circle" />
+              <h:outputText value="#{msg['enum.EEnrollmentStatus.ENROLLED']}" />
+            </h:panelGroup>
+            <h:panelGroup
+              id="enrollmentInfoDisenrolled"
+              layout="block"
+              styleClass="enrollment-info small-info disenrolled"
+              rendered="#{element.explicitlyDisenrolled}">
+              <h:outputText styleClass="fas fa-times-circle" />
+              <h:outputText value="#{msg['enum.EEnrollmentStatus.DISENROLLED']}" />
+            </h:panelGroup>
+            <h:panelGroup
+              id="enrollmentInfoWaitingList"
+              layout="block"
+              styleClass="enrollment-info small-info onWaitingList"
+              rendered="#{element.onWaitingList}">
+              <h:outputText styleClass="fas fa-pause-circle" />
+              <h:outputText value="#{msg['enum.EEnrollmentStatus.ON_WAITINGLIST']}" />
+            </h:panelGroup>
+
+            <!-- Information for running submission -->
+            <h:panelGroup
+              id="openCourseRecordInfo"
+              layout="block"
+              styleClass="enrollment-info small-info enrolled"
+              rendered="#{not empty element.openCourseRecord}">
+              <h:outputText styleClass="fas fa-play" />
+              <h:outputText value="#{msg['start.openCourseRecord']}" />
+            </h:panelGroup>
+
+            <!-- Links -->
+            <p:link
+              id="dgLinkShowCourseRecord"
+              outcome="#{viewId.courseRecordView}"
+              rendered="#{not empty element.openCourseRecord}"
+              value="#{element.courseOfferName}">
+              <f:param
+                name="courseRecord"
+                value="#{element.openCourseRecord.id}" />
+            </p:link>
+            <p:link
+              id="dgLinkShowCourseOffer"
+              outcome="#{viewId.courseMainMenu}"
+              rendered="#{empty element.openCourseRecord}"
+              value="#{element.courseOfferName}">
+              <f:param
+                name="courseOffer"
+                value="#{element.courseOffer.id}" />
+            </p:link>
+
+            <h:panelGroup rendered="#{not empty element.openCourseRecord}">
+              <ul style="text-align: left; padding-left: 0px; font-size: 70%; list-style-type: none;">
+                <li>#{msg['start.startedAt']}: <j:outputTimestamp
+                    value="#{element.startTime}"
+                    converter="relativeTimestampConverter"
+                    showNever="true" /></li>
+                <li>#{msg['start.lastVisitAt']}: <j:outputTimestamp
+                    value="#{element.lastVisit}"
+                    converter="relativeTimestampConverter"
+                    showNever="true" /></li>
+                <li><h:outputText
+                    value="#{msg['start.deadlineAt']}:"
+                    rendered="#{not empty element.deadline}" /> <j:outputTimestamp
+                    value="#{element.deadline}"
+                    converter="longTimestampConverter"
+                    showNever="false" /></li>
+              </ul>
+            </h:panelGroup>
+
+          </p:panel>
+
+        </p:dataGrid>
+      </p:column>
+    </p:row>
+  </p:panelGrid>
+</ui:composition>

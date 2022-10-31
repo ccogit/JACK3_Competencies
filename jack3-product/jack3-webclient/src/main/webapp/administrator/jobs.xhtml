@@ -1,0 +1,54 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:c="http://java.sun.com/jsp/jstl/core"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:j="http://jack.s3.uni-due.de/ui-elements"
+  template="/WEB-INF/templates/template.xhtml">
+
+  <ui:define name="content">
+    <c:set
+      var="current"
+      value="#{'admin-jobs'}"
+      scope="request" />
+    <h3>#{msg['tenantadmin.jobs']}</h3>
+
+    <h:form id="jobs">
+      <p:dataTable
+        var="job"
+        value="#{jobsView.jobs}"
+        paginator="true"
+        lazy="true"
+        rows="20"
+        sortBy="#{job.startedAt}"
+        tableStyle="white-space: nowrap; overflow: hidden; table-layout: auto;">
+        <p:column
+          headerText="Id"
+          sortBy="#{job.id}">
+          <h:outputText value="#{job.id}" />
+        </p:column>
+        <p:column
+          headerText="Start Time">
+          <j:outputTimestamp
+            value="#{job.startedAt}"
+            converter="fullTimestampConverter" />
+        </p:column>
+        <p:column
+          headerText="End Time">
+          <j:outputTimestamp
+            value="#{job.finishedAt}"
+            converter="fullTimestampConverter" />
+        </p:column>
+        <p:column headerText="Kafka Topic">
+          <h:outputText value="#{job.kafkaTopic}" />
+        </p:column>
+        <p:column headerText="Backend">
+          <h:outputText value="#{job.graderId}" />
+        </p:column>
+      </p:dataTable>
+    </h:form>
+
+  </ui:define>
+</ui:composition>

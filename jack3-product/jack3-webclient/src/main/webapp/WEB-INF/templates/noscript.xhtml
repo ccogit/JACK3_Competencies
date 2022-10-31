@@ -1,0 +1,53 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html">
+
+	<body>
+
+		<ui:composition>
+		<!--	
+          <h1>
+          
+            <h:graphicImage
+              width="32"
+              height="32"
+              library="jack"
+              name="images/header/h1/error.png"/>
+              <h:outputText value="JavaScript Fehler"/>
+          </h1>
+          -->
+      
+          <h:panelGrid
+            id="pgJavaScriptWarning"
+            columns="2"
+            cellspacing="16">
+      
+      	<!--  
+            <h:graphicImage
+              width="128"
+              height="128"
+              library="jack"
+              name="/images/symbols/javascript.png"/>
+        -->      
+      
+            <h:panelGroup
+              id="pgroupJavaScriptWarning">
+              <p>
+                #{msg['global.jsWarn']}
+              </p>
+              <p>
+                <h:link value="#{msg['global.retry']}"
+                  id="linkRetryWithJavascript" 
+                  outcome="#{viewId.home}">
+                </h:link>
+              </p>
+            </h:panelGroup>
+          </h:panelGrid>
+
+		</ui:composition>
+
+	</body>
+
+</html>

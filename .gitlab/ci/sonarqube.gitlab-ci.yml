@@ -1,0 +1,17 @@
+# Perform SonarQube code analysis
+SonarQube analysis:
+  stage: report
+  script:
+    - cd jack3-product
+# Imports our self signed cert into the java cert truststore
+    - keytool -import -noprompt -alias sonarqube -file setup/sonarqube.pem -keystore $CACERTS -storepass changeit
+    - mvn $MAVEN_CLI_OPTS sonar:sonar -Dsonar.projectKey=de.uni-due.s3.jack3:jack3-product -Dsonar.host.url=https://10.168.68.79 -Dsonar.login=$SONARQUBE_KEY -Dsonar.java.binaries=target
+# We need these artifacts for test coverage report
+  dependencies:
+    - Build
+    - Tests
+    - Selenium Tests
+  needs: ["Build", "Selenium Tests", "Tests"]
+# The free version of SonarQube dosn't support branches
+  only:
+    - master

@@ -1,0 +1,35 @@
+<!-- Label-like indicator for Enrollment status  -->
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:c="http://java.sun.com/jsp/jstl/core"
+  xmlns:p="http://primefaces.org/ui">
+  <h:panelGroup
+    id="#{id}"
+    layout="block"
+    style="display: inline;">
+    <h:outputStylesheet
+      library="jack"
+      name="css/enrollmentInfo.css" />
+    <h:panelGroup
+      styleClass="enrollment-info-label enrollment-info enrolled"
+      rendered="#{not empty status and status == 'ENROLLED'}">
+      <h:outputText styleClass="fas fa-check-circle" />
+      <h:outputText value="#{msg['enum.EEnrollmentStatus.ENROLLED']}" />
+    </h:panelGroup>
+    <h:panelGroup
+      styleClass="enrollment-info-label enrollment-info disenrolled"
+      rendered="#{not empty status and status == 'DISENROLLED'}">
+      <h:outputText styleClass="fas fa-times-circle" />
+      <h:outputText value="#{msg[(not empty showNotYetEnrolled and showNotYetEnrolled) ? 'enum.EEnrollmentStatus.DISENROLLED_OR_NOT_ENROLLED' : 'enum.EEnrollmentStatus.DISENROLLED']}" />
+    </h:panelGroup>
+    <h:panelGroup
+      styleClass="enrollment-info-label enrollment-info onWaitingList"
+      rendered="#{not empty status and status == 'ON_WAITINGLIST'}">
+      <h:outputText styleClass="fas fa-pause-circle" />
+      <h:outputText value="#{msg['enum.EEnrollmentStatus.ON_WAITINGLIST']}" />
+    </h:panelGroup>
+  </h:panelGroup>
+</ui:composition>

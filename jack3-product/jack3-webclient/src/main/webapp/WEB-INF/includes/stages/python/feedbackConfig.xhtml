@@ -1,0 +1,205 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:c="http://java.sun.com/jsp/jstl/core"
+  xmlns:p="http://primefaces.org/ui">
+
+  <h4>
+    <h:outputText value="#{msg['exerciseEdit.python.propagateInternalErrors']}" />
+  </h4>
+
+  <p:selectOneRadio
+    id="propagateOnInternalErrors"
+    value="#{stageBean.stage.propagateInternalErrors}"
+    onclick="processChange()">
+    <f:selectItem
+      itemLabel="#{msg['exerciseEdit.python.propagateInternalErrors.true']}"
+      itemValue="#{true}" />
+    <f:selectItem
+      itemLabel="#{msg['exerciseEdit.python.propagateInternalErrors.false']}"
+      itemValue="#{false}" />
+  </p:selectOneRadio>
+
+  <p:tabView id="checkerConfigurations">
+    <c:forEach
+      items="#{stageBean.stage.gradingSteps}"
+      var="gradingStep"
+      varStatus="loopStatus">
+      <p:tab
+        id="step_#{gradingStep.id}"
+        title="#{loopStatus.index+1}">
+
+        <h:outputLabel
+          for="stepWeight_#{stageBean.stage.orderIndex}_#{gradingStep.id}"
+          value="#{msg['exerciseEdit.checkerConfigurationWeight']}: " />
+        <p:spinner
+          id="stepWeight_#{stageBean.stage.orderIndex}_#{gradingStep.id}"
+          disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+          value="#{gradingStep.weight}"
+          min="0"
+          size="1"
+          required="true"
+          onkeydown="checkUserInputForActivationOfSaveButton()"
+          onchange="processChange()" />
+
+        <p:commandButton
+          id="cdDeleteGraderConfig"
+          action="#{stageBean.deleteGraderConfig(gradingStep)}"
+          disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+          value="#{msg['exerciseEdit.java.deleteGraderConfig']}"
+          icon="fas fa-trash-alt fa-sm"
+          style="background: #d2562d;border-color:#d2442a;"
+          update="checkerConfigurations"
+          oncomplete="processChange()" />
+
+        <c:if test="#{not empty exerciseEditView.exercise.exerciseResources}">
+          <h4>
+            <h:outputText value="#{msg['exerciseEdit.python.fileSettings']}" />
+          </h4>
+  
+          <h:outputText value="#{msg['exerciseEdit.python.config.sourceFiles']}:" />
+          <br />
+          <p:dataTable
+            id="dtSourceFiles_#{stageBean.stage.orderIndex}_#{gradingStep.id}"
+            var="sourceFile"
+            value="#{exerciseEditView.sortedResources}"
+            selection="#{gradingStep.sourceFilesAsSortedList}"
+            rowKey="#{sourceFile.id}">
+            <p:column
+              selectionMode="multiple"
+              style="width:16px;text-align:center" />
+            <p:column headerText="#{msg['global.filename']}">
+              <h:outputText value="#{sourceFile.filename}" />
+            </p:column>
+            <p:ajax
+              event="rowSelect"
+              oncomplete="processChange()"></p:ajax>
+            <p:ajax
+              event="rowUnselect"
+              oncomplete="processChange()"></p:ajax>
+            <p:ajax
+              event="rowSelectCheckbox"
+              oncomplete="processChange()"></p:ajax>
+            <p:ajax
+              event="rowUnselectCheckbox"
+              oncomplete="processChange()"></p:ajax>
+          </p:dataTable>
+  
+          <h:outputText
+            value="#{msg['exerciseEdit.python.config.libraryFiles']}:"
+            rendered="#{gradingStep.class.simpleName eq 'TracingPythonGradingConfig'}" />
+          <br />
+          <p:dataTable
+            id="dtLibraryFiles_#{stageBean.stage.orderIndex}_#{gradingStep.id}"
+            var="libraryFile"
+            value="#{exerciseEditView.sortedResources}"
+            selection="#{gradingStep.libraryFilesAsSortedList}"
+            rowKey="#{libraryFile.id}"
+            rendered="#{gradingStep.class.simpleName eq 'TracingPythonGradingConfig'}">
+            <p:column
+              selectionMode="multiple"
+              style="width:16px;text-align:center" />
+            <p:column headerText="#{msg['global.filename']}">
+              <h:outputText value="#{libraryFile.filename}" />
+            </p:column>
+            <p:ajax
+              event="rowSelect"
+              oncomplete="processChange()"></p:ajax>
+            <p:ajax
+              event="rowUnselect"
+              oncomplete="processChange()"></p:ajax>
+            <p:ajax
+              event="rowSelectCheckbox"
+              oncomplete="processChange()"></p:ajax>
+            <p:ajax
+              event="rowUnselectCheckbox"
+              oncomplete="processChange()"></p:ajax>
+          </p:dataTable>
+        </c:if>
+
+        <h4>
+          <h:outputText
+            value="#{msg['exerciseEdit.python.greqlRules']}"
+            rendered="#{gradingStep.class.simpleName eq 'GreqlPythonGradingConfig'}" />
+          <h:outputText
+            value="#{msg['exerciseEdit.python.testDriver']}"
+            rendered="#{gradingStep.class.simpleName eq 'TracingPythonGradingConfig'}" />
+        </h4>
+
+        <h:panelGrid
+          columns="2"
+          rendered="#{gradingStep.class.simpleName eq 'TracingPythonGradingConfig'}">
+          <h:outputLabel
+            for="tracingCheckerTimeout_#{stageBean.stage.orderIndex}_#{gradingStep.id}"
+            value="#{msg['exerciseEdit.python.tracingCheckerTimeout']}: " />
+          <p:spinner
+            id="tracingCheckerTimeout_#{stageBean.stage.orderIndex}_#{gradingStep.id}"
+            disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+            value="#{gradingStep.timeoutSeconds}"
+            min="1"
+            size="3"
+            required="true"
+            onchange="processChange()" />
+            
+          <h:outputLabel
+            for="tracingCheckerStudentModule_#{stageBean.stage.orderIndex}_#{gradingStep.id}"
+            value="#{msg['exerciseEdit.python.tracingCheckerStudentModule']}: " />
+          <p:inputText
+            id="tracingCheckerStudentModule_#{stageBean.stage.orderIndex}_#{gradingStep.id}"
+            disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+            value="#{gradingStep.studentModule}"
+            onkeydown="checkUserInputForActivationOfSaveButton()"
+            onchange="processChange()" />
+        </h:panelGrid>
+
+        <p:inputTextarea
+          rendered="#{gradingStep.class.simpleName eq 'GreqlPythonGradingConfig'}"
+          value="#{gradingStep.greqlRules}"
+          disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+          onkeypress="processChange()"
+          rows="20"
+          autoResize="false"
+          style="width:99%;align:left;">
+          <p:ajax
+            event="blur"
+            onkeydown="checkUserInputForActivationOfSaveButton()"
+            oncomplete="processChange()"></p:ajax>
+        </p:inputTextarea>
+
+        <p:inputTextarea
+          rendered="#{gradingStep.class.simpleName eq 'TracingPythonGradingConfig'}"
+          value="#{gradingStep.testDriver}"
+          disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+          onkeypress="processChange()"
+          rows="20"
+          autoResize="false"
+          style="width:99%;align:left;">
+          <p:ajax
+            event="blur"
+            onkeydown="checkUserInputForActivationOfSaveButton()"
+            oncomplete="processChange()"></p:ajax>
+        </p:inputTextarea>
+
+      </p:tab>
+    </c:forEach>
+
+  </p:tabView>
+
+  <!--  <p:commandButton
+    id="cdAddGreqlConfig"
+    action="#{stageBean.addGreqlConfig()}"
+    disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+    value="#{msg['exerciseEdit.python.addGreqlConfig']}"
+    update="checkerConfigurations"
+    oncomplete="processChange()" />-->
+  <p:commandButton
+    id="cdAddTracingConfig"
+    action="#{stageBean.addTracingConfig()}"
+    disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+    value="#{msg['exerciseEdit.python.addTracingConfig']}"
+    update="checkerConfigurations"
+    oncomplete="processChange()" />
+
+</ui:composition>

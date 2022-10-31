@@ -1,0 +1,44 @@
+<!-- NOSONAR
+Usage:
+<j:evaluatorInputField
+  id="<Client-side ID>"
+  evaluatorExpression="#{<Reference to an EvaluatorExpression>}"
+  disabled="#{<Reference to a boolean>}"
+  onKeyDown="<Additional code to execute on key down>"
+  onChange="<Additional code to execute on change>"
+  width="<Width>"
+  placeholder="<Placeholder>" />
+ -->
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:c="http://java.sun.com/jsp/jstl/core"
+  xmlns:p="http://primefaces.org/ui">
+
+  <p:importEnum
+    type="de.uni_due.s3.jack3.entities.tenant.EvaluatorExpression$EDomain"
+    var="EVariableDomains" />
+
+  <div>
+    <p:inputTextarea
+      id="#{id}_initCodeInput"
+      disabled="#{empty disabled ? false : disabled}"
+      value="#{evaluatorExpression.code}"
+      rows="1"
+      cols="#{empty width ? 55 : width}"
+      onkeydown="#{onKeyDown}"
+      onchange="#{onChange}"
+      styleClass="monospaceForce"
+      placeholder="#{placeholder}" />
+    <p:selectOneMenu
+      id="#{id}_selectDomainInput"
+      disabled="#{empty disabled ? false : disabled}"
+      value="#{evaluatorExpression.domain}"
+      onchange="#{onChange}">
+      <f:selectItems value="#{EVariableDomains.ALL_VALUES}" />
+    </p:selectOneMenu>
+  </div>
+
+</ui:composition>

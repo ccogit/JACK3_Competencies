@@ -1,0 +1,29 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+	<br />
+	<h4>
+		<p:outputLabel value="#{msg['rStage.feedbackConfig.evaluationRule']}" />
+	</h4>
+	<p:outputLabel
+		value="#{msg['rStage.feedbackConfig.evaluationRuleExplanation']}" />
+	<br />
+	<br />
+	<p:inputTextarea
+		id="resultComputationString"
+		disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+		value="#{stageBean.stage.finalResultComputationString}"
+		rows="1"
+		cols="40"
+		onkeydown="checkUserInputForActivationOfSaveButtonNoReturnSurpession()"
+		onchange="processChange()"
+		styleClass="monospaceForce"
+		placeholder="#{msg['rStage.feedbackConfig.evaluationRuleExplanationPlaceholder']}" />
+
+	<br />
+	<p:outputLabel escape="false" style="font-size: smaller;"
+		value=" #{msg['rStage.feedbackConfig.availableVariables']} #{stageBean.getTestcaseTupelNamesAsUiString()}" />
+</ui:composition>

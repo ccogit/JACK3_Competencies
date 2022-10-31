@@ -1,0 +1,138 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>de.uni-due.s3.jack3</groupId>
+		<artifactId>jack3-product</artifactId>
+		<version>${revision}</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+	<artifactId>jack3-business</artifactId>
+	<packaging>jar</packaging>
+	<name>jack3-business</name>
+	<url>https://maven.apache.org</url>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>de.uni-due.s3.jack3</groupId>
+			<artifactId>jack3-core</artifactId>
+			<type>ejb</type>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.wildfly.security</groupId>
+			<artifactId>wildfly-elytron</artifactId>
+			<version>1.17.1.Final</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+		</dependency>
+	
+		<!--  JACK 2 Import -->
+		<dependency>
+			<groupId>de.uni-due.s3.jack2import</groupId>
+			<artifactId>jack2import</artifactId>
+			<version>0.2.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>de.uni-due.s3.evaluatorconverter</groupId>
+			<artifactId>evaluator-converter</artifactId>
+			<version>0.0.3</version>
+		</dependency>
+
+		<!-- Microservices + stuff for eureka -->
+		<dependency>
+			<groupId>de.uni-due.s3.microservices</groupId>
+			<artifactId>evaluator-api</artifactId>
+			<version>4.3</version>
+		</dependency>
+		<dependency>
+			<groupId>io.github.openfeign</groupId>
+			<artifactId>feign-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.github.openfeign</groupId>
+			<artifactId>feign-ribbon</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.github.openfeign</groupId>
+			<artifactId>feign-jaxb</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.github.openfeign</groupId>
+			<artifactId>feign-slf4j</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<version>1.7.30</version>
+		</dependency>
+		<dependency>
+			<groupId>com.netflix.ribbon</groupId>
+			<artifactId>ribbon-eureka</artifactId>
+			<version>2.3.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.netflix.eureka</groupId>
+			<artifactId>eureka-client</artifactId>
+			<version>1.9.17</version>
+			<exclusions>
+				<exclusion>
+					<groupId>javax.servlet</groupId>
+					<artifactId>servlet-api</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>com.netflix.archaius</groupId>
+			<artifactId>archaius-core</artifactId>
+			<version>0.7.6</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-configuration</groupId>
+			<artifactId>commons-configuration</artifactId>
+			<version>1.8</version>
+		</dependency>
+		<!-- end Microservices + stuff for eureka -->
+		
+		<!--  JAXB runtime -->
+		<dependency>
+			<groupId>com.sun.xml.bind</groupId>
+			<artifactId>jaxb-impl</artifactId>
+			<version>2.3.3</version>
+		</dependency>
+	</dependencies>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>3.3.1</version>
+				<configuration>
+					<failOnMissingWebXml>false</failOnMissingWebXml>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-openfeign-dependencies</artifactId>
+				<version>2.2.2.RELEASE</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+</project>

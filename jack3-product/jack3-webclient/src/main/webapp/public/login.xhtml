@@ -1,0 +1,81 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:c="http://java.sun.com/jsp/jstl/core"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:p="http://primefaces.org/ui"
+  template="../WEB-INF/templates/template.xhtml">
+
+  <ui:define name="content">
+    <f:metadata>
+      <f:viewAction
+        action="#{setupView.doFirstTimeSetup}"
+        immediate="true" />
+    </f:metadata>
+    
+    <ui:include page="/WEB-INF/includes/loggedIn.xhtml"/>
+
+    <c:if test="#{empty userSession.currentUser}">
+      <p:panel id="loginPanel" header="#{msg['global.login']}">
+        <h:form id="loginForm">
+          <h:panelGrid
+            columns="2"
+            cellpadding="5">
+            <p:outputLabel
+              id="loginUsernameLabel"
+              for="loginUsername"
+              value="#{msg['global.username']}:"/>
+            <p:inputText
+              id="loginUsername"
+              value="#{loginView.loginName}"
+              label="#{msg['global.username']}"
+              placeholder="#{msg['global.username']}"
+              required="true"
+              validatorMessage="#{msg['global.usernameInvalid']}">
+              <f:validateRegex pattern="#{loginView.loginNameRegex}"/>
+            </p:inputText>
+              
+
+            <p:outputLabel
+              id="loginPasswordLabel"
+              for="loginPasswordField"
+              value="#{msg['global.password']}:" />
+            <p:password
+              id="loginPasswordField"
+              value="#{loginView.password}"
+              label="#{msg['global.password']}"
+              placeholder="#{msg['global.password']}"
+              required="true"/>
+
+            <h:outputText/>
+            <h:outputFormat
+              value="#{msg['loginView.retrievalHint']}"
+              escape="false">
+              <f:param value="#{viewId.passwordRetrieval.toActionUrl()}"/>
+            </h:outputFormat>
+
+            <h:outputText/>
+            <p:commandButton
+              id="loginButton"
+              value="#{msg['global.login']}"
+              action="#{loginView.login()}"
+              onclick="Jack.activityBar.start(); PF('loginBlocker').show();"
+              ajax="false"/>
+          </h:panelGrid>
+        </h:form>
+        <p:blockUI widgetVar="loginBlocker"  block="loginPanel"/>
+      </p:panel>
+
+      <c:if test="#{loginView.registrationEnabled}">
+        <p:panel id="registerPanel" header="#{msg['registrationView.register']}">
+          <h:outputFormat escape="false"
+            value="#{msg['loginView.registrationHint']}">
+            <f:param value="#{viewId.registration.toActionUrl()}"/>
+          </h:outputFormat>
+        </p:panel>
+      </c:if>
+    </c:if>
+
+  </ui:define>
+</ui:composition>

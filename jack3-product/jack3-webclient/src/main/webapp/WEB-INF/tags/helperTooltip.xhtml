@@ -1,0 +1,28 @@
+<!-- Displays a clickable questionmark with a tooltip behind a text  -->
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:c="http://java.sun.com/jsp/jstl/core"
+  xmlns:p="http://primefaces.org/ui">
+
+  <h:panelGroup rendered="#{empty rendered ? true : rendered}">
+    <h:outputText
+      id="#{id}"
+      value="#{text} "
+      style="#{style}" />
+    <h:outputText
+      styleClass="fas fa-question-circle"
+      id="#{id}Info"
+      title="#{tooltip}"
+      style="color:#1f89ce;" />
+    <p:tooltip
+      id="#{id}ToolTip"
+      for="#{id}Info"
+      escape="false"
+      showDelay="1000"
+      style="max-width:700px;"
+      position="#{empty position ? 'top' : position}" />
+  </h:panelGroup>
+</ui:composition>

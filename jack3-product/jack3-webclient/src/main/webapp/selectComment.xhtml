@@ -1,0 +1,39 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"  
+    xmlns:p="http://primefaces.org/ui"
+	template="WEB-INF/templates/template.xhtml">
+
+	<h:head>
+		<title>Comments</title>
+		<style type="text/css">
+			.ui-widget {  
+				font-size: 90%;
+			}
+		</style>
+	</h:head>
+	
+	<h:body>
+		<h:form>
+			<p:dataTable var="comments" value="#{commentView.comment}">
+				<p:column headerText="Date">
+					<h:outputText value="#{comment.date}" />
+				</p:column>
+				
+				<p:column headerText="User">
+					<h:outputText value="#{comment.user}" />
+				</p:column>
+				
+				<p:column headerText="Comments">
+					<h:outputText value="#{comment.comment}" />
+				</p:column>
+				
+				<p:column style="width:32px;text-align: center">
+					<p:commandButton icon="fas fa-search fa-sm" actionListener="#{commentView.selectCommentFromDialog(comment)}" />
+				</p:column>
+			</p:dataTable>
+		</h:form>
+	</h:body>
+	
+</ui:composition>

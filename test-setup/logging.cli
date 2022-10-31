@@ -1,0 +1,19 @@
+embed-server
+cd /subsystem=logging
+
+./logger=com.arjuna:remove
+./logger=org.jboss.as.config:remove
+./logger=sun.rmi:remove
+./logger=io.jaegertracing.Configuration:remove
+./root-logger=ROOT:remove
+
+./logger=org.wildfly:add(handlers=[CONSOLE,FILE],level=INFO)
+./logger=org.jboss.weld:add(handlers=[CONSOLE,FILE],level=INFO)
+./logger=org.jboss.as.connector:add(handlers=[CONSOLE,FILE],level=INFO)
+./logger=org.jboss.as.server:add(handlers=[CONSOLE,FILE],level=INFO)
+./logger=stdout:add(handlers=[CONSOLE,FILE])
+# see JACK/jack3-core#292
+./logger=org.jboss.jca.core.connectionmanager.listener.TxConnectionListener:add(handlers=[FILE],level=WARN)
+./root-logger=ROOT:add(handlers=[FILE],level=INFO)
+
+stop-embedded-server

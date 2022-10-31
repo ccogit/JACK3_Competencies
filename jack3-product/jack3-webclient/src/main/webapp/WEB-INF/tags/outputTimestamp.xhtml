@@ -1,0 +1,42 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:c="http://java.sun.com/jsp/jstl/core"
+  xmlns:p="http://primefaces.org/ui">
+
+  <h:panelGroup rendered="#{empty rendered ? true : rendered}">
+    <c:choose>
+
+      <c:when test="#{not empty id}">
+        <h:outputText
+          id="#{id}"
+          value="#{value}"
+          rendered="#{not empty value}"
+          escape="false"
+          style="#{style}">
+          <f:converter converterId="#{converter}" />
+        </h:outputText>
+        <h:outputText
+          id="#{id}_empty"
+          value="#{msg['global.never']}"
+          rendered="#{not empty showNever and showNever and empty value}" />
+      </c:when>
+
+      <c:otherwise>
+        <h:outputText
+          value="#{value}"
+          rendered="#{not empty value}"
+          escape="false"
+          style="#{style}">
+          <f:converter converterId="#{converter}" />
+        </h:outputText>
+        <h:outputText
+          value="#{msg['global.never']}"
+          rendered="#{not empty showNever and showNever and empty value}" />
+      </c:otherwise>
+
+    </c:choose>
+  </h:panelGroup>
+</ui:composition>

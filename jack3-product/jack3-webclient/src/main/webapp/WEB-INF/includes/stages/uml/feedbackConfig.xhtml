@@ -1,0 +1,48 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+  <h4>
+    <h:outputText value="#{msg['exerciseEdit.uml.handleMissingUpload']}" />
+  </h4>
+  
+       <p:selectOneRadio id="repeatOnMissingUpload" value="#{stageBean.stage.repeatOnMissingUpload}" onclick="processChange()">
+            <f:selectItem itemLabel="#{msg['exerciseEdit.uml.repeatOnMissingUpload']}" itemValue="#{true}" />
+            <f:selectItem itemLabel="#{msg['exerciseEdit.uml.failOnMissingUpload']}" itemValue="#{false}" />
+        </p:selectOneRadio>
+
+  <h4>
+    <h:outputText value="#{msg['exerciseEdit.uml.greqlRules']}" />
+  </h4>
+  
+    <p:inputTextarea 
+      id="greqlRuleText"
+      value="#{stageBean.stage.greqlRules}"
+      disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+      onkeypress="processChange()" 
+      rows="20" 
+      autoResize="false"
+      style="width:99%;align:left;">
+      <p:ajax event="blur"
+        oncomplete="processChange()"></p:ajax>
+    </p:inputTextarea>
+        
+  <h4>
+    <h:outputText value="#{msg['exerciseEdit.uml.propagateInternalErrors']}" />
+  </h4>
+
+  <p:selectOneRadio
+    id="propagateOnInternalErrors"
+    value="#{stageBean.stage.propagateInternalErrors}"
+    onclick="processChange()">
+    <f:selectItem
+      itemLabel="#{msg['exerciseEdit.uml.propagateInternalErrors.true']}"
+      itemValue="#{true}" />
+    <f:selectItem
+      itemLabel="#{msg['exerciseEdit.uml.propagateInternalErrors.false']}"
+      itemValue="#{false}" />
+  </p:selectOneRadio>
+
+</ui:composition>

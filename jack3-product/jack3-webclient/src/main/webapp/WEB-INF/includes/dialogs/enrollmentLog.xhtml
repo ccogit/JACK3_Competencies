@@ -1,0 +1,73 @@
+<!-- Parameters: 
+  {log} (List<Enrollment>) - The enrollment log that is to be shown
+  {lecturerMode} (boolean) - Wether to show additional lecturer information
+  {studentName} (String) - For which student the log is requested (shown name, only requested for lecturer mode)
+-->
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:c="http://java.sun.com/jsp/jstl/core">
+  <h:form id="enrollmentLogForm">
+    <p:dialog
+      widgetVar="enrollmentLogDialog"
+      closable="true"
+      resizable="false"
+      header="#{lecturerMode and not empty studentName ? msg['enrollmentLogDialog.titleForLecturers'] += studentName : msg['enrollmentLogDialog.title']}"
+      closeOnEscape="true"
+      width="800">
+      <p:dataTable
+        id="enrollmentLog"
+        value="#{log}"
+        var="entry"
+        scrollable="true"
+        scrollHeight="400"
+        rowIndexVar="rowIndex">
+        <p:column
+          id="columnStatus"
+          headerText="#{msg['enrollmentLogDialog.columnStatus']}"
+          width="170">
+          <h:outputText value="#{msg['enum.EEnrollmentStatus' += '.' += entry.status]} " />
+          <h:outputText
+            value="#{msg['enrollmentLogDialog.current']}"
+            styleClass="colored-tag"
+            rendered="#{(rowIndex + 1) eq log.size()}" />
+        </p:column>
+        <p:column
+          id="columnDate"
+          headerText="#{msg['enrollmentLogDialog.columnTimestamp']}"
+          width="170">
+          <h:outputText
+            value="#{entry.timestamp}"
+            converter="fullTimestampConverter" />
+        </p:column>
+        <p:column
+          id="columnAdditionalInformation"
+          headerText="#{msg['enrollmentLogDialog.columnAction']}">
+          <!-- Changed by system -->
+          <h:outputText
+            value="#{msg['enrollmentLogDialog.columnAction.automaticAction']}"
+            rendered="#{empty entry.changedBy}" />
+          <!-- Changed by student -->
+          <h:outputText
+            value="#{lecturerMode ? msg['enrollmentLogDialog.columnAction.manualActionStudent'] : msg['enrollmentLogDialog.columnAction.manualActionYou']}"
+            rendered="#{(not empty entry.changedBy) and (entry.changedBy eq entry.user)}" />
+          <!-- Changed by lecturer -->
+          <ui:fragment rendered="#{(not empty entry.changedBy) and (entry.changedBy ne entry.user)}">
+            <h:outputText value="#{msg['enrollmentLogDialog.columnAction.manualActionLecturer']}" />
+            <h:outputText
+              value=" '#{entry.changedBy.loginName}'."
+              rendered="#{lecturerMode}" />
+          </ui:fragment>
+          <!-- Given reason -->
+          <ui:fragment rendered="#{not empty entry.reason}">
+            <br />
+            <h:outputText value="#{msg['enrollmentLogDialog.columnAction.manualActionReason']}: #{entry.reason}" />
+          </ui:fragment>
+        </p:column>
+      </p:dataTable>
+    </p:dialog>
+  </h:form>
+</ui:composition>

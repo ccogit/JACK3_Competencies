@@ -1,0 +1,86 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:pe="http://primefaces.org/ui/extensions"
+  xmlns:p="http://primefaces.org/ui">
+
+  <script
+    id="molResInsideElem#{textSource}"
+    type="chemical/x-mdl-molfile">#{editorContentOldMol}</script>
+
+  <script>
+	var chemComposer#{textSource};
+        
+    function init#{textSource}(editorFormat, editorContent)
+        {
+			chemComposer#{textSource} = new Kekule.Editor.Composer(document.getElementById('moleculeEditor_#{textSource}'));
+            chemComposer#{textSource}//.setAutoResizeConstraints({width: 1, height: 1})
+                .setEnableDimensionTransform(true).setAutoSetMinDimension(true);
+            
+            if (editorFormat === Kekule.IO.DataFormat.MOL) {
+                Kekule.IO.loadResourceData('url(#molResInsideElem#{textSource})', function(mol, success) {
+                  if (success) {
+                	  chemComposer#{textSource}.setChemObj(mol);
+                  }
+                });
+            } else {            	
+           		chemComposer#{textSource}.setChemObj(Kekule.IO.loadFormatData(editorContent, editorFormat));
+            }
+        }
+
+	function handleChange#{textSource}() {
+  		const editorContent = Kekule.IO.saveFormatData(chemComposer#{textSource}.getChemObj(), Kekule.IO.DataFormat.KEKULE_JSON);
+  		
+		const allMols = chemComposer#{textSource}.exportObjs(Kekule.Molecule);
+		const asMolData = allMols.map(m => Kekule.IO.saveFormatData(m, 'mol'));
+		const asInchiData = asMolData.map(m => InChI.fromMolfile(m));
+    		
+      
+		updateMoleculeInStage#{textSource}([ {
+				name : 'moleculeInChIs',
+				value: JSON.stringify(asInchiData)
+			}, {
+				name : 'moleculeMols',
+				value: JSON.stringify(asMolData)
+			}, {
+				name : 'moleculeEditorContent',
+				value: JSON.stringify(editorContent)
+			} ]);
+    }
+  </script>
+
+  <!--  
+    So Javascript can call the bean method: 
+    de.uni_due.s3.jack3.beans.stagetypes.MoleculeStageEditDialogView.updateMolecule() 
+  -->
+  <p:remoteCommand
+    name="updateMoleculeInStage#{textSource}"
+    action="#{stageBean.updateMolecule}"
+    update="@parent:#{textSource} @parent:#{textSourceContainer}"
+    oncomplete="processChange()" />
+
+  <p:commandButton
+    id="load_#{textSource}_InMoleculeEditor"
+    icon="fas fa-key fa-sm"
+    disabled="#{readOnlyParam}"
+    type="button" />
+  <p:overlayPanel
+    id="overlayPanel_#{textSource}_MoleculeEditor"
+    for="load_#{textSource}_InMoleculeEditor"
+    hideEffect="fade"
+    style="width:820px;"
+    my="right bottom"
+    at="left top"
+    modal="true"
+    onShow="init#{textSource}(#{editorContentFormat}, #{editorContentValue})"
+    onHide="handleChange#{textSource}()">
+
+    <div
+      id="moleculeEditor_#{textSource}"
+      style="width: 800px; height: 600px"></div>
+
+  </p:overlayPanel>
+
+</ui:composition>

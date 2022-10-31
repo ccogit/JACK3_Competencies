@@ -1,0 +1,32 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core">
+
+
+	<strong>Kafka-Topic: </strong>
+	<p:outputLabel escape="false" value="#{checkResult.fromKafkaTopic}" />
+	<br />
+
+
+	<strong>#{msg['global.points']}: </strong>
+	<p:outputLabel escape="false" value="#{checkResult.points}" />
+	<br/>
+	
+	<strong>#{msg['exerciseEdit.stageFeedback']}: </strong>
+	<p:outputLabel escape="false" value="#{checkResult.publicComment}" />
+	<br />
+	
+	<strong>#{msg['checkResultView.log']}: </strong>
+
+<pre>
+<p:outputLabel escape="false" value="#{checkResult.checkerLog}"
+			rendered="#{not empty checkResult.checkerLog}" />
+</pre>
+
+	<p:outputLabel value="#{msg['checkResultView.noLogFound']}"
+		rendered="#{empty checkResult.checkerLog}" />
+
+</ui:composition>

@@ -1,0 +1,62 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:p="http://primefaces.org/ui">
+  <p:panel
+    id="#{id}Pattern"
+    header="#{header}"
+    toggleable="true"
+    toggleOrientation="horizontal"
+    toggleSpeed="0"
+    closeSpeed="0"
+    widgetVar="#{id}Panel#{stageBean.stage.orderIndex}"
+    style="font-size:0.85em;padding:0px;border:0px;"
+    collapsed="true">
+    <p:ajax event="toggle" listener="#{stageBean.updateNewOptions}" update="#{id}Table" />
+    <p:dataTable
+      id="#{id}Table"
+      value="#{stageBean.newOptions}"
+      var="option"
+      style="width:100%;">
+      <p:column headerText="#{msg['exerciseEdit.mc.answer']}">
+        <h:outputText value="#{option.text}" escape="false" />
+      </p:column>
+      <p:column
+        headerText="#{msg['exerciseEdit.mc.ticked']}"
+        style="width:30%">
+        <p:selectOneMenu
+          id="feedbackSelectPattern"
+          value="#{option.rule}"
+          onchange="processChange()"
+          disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+          unselectable="false">
+          <f:selectItem
+            itemLabel="#{msg['exerciseEdit.mc.ticked.no']}"
+            itemValue="WRONG" />
+          <f:selectItem
+            itemLabel="#{msg['exerciseEdit.mc.ticked.yes']}"
+            itemValue="CORRECT" />
+          <f:selectItem
+            itemLabel="#{msg['exerciseEdit.mc.ticked.dontcare']}"
+            itemValue="NO_MATTER" />
+          <f:selectItems
+            value="#{exerciseEditView.exercise.variableDeclarations}"
+            var="variableDeclaration"
+            itemLabel="#{variableDeclaration.name}"
+            itemValue="#{variableDeclaration.name}" />
+        </p:selectOneMenu>
+      </p:column>
+    </p:dataTable>
+
+    <p:commandButton
+      value="#{msg['global.add']}"
+      action="#{stageBean[action]}"
+      disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+      partialSubmit="true"
+      process="#{id}Pattern #{update}"
+      update="#{update}"
+      oncomplete="processChange();PF('#{id}Panel#{stageBean.stage.orderIndex}').toggle();" />
+  </p:panel>
+</ui:composition>

@@ -1,0 +1,83 @@
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:j="http://jack.s3.uni-due.de/ui-elements">
+
+	<p:commandButton id="cb#{imageButtonId}_#{stageBean.stage.orderIndex}"
+		value="#{msg['exerciseEdit.addImageOrLink']}" type="button"
+		disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}" />
+	<p:overlayPanel
+		id="overlay#{imageButtonId}_#{stageBean.stage.orderIndex}"
+		for="cb#{imageButtonId}_#{stageBean.stage.orderIndex}"
+		hideEffect="fade" dynamic="false" style="width:840px">
+
+		<p:dataTable
+			id="exerciseResources#{imageButtonId}_#{stageBean.stage.orderIndex}"
+			value="#{exerciseEditView.getImageList()}" var="file"
+			emptyMassage="#{msg['exerciseEdit.noExerciseResources']}"
+			resizeableColumns="true" editable="false">
+			<p:column
+				id="headerPreviewImage#{imageButtonId}_#{stageBean.stage.orderIndex}"
+				headerText="#{msg['exerciseEdit.addImageOrLink']}" style="width:100px;">
+				<p:commandButton
+					id="cbAddResourceAsImageToEditor#{imageButtonId}_#{stageBean.stage.orderIndex}"
+					icon="fas fa-image fa-sm"
+					action="#{exerciseEditView.addResourceAsImageInEditor(file,editorWidgetVarId,stageBean.stage.orderIndex)}"
+					oncomplete="processChange()" update="@this"
+					disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}" /> 
+                <p:commandButton
+                  id="cbAddResourceAsLinkToEditor#{imageButtonId}_#{stageBean.stage.orderIndex}"
+                  icon="fas fa-link fa-sm"
+                  action="#{exerciseEditView.addResourceAsLinkInEditor(file,editorWidgetVarId,stageBean.stage.orderIndex)}"
+                  oncomplete="processChange()" update="@this"
+                  disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}" />
+			</p:column>
+			<p:column
+				id="headerTextExerciseFilename#{imageButtonId}_#{stageBean.stage.orderIndex}"
+				headerText="#{msg['global.filename']}">
+				<h:outputText value="#{file.filename}" />
+			</p:column>
+			<p:column
+				id="headerTextExerciseFileDescription#{imageButtonId}_#{stageBean.stage.orderIndex}"
+				headerText="#{msg['exerciseEdit.description']}">
+				<p:inplace
+					id="editorFileDescription#{imageButtonId}_#{stageBean.stage.orderIndex}"
+					editor="true"
+                    class="inplaceIcon">
+					<f:facet
+						id="facetOutputFile#{imageButtonId}_#{stageBean.stage.orderIndex}"
+						name="output">
+						<h:outputText value="#{file.description}"
+							rendered="#{file.description!=null and file.description!=''}" />
+						<h:outputText value="#{msg['exerciseEdit.noFileDescription']}"
+							style="font-style:italic"
+							rendered="#{file.description==null or file.description==''}" />
+					</f:facet>
+					<f:facet
+						id="facetInputFile#{imageButtonId}_#{stageBean.stage.orderIndex}"
+						name="input">
+						<p:inputText id="inputFileDescription" value="#{file.description}"
+							onchange="processChange()"
+							disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+							onkeypress="return event.keyCode != 13" />
+					</f:facet>
+				</p:inplace>
+			</p:column>
+			<p:column
+				id="headerTextFileUploadDate#{imageButtonId}_#{stageBean.stage.orderIndex}"
+				headerText="#{msg['global.timestamp']}" style="width:160px;">
+				<j:outputTimestamp value="#{file.uploadTimestamp}" converter="shortTimestampConverter" />
+			</p:column>
+			<p:column
+				id="headerTextFileUploadedBy#{imageButtonId}_#{stageBean.stage.orderIndex}"
+				headerText="#{msg['exerciseEdit.user']}" style="width:80px;">
+				<h:outputText value="#{file.lastEditor.loginName}" />
+			</p:column>
+		</p:dataTable>
+	</p:overlayPanel>
+
+</ui:composition>

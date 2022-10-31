@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.0"
+	xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
+	<persistence-unit name="jack3-core">
+		<!-- No idea why, but this class entry prevents https://issues.jboss.org/browse/JBIDE-16016 
+			from kicking in. Let's just leave it as that until the issue is resolved. -->
+		<class>de.uni_due.s3.jack3.entities.tenant.CheckerConfiguration</class>
+		<properties>
+			<!-- Multi-tenancy configuration. -->
+			<property name="hibernate.multi_tenant_connection_provider"
+				value="de.uni_due.s3.jack3.multitenancy.TenantPerDeploymentConnectionProvider" />
+			<property name="hibernate.tenant_identifier_resolver"
+				value="de.uni_due.s3.jack3.multitenancy.TenantPerDeploymentIdentifierResolver" />
+			<property name="hibernate.multiTenancy" value="DATABASE" />
+
+			<!-- General hibernate configuration -->
+			<property name="hibernate.hbm2ddl.auto" value="update" />
+			<property name="hibernate.show_sql" value="false" />
+			<property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect" />
+
+			<!-- Envers auditing strategy: Every auditing log entry gets a column 
+				for latest revision, which is updated for all revision beloning to the entity 
+				on persist. This leads to sligthly slower persistence but to much faster 
+				auditing querys. -->
+			<property name="org.hibernate.envers.audit_strategy"
+				value="org.hibernate.envers.strategy.ValidityAuditStrategy" />
+			
+			<!-- This set to true will cause Envers to add _mod columns to audited entitys, 
+				which indicate if the corresponding column was changed in this revision -->
+			<property name="org.hibernate.envers.global_with_modified_flag"
+				value="true" />
+				
+			<!-- Instead of just storing a deleted revision with nulled attributes, save the object 
+			before deletion in the delete-revision. This makes it easyer to look at deleted entitys. -->
+			<property name="org.hibernate.envers.store_data_at_delete"
+				value="true" />
+
+		</properties>
+	</persistence-unit>
+</persistence> 
+	

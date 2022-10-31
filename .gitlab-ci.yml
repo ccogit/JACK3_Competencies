@@ -1,0 +1,24 @@
+image: maven:3-adoptopenjdk-11
+
+variables:
+# Default settings for building the project. Path to local maven repository must be absolute, otherwise it won't work.
+  COMMON_OPTS: "-s ../.m2/settings.xml --batch-mode --no-transfer-progress -Dmaven.repo.local=/builds/JACK/jack3-core/.m2/repository"
+  MAVEN_CLI_OPTS: "$COMMON_OPTS"
+  CACERTS: "/opt/java/openjdk/lib/security/cacerts"
+  WILDFLY_VERSION: "25.0.0.Final"
+  WILDFLY_SHA256_SUM: "f0a23fd071b78c955163d7ec702143b555b7ac3caa3a61dfe5b931c1fba75f0d"
+# Downloaded artifacts and binaries are cached
+cache:
+  paths:
+    - wildfly-${WILDFLY_VERSION}.zip
+    - geckodriver
+    - .m2/repository/
+
+stages:
+  - build
+  - test
+  - report
+  - deploy
+
+include:
+  - local: .gitlab/ci/*.gitlab-ci.yml

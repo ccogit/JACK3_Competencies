@@ -1,0 +1,538 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:c="http://java.sun.com/jsp/jstl/core"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:j="http://jack.s3.uni-due.de/ui-elements">
+
+  <!-- Adds "Filter" placeholder to the tree filter which is not controllable via XHTML -->
+  <script type="text/javascript">
+  function addSearchPlaceholderToPresentationTreeFilter() {
+	  let field = document.getElementById('treeForm:courseOfferTree_filter')
+      if (field) {
+        field.setAttribute('placeholder', "#{msg['global.filter']}")
+      }
+  }
+  $(document).ready(addSearchPlaceholderToPresentationTreeFilter)
+  $(document).on('pfAjaxComplete',addSearchPlaceholderToPresentationTreeFilter);
+  </script>
+
+  <p:panelGrid
+    id="mainLayoutPresentation"
+    style="width:100%;border:0px;">
+    <p:row style="border-width:0px;">
+      <p:column
+        id="presentationContainer"
+        style="width:100%;vertical-align:top;padding:0px;">
+        <p:toolbar
+          id="courseOfferToolbar"
+          style="border-width:0px;"
+          rendered="#{availableCoursesView.currentUser.hasEditRights}">
+          <f:facet
+            id="facetCourseOfferToolbarLeft"
+            name="left">
+            <p:menuButton
+              id="menubuttonPresentationView2"
+              value="#{msg['start.presentation.filter']}"
+              style="margin-left:5px;">
+              <p:menuitem
+                id="showMyCourseOffersView"
+                value="#{msg['start.presentation.mycourses']}"
+                actionListener="#{availableCoursesView.showMyCourseOffers}"
+                update="@form"
+                icon="fa fa-sm"
+                rendered="#{!availableCoursesView.filterMyCourseOffers}" />
+              <p:menuitem
+                id="showMyCourseOffersViewActive"
+                value="#{msg['start.presentation.mycourses']}"
+                actionListener="#{availableCoursesView.showMyCourseOffers}"
+                update="@form"
+                icon="fas fa-check fa-sm"
+                rendered="#{availableCoursesView.filterMyCourseOffers}" />
+              <p:menuitem
+                id="showAllCourseOffersView"
+                value="#{msg['start.presentation.allcourses']}"
+                actionListener="#{availableCoursesView.showAllCourseOffers}"
+                update="@form"
+                icon="fa fa-sm"
+                rendered="#{availableCoursesView.filterMyCourseOffers}" />
+              <p:menuitem
+                id="showAllCourseOffersViewActive"
+                value="#{msg['start.presentation.allcourses']}"
+                actionListener="#{availableCoursesView.showAllCourseOffers}"
+                update="@form"
+                icon="fas fa-check fa-sm"
+                rendered="#{!availableCoursesView.filterMyCourseOffers}" />
+            </p:menuButton>
+          </f:facet>
+        </p:toolbar>
+
+        <h:panelGroup
+          id="noOffersHint"
+          layout="block"
+          style="display: flex;">
+          <h:outputText
+            rendered="#{availableCoursesView.rootPresentationNode.childCount == 0}"
+            value="#{msg['start.noOffers']}"
+            style="text-align: center; margin-top: 10px; width: 100%;" />
+        </h:panelGroup>
+
+        <p:tree
+          id="courseOfferTree"
+          value="#{availableCoursesView.rootPresentationNode}"
+          var="doc"
+          style="border:none; width:100%"
+          selectionMode="single"
+          draggable="true"
+          droppable="true"
+          selection="#{availableCoursesView.selectedPresentationNode}"
+          filterBy="#{availableCoursesView.getSearchString(doc)}"
+          filterMatchMode="contains">
+          
+          <p:treeNode
+            type="folder"
+            expandedIcon="fas fa-folder-open fa-sm"
+            collapsedIcon="fas fa-folder fa-sm">
+            <h:outputText
+              id="folderName"
+              value="#{doc.name}" />
+            <h:outputText
+              value="#{availableCoursesView.getShownAccessRight(doc)}"
+              styleClass="weaker" />
+            <j:helperTooltip
+              id="folderLinkedCoursesHint"
+              text=" #{availableCoursesView.getParallelHint(doc)}"
+              tooltip="#{msg['start.linkedFolderHint.lecturer']}"
+              rendered="#{not empty availableCoursesView.getParallelHint(doc)}"
+              style="color:#888;font-size:70%" />
+          </p:treeNode>
+      
+          <p:treeNode
+            type="emptyFolder"
+            expandedIcon="fas fa-folder-open fa-sm"
+            collapsedIcon="fas fa-folder fa-sm">
+            <h:outputText
+              id="emptyFolderName"
+              value="#{doc.name}" />
+            <h:outputText
+              value="#{availableCoursesView.getShownAccessRight(doc)}"
+              styleClass="weaker" />
+            <j:helperTooltip
+              id="emptyFolderLinkedCoursesHint"
+              text=" #{availableCoursesView.getParallelHint(doc)}"
+              tooltip="#{msg['start.linkedFolderHint.lecturer']}"
+              rendered="#{not empty availableCoursesView.getParallelHint(doc)}"
+              style="color:#888;font-size:70%" />
+          </p:treeNode>
+      
+          <p:treeNode
+            type="noDeleteFolder"
+            expandedIcon="fas fa-folder-open fa-sm"
+            collapsedIcon="fas fa-folder fa-sm">
+            <h:outputText
+              id="noDeleteFolderName"
+              value="#{doc.name}" />
+            <h:outputText
+              value="#{availableCoursesView.getShownAccessRight(doc)}"
+              styleClass="weaker" />
+            <j:helperTooltip
+              id="noDeleteFolderLinkedCoursesHint"
+              text=" #{availableCoursesView.getParallelHint(doc)}"
+              tooltip="#{msg['start.linkedFolderHint.lecturer']}"
+              rendered="#{not empty availableCoursesView.getParallelHint(doc)}"
+              style="color:#888;font-size:70%" />
+          </p:treeNode>
+          
+          <p:treeNode
+            id="readRightsFolder"
+            type="readRightsFolder"
+            expandedIcon="fas fa-folder-open fa-sm"
+            collapsedIcon="fas fa-folder fa-sm">
+            <h:outputText value="#{doc.name}" />
+            <h:outputText
+              value="#{availableCoursesView.getShownAccessRight(doc)}"
+              styleClass="weaker" />
+            <j:helperTooltip
+              id="readRightsFolderLinkedCoursesHint"
+              text=" #{availableCoursesView.getParallelHint(doc)}"
+              tooltip="#{msg['start.linkedFolderHint.student']}"
+              rendered="#{not empty availableCoursesView.getParallelHint(doc)}"
+              style="color:#888;font-size:70%" />
+          </p:treeNode>
+      
+          <p:treeNode
+            id="noActionFolder"
+            type="noActionFolder"
+            expandedIcon="fas fa-folder-open fa-sm"
+            collapsedIcon="fas fa-folder fa-sm">
+            <h:outputText value="#{doc.name}" />
+            <h:outputText
+              value="#{availableCoursesView.getShownAccessRight(doc)}"
+              styleClass="weaker" />
+            <j:helperTooltip
+              id="noActionFolderLinkedCoursesHint"
+              text=" #{availableCoursesView.getParallelHint(doc)}"
+              tooltip="#{msg['start.linkedFolderHint.student']}"
+              rendered="#{not empty availableCoursesView.getParallelHint(doc)}"
+              style="color:#888;font-size:70%" />
+          </p:treeNode>
+      
+          <p:treeNode
+            id="onlyAddFolder"
+            type="onlyAddFolder"
+            expandedIcon="fas fa-folder-open fa-sm"
+            collapsedIcon="fas fa-folder fa-sm">
+            <h:outputText
+              id="onlyAddFolderName"
+              value="#{doc.name}" />
+            <h:outputText
+              value="#{availableCoursesView.getShownAccessRight(doc)}"
+              styleClass="weaker" />
+            <j:helperTooltip
+              id="onlyAddFolderLinkedCoursesHint"
+              text=" #{availableCoursesView.getParallelHint(doc)}"
+              tooltip="#{msg['start.linkedFolderHint.lecturer']}"
+              rendered="#{not empty availableCoursesView.getParallelHint(doc)}"
+              style="color:#888;font-size:70%" />
+          </p:treeNode>
+      
+          <p:treeNode
+            id="newFolderNode"
+            type="newFolder"
+            icon="fas fa-folder fa-sm">
+            <p:focus
+              id="focusTreeNodeNewFolderNode"
+              for="newFolderName" />
+            <p:remoteCommand
+              id="treeNodeNewFolderNodeTempNewFolder"
+              name="tempNewFolder"
+              actionListener="#{availableCoursesView.createNewPresentationFolder()}"
+              update="courseOfferTree globalGrowl" />
+            <p:remoteCommand
+              id="treeNodeNewFolderNodeRemoveEmptyFolder"
+              name="removeEmptyFolder"
+              actionListener="#{availableCoursesView.clearInputTreeNode()}"
+              update="courseOfferTree  globalGrowl" />
+            <p:inputText
+              id="newFolderName"
+              value="#{availableCoursesView.newPresentationFolderName}"
+              placeholder="#{msg['start.newFolder']}"
+              onkeypress="if (event.keyCode == 13) { tempNewFolder(); return false; } else if (event.keyCode == 27) {removeEmptyFolder(); return false;}"
+              onblur="removeEmptyFolder(); return false;" />
+          </p:treeNode>
+      
+          <p:treeNode
+            id="newCourseOfferNode"
+            type="newCourseOffer"
+            icon="far fa-file fa-sm">
+            <p:focus
+              id="focusTreeNodeNewCourseOfferNodeNewCourseOfferName"
+              for="newCourseOfferName" />
+            <p:remoteCommand
+              id="treeNodeNewCourseOfferNodeTempNewCourseOffer"
+              name="tempNewCourseOffer"
+              actionListener="#{availableCoursesView.createNewCourseOffer()}"
+              update="courseOfferTree globalGrowl" />
+            <p:remoteCommand
+              id="treeNodeNewCourseOfferNodeRemoveEmptyCourseOffer"
+              name="removeEmptyCourseOffer"
+              actionListener="#{availableCoursesView.clearInputTreeNode()}"
+              update="courseOfferTree" />
+            <p:inputText
+              id="newCourseOfferName"
+              value="#{availableCoursesView.newCourseOfferName}"
+              placeholder="#{msg['start.newCourseOffer']}"
+              onkeypress="if (event.keyCode == 13) { tempNewCourseOffer(); return false; } else if (event.keyCode == 27) {removeEmptyCourseOffer(); return false;}"
+              onblur="removeEmptyCourseOffer(); return false;" />
+          </p:treeNode>
+      
+          <p:treeNode
+            type="editRightsOffer"
+            icon="far fa-file fa-sm">
+            <p:link
+              id="editOfferName"
+              outcome="#{viewId.courseOfferEditor}"
+              value="#{doc.name}">
+              <f:param
+                name="courseOffer"
+                value="#{doc.id}" />
+            </p:link>
+            <h:outputText value=" [#{msg['global.id']}: #{doc.id}]" styleClass="weaker"/>
+            <h:outputText
+              value=" #{availableCoursesView.getFreePlacesMessageForCourseOffer(doc)}"
+              rendered="#{doc.maxAllowedParticipants > 0}"
+              style="color:#888;font-size:60%" />
+          </p:treeNode>
+      
+          <p:treeNode
+            type="readRightsOffer"
+            icon="far fa-file fa-sm">
+            <p:link
+              id="readOfferName"
+              outcome="#{viewId.courseOfferEditor}"
+              value="#{doc.name}">
+              <f:param
+                name="courseOffer"
+                value="#{doc.id}" />
+            </p:link>
+            <h:outputText value=" [#{msg['global.id']}: #{doc.id}]" styleClass="weaker"/>
+            <h:outputText
+              value=" #{availableCoursesView.getFreePlacesMessageForCourseOffer(doc)}"
+              rendered="#{doc.maxAllowedParticipants > 0}"
+              style="color:#888;font-size:60%" />
+          </p:treeNode>
+      
+          <p:treeNode
+            type="studentOffer"
+            icon="far fa-file fa-sm">
+            <p:link
+              id="studentOfferName"
+              outcome="#{viewId.courseMainMenu}"
+              value="#{doc.name}">
+              <f:param
+                name="courseOffer"
+                value="#{doc.id}" />
+            </p:link>
+            <h:outputText
+              value=" #{availableCoursesView.getFreePlacesMessageForCourseOffer(doc)}"
+              rendered="#{doc.maxAllowedParticipants > 0}"
+              style="color:#888;font-size:60%" />
+          </p:treeNode>
+      
+          <p:treeNode
+            type="noRightsOffer"
+            icon="far fa-file fa-sm">
+            <h:outputText
+              id="noRightsOfferName"
+              value="#{doc.name}">
+            </h:outputText>
+            <h:outputText
+              value=" #{availableCoursesView.getFreePlacesMessageForCourseOffer(doc)}"
+              rendered="#{doc.maxAllowedParticipants > 0}"
+              style="color:#888;font-size:60%" />
+          </p:treeNode>
+      
+          <p:ajax
+            event="select"
+            listener="#{availableCoursesView.onNodeSelect}"
+            update="courseOfferTree" />
+          <p:ajax
+            event="contextMenu"
+            listener="#{availableCoursesView.onTreeContextMenu}"
+            update=":treeForm:contextCourseOfferTreeEmptyFolder :treeForm:contextCourseOfferTreeFolder :treeForm:contextCourseOfferTreeNoDelete"/>
+          <p:ajax
+            event="dragdrop"
+            listener="#{availableCoursesView.onDragDrop}"
+            update=":moveCourseOfferForm:dialogMoveCourseOffer :movePresentationFolderForm:dialogMovePresentationFolder courseOfferTree globalGrowl" />
+          <p:ajax
+            event="expand"
+            listener="#{availableCoursesView.onNodeExpand}" />
+          <p:ajax
+            event="collapse"
+            listener="#{availableCoursesView.onNodeCollapse}" />
+        </p:tree>
+
+        <p style="margin: 0px 10px 5px 10px;">
+          <h:outputText
+            id="presentationFolderAccessRightLegend"
+            value="#{msg['AccessRight.legend']}"
+            styleClass="weaker"
+            rendered="#{availableCoursesView.showRightsLegend}" />
+        </p>
+
+        <p:contextMenu
+          id="contextCourseOfferTreeEmptyFolder"
+          for="courseOfferTree"
+          nodeType="emptyFolder">
+          <p:menuitem
+            id="contextCreateFolder"
+            value="#{msg['start.createFolder']}"
+            icon="fas fa-folder fa-sm"
+            actionListener="#{availableCoursesView.createNewEmptyPresentationFolder}"
+            update="courseOfferTree" />
+          <p:menuitem
+            id="contextRenameEmptyFolder"
+            value="#{msg['start.renameFolder']}"
+            icon="fas fa-wrench fa-sm"
+            update=":renameFolderDialogForm"
+            actionListener="#{availableCoursesView.openRenameFolderDialog}" />
+          <p:menuitem
+            id="contextNewCourseOffer"
+            value="#{msg['startPresentationTabView.newCourseOffer']}"
+            icon="fas fa-plus fa-sm"
+            actionListener="#{availableCoursesView.createNewEmptyCourseOffer}"
+            update="courseOfferTree" />
+          <p:menuitem
+            id="contextEditRights"
+            rendered="#{availableCoursesView.userAllowedToManageFolder}"
+            value="#{msg['start.editRights']}"
+            icon="fas fa-key fa-sm"
+            action="#{availableCoursesView.openUserRightsDialog}"
+            update=":editRightsDialogForm globalGrowl" />
+          <p:menuitem
+            id="contextCourseOfferTreeDeleteFolder"
+            value="#{msg['start.deleteFolder']}"
+            icon="fas fa-times fa-sm"
+            actionListener="#{availableCoursesView.deletePresentationFolder}"
+            update="courseOfferTree noOffersHint" />
+        </p:contextMenu>
+      
+        <p:contextMenu
+          id="contextCourseOfferTreeFolder"
+          for="courseOfferTree"
+          nodeType="folder">
+          <p:menuitem
+            id="contextEmptyFolderCreate"
+            value="#{msg['start.createFolder']}"
+            icon="fas fa-folder fa-sm"
+            actionListener="#{availableCoursesView.createNewEmptyPresentationFolder}"
+            update="courseOfferTree" />
+          <p:menuitem
+            id="contextFolderRename"
+            value="#{msg['start.renameFolder']}"
+            icon="fas fa-wrench fa-sm"
+            update=":renameFolderDialogForm"
+            actionListener="#{availableCoursesView.openRenameFolderDialog}"/>
+          <p:menuitem
+            id="contextEmptyFolderNewCourseOffer"
+            value="#{msg['startPresentationTabView.newCourseOffer']}"
+            icon="fas fa-plus fa-sm"
+            actionListener="#{availableCoursesView.createNewEmptyCourseOffer}"
+            update="courseOfferTree" />
+          <p:menuitem
+            id="contextEmptyFolderEditRights"
+            rendered="#{availableCoursesView.userAllowedToManageFolder}"
+            value="#{msg['start.editRights']}"
+            icon="fas fa-key fa-sm"
+            action="#{availableCoursesView.openUserRightsDialog}"
+            update=":editRightsDialogForm globalGrowl" />
+          <p:menuitem 
+            id="contextFolderShowParticipantsData"
+            icon="fas fa-chart-bar fa-sm" 
+            value="#{msg['start.presentation.showParticipantsData']}"
+            action="#{availableCoursesView.redirectToParticipantsOverviewForFolder}"
+            ajax ="false"/>
+          <p:menuitem
+            id="contextEmptyFolderDeleteFolder"
+            value="#{msg['start.deleteFolder']}"
+            icon="fas fa-times fa-sm"
+            actionListener="#"
+            disabled="true" />
+          <p:menuitem
+            id="contextEmptyFolderLinkCourses"
+            value="#{msg['start.linkFolder']}"
+            icon="fas fa-wrench fa-sm"
+            actionListener="#{availableCoursesView.linkCourses}"
+            update="globalGrowl courseOfferTree contextCourseOfferTreeFolder" />
+        </p:contextMenu>
+      
+        <p:contextMenu
+          id="contextCourseOfferTreeNoDelete"
+          for="courseOfferTree"
+          nodeType="noDeleteFolder">
+          <p:menuitem
+            id="noDeleteFolderCreateFolder"
+            value="#{msg['start.createFolder']}"
+            icon="fas fa-folder fa-sm"
+            actionListener="#{availableCoursesView.createNewEmptyPresentationFolder}"
+            update="courseOfferTree" />
+          <p:menuitem
+            id="noDeleteFolderRenameFolder"
+            value="#{msg['start.renameFolder']}"
+            icon="fas fa-wrench fa-sm"
+            update=":renameFolderDialogForm"
+            actionListener="#{availableCoursesView.openRenameFolderDialog}" />
+          <p:menuitem
+            id="noDeleteFolderNewCourseOffer"
+            value="#{msg['startPresentationTabView.newCourseOffer']}"
+            icon="fas fa-plus fa-sm"
+            actionListener="#{availableCoursesView.createNewEmptyCourseOffer}"
+            update="courseOfferTree" />
+          <p:menuitem
+            id="noDeleteFolderEditRights"
+            rendered="#{availableCoursesView.userAllowedToManageFolder}"
+            value="#{msg['start.editRights']}"
+            icon="fas fa-key fa-sm"
+            action="#{availableCoursesView.openUserRightsDialog}"
+            update=":editRightsDialogForm globalGrowl" />
+          <p:menuitem
+            id="noDeleteFolderLinkCourses"
+            value="#{msg['start.linkFolder']}"
+            icon="fas fa-wrench fa-sm"
+            actionListener="#{availableCoursesView.linkCourses}"
+            update="globalGrowl courseOfferTree contextCourseOfferTreeFolder" />
+        </p:contextMenu>
+      
+        <p:contextMenu
+          id="contextCourseOfferTreeOnlyAdd"
+          for="courseOfferTree"
+          nodeType="onlyAddFolder">
+          <p:menuitem
+            id="onlyAddFolderCreateFolder"
+            value="#{msg['start.createFolder']}"
+            icon="fas fa-folder fa-sm"
+            actionListener="#{availableCoursesView.createNewEmptyPresentationFolder}"
+            update="courseOfferTree" />
+          <p:menuitem
+            id="onlyAddFolderNewCourseOffer"
+            value="#{msg['startPresentationTabView.newCourseOffer']}"
+            icon="fas fa-plus fa-sm"
+            actionListener="#{availableCoursesView.createNewEmptyCourseOffer}"
+            update="courseOfferTree" />
+        </p:contextMenu>
+      
+        <p:contextMenu
+          id="contextCourseOfferTreeOffer"
+          for="courseOfferTree"
+          nodeType="editRightsOffer">
+          <p:menuitem
+            id="contextCourseOfferTreeDuplicate"
+            value="#{msg['start.presentation.duplicateCourseOffer']}"
+            icon="far fa-clone fa-sm"
+            actionListener="#{availableCoursesView.prepareDuplicateCourseOffer}"
+            oncomplete="PF('duplicateCourseOfferDialog').show()"
+            update=":duplicateCourseOfferForm:duplicateCourseOfferDialog"/>
+          <p:menuitem 
+            id="contextCourseOfferTreeShowParticipantsData"
+            icon="fas fa-chart-bar fa-sm" 
+            value="#{msg['start.presentation.showParticipantsData']}"
+            action="#{availableCoursesView.redirectToParticipantsOverviewForCourseOffer}"
+            ajax ="false"/>
+          <p:menuitem
+            id="contextCourseOfferTreeDelete"
+            value="#{msg['start.deleteCourseOffer']}"
+            icon="fas fa-minus fa-sm"
+            actionListener="#{availableCoursesView.prepareCourseOfferDeletion}"
+            onclick="PF('deleteDialog').show()"
+            update="courseOfferTree :deleteCourseOfferForm:deletionInput" />        
+        </p:contextMenu>
+        
+        <p:contextMenu
+          id="contextCourseOfferTreeReadOffer"
+          for="courseOfferTree"
+          nodeType="readRightsOffer">
+          <p:menuitem 
+            id="contextReadCourseOfferTreeShowParticipantsData"
+            icon="fas fa-chart-bar fa-sm" 
+            value="#{msg['start.presentation.showParticipantsData']}"
+            action="#{availableCoursesView.redirectToParticipantsOverviewForCourseOffer}"
+            ajax ="false"/>       
+        </p:contextMenu>
+        
+        <p:contextMenu
+          id="contextCourseOfferTreeReadRightsFolder"
+          for="courseOfferTree"
+          nodeType="readRightsFolder">
+          <p:menuitem 
+            id="contextCourseOfferReadRightsTreeShowParticipantsData"
+            icon="fas fa-chart-bar fa-sm" 
+            value="#{msg['start.presentation.showParticipantsData']}"
+            action="#{availableCoursesView.redirectToParticipantsOverviewForFolder}"
+            ajax ="false"/>       
+        </p:contextMenu>
+      </p:column>
+    </p:row>
+  </p:panelGrid>
+</ui:composition>

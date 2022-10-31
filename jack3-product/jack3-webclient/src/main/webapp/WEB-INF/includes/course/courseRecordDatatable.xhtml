@@ -1,0 +1,156 @@
+<!--
+Parameters: 
+  {id} - The unique identifier of the datatable
+  {value} - List value
+  {exportFilename} - Filename for exporting the table
+  {extendedRead} - Wether the user has extended right on the folder
+Placeholders:
+  "headerRow" - Row that groups many course records that belong to the same course (version)
+  "additionalColumns" - Should be replaced with a list of p:columns that should be shown additional
+  "additionalHeader" - Additional elements in the table's header next to the Export buttons
+-->
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:c="http://java.sun.com/jsp/jstl/core"
+  xmlns:j="http://jack.s3.uni-due.de/ui-elements">
+  <p:dataTable
+    id="#{id}"
+    var="courseRecord"
+    value="#{value}"
+    sortBy="#{not userSession.statisticsStateHolder.groupSubmissionsByVersion ? courseRecord.startTime : courseRecord.groupKey}"
+    sortOrder="descending"
+    paginator="true"
+    rows="10"
+    rowsPerPageTemplate="10,50,500"
+    paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+    currentPageReportTemplate="{startRecord}-{endRecord} #{msg['paginator.of']} {totalRecords} #{msg['paginator.entries']}"
+    paginatorAlwaysVisible="false"
+    expandableRowGroups="true"
+    tableStyle="table-layout:auto;"
+    widgetVar="courseRecordTable">
+
+    <!-- Header -->
+    <f:facet name="header">
+      <j:exportButtons
+        target="#{id}"
+        fileName="#{exportFilename}" />
+      <p:commandButton
+        id="columnToggler"
+        type="button"
+        icon="fas fa-align-justify"
+        style="float: right;" />
+      <p:columnToggler
+        datasource="#{id}"
+        trigger="columnToggler" />
+      <ui:insert name="additionalHeader" />
+    </f:facet>
+
+    <!-- Header for grouped course records -->
+    <ui:insert name="headerRow" />
+
+    <!-- Username -->
+    <p:column
+      headerText="#{msg['global.username']}"
+      filterBy="#{userSession.getPublicUserName(courseRecord.user)}"
+      toggleable="false"
+      width="180">
+      <j:publicUserName
+        id="publicUserName"
+        publicUserName="#{userSession.getPublicUserName(courseRecord.user)}" />
+      <h:outputText
+        style="font-size: 80%; color: gray;"
+        value=" [#{msg['exerciseSubmissions.testSubmission']}] "
+        rendered="#{courseRecord.testSubmission}" />
+      <h:outputText
+        style="font-size: 80%; color: gray;"
+        value=" [#{msg['statistics.unreadComments']}] "
+        rendered="#{courseRecord.unreadCommentsOnSubmissions > 0}" />
+      <h:outputText
+        style="font-size: 80%; color: gray;"
+        value=" [#{msg['statistics.comments']}] "
+        rendered="#{courseRecord.unreadCommentsOnSubmissions == 0 and courseRecord.commentsOnSubmissions > 0}" />
+    </p:column>
+
+    <!-- Email -->
+    <p:column
+      headerText="#{msg['global.email']}"
+      filterBy="#{courseRecord.user.email}"
+      exportable="false"
+      rendered="#{extendedRead}"
+      visible="false"
+      width="140"
+      style="text-overflow:ellipsis; overflow:hidden; white-space:nowrap; max-width:130px;">
+      <h:outputLink
+        value="mailto:#{courseRecord.user.email}"
+        title="#{courseRecord.user.email}">
+        <h:outputText value="#{courseRecord.user.email}" />
+      </h:outputLink>
+    </p:column>
+    <p:column
+      headerText="#{msg['global.email']}"
+      exportable="true"
+      rendered="#{extendedRead}"
+      styleClass="export-hidden-column"
+      toggleable="false">
+      <h:outputText value="#{courseRecord.user.email}" />
+    </p:column>
+
+    <!-- Profile fields -->
+    <c:forEach
+      items="#{userSession.statisticsStateHolder.selectedProfileFields}"
+      var="field">
+      <p:column
+        headerText="#{field}"
+        filterBy="#{courseRecord.user.profileData.get(field)}"
+        filterMatchMode="contains"
+        rendered="#{extendedRead}">
+        <h:outputText value="#{courseRecord.user.profileData.get(field)}" />
+      </p:column>
+    </c:forEach>
+
+    <!-- Time data -->
+    <p:column headerText="#{msg['courseStatistics.begun']}">
+      <h:outputText
+        value="#{courseRecord.startTime}"
+        converter="shortTimestampConverter" />
+    </p:column>
+    <!-- Because we want to show "never", we need an extra-column for export -->
+    <p:column
+      headerText="#{msg['courseStatistics.lastVisited']}"
+      visible="false"
+      exportable="false">
+      <j:outputTimestamp
+        value="#{courseRecord.lastVisit}"
+        converter="shortTimestampConverter"
+        showNever="true"
+        rendered="#{not courseRecord.testSubmission}" />
+      <h:outputText
+        value="#{msg['global.notAvailable.short']}"
+        rendered="#{courseRecord.testSubmission}"
+        title="#{msg['courseStatistics.valueNotAvailableForTestSubmissions']}" />
+    </p:column>
+    <p:column
+      headerText="#{msg['courseStatistics.lastVisited']}"
+      styleClass="export-hidden-column"
+      toggleable="false">
+      <h:outputText
+        value="#{courseRecord.lastVisit}"
+        converter="shortTimestampConverter"
+        rendered="#{not courseRecord.testSubmission}" />
+    </p:column>
+    <!-- Finish time -->
+    <p:column headerText="#{msg['courseStatistics.isExited']}">
+      <h:outputText
+        value="#{courseRecord.closedTimestamp}"
+        converter="shortTimestampConverter" />
+    </p:column>
+    
+    <!-- Additional columns -->
+    <ui:insert name="additionalColumns" />
+    
+  </p:dataTable>
+</ui:composition>

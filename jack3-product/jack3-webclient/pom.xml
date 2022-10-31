@@ -1,0 +1,161 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>de.uni-due.s3.jack3</groupId>
+		<artifactId>jack3-product</artifactId>
+		<version>${revision}</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+	<artifactId>jack3-webclient</artifactId>
+	<packaging>war</packaging>
+	<name>jack3-webclient</name>
+	<repositories>
+		<repository>
+			<id>prime-repo</id>
+			<name>PrimeFaces Maven Repository</name>
+			<url>https://repository.primefaces.org</url>
+			<layout>default</layout>
+		</repository>
+	</repositories>
+	
+	<profiles>
+		<profile>
+			<id>local-build</id>
+			<activation>
+				<property>
+					<name>!env.CI_COMMIT_SHORT_SHA</name>
+				</property>
+			</activation>
+			<properties>
+				<jackBuildInfo>-L+${maven.build.timestamp}</jackBuildInfo>
+			</properties>
+		</profile>
+		<profile>
+			<id>gitlab-build</id>
+			<activation>
+				<property>
+					<name>env.CI_COMMIT_SHORT_SHA</name>
+				</property>
+			</activation>
+			<properties>
+				<jackBuildInfo>-GCI+${env.CI_COMMIT_SHORT_SHA}.${maven.build.timestamp}</jackBuildInfo>
+			</properties>
+		</profile>
+	</profiles>
+	
+	<dependencies>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-envers</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>4.0.0</version>
+			<scope>provided</scope>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.primefaces/primefaces -->
+		<dependency>
+			<groupId>org.primefaces</groupId>
+			<artifactId>primefaces</artifactId>
+			<version>8.0.9</version>
+		</dependency>
+		<dependency>
+			<groupId>org.primefaces.extensions</groupId>
+			<artifactId>primefaces-extensions</artifactId>
+			<version>8.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.primefaces.extensions</groupId>
+			<artifactId>resources-ckeditor</artifactId>
+			<version>8.0</version>
+		</dependency>
+		<dependency>
+			<groupId>de.uni-due.s3.jack3</groupId>
+			<artifactId>jack3-core</artifactId>
+			<type>ejb</type>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>de.uni-due.s3.jack3</groupId>
+			<artifactId>jack3-business</artifactId>
+			<type>jar</type>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.primefaces.themes</groupId>
+			<artifactId>all-themes</artifactId>
+			<version>1.0.10</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.5</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.5.9</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.apache.poi/poi (for PrimeFaces 
+			export) -->
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi</artifactId>
+			<version>3.17</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>3.17</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.webjars</groupId>
+			<artifactId>font-awesome</artifactId>
+			<version>5.14.0</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/net.oauth.core/oauth (for LTI message signing) -->
+		<dependency>
+			<groupId>net.oauth.core</groupId>
+			<artifactId>oauth-provider</artifactId>
+			<version>20100527</version>
+		</dependency>
+
+	</dependencies>
+
+	<build>
+		<finalName>${project.artifactId}</finalName>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>3.3.1</version>
+				<configuration>
+					<archive>
+						<manifestEntries>
+							<Implementation-Title>JACK 3 WebClient</Implementation-Title>
+							<Implementation-Vendor>JACK Team / Uni Duisburg-Essen</Implementation-Vendor>
+							<Implementation-Version>${project.version}${jackBuildInfo}</Implementation-Version>
+						</manifestEntries>
+					</archive>
+				</configuration>
+			</plugin>
+		</plugins>
+		<!-- Resource Filtering -->
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
+		<!-- Resource Filtering should also include build timestamp in m2e (http://stackoverflow.com/questions/802677/adding-the-current-date-with-maven2-filtering/16675480#16675480) -->
+	</build>
+</project>
