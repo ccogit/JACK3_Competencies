@@ -12,13 +12,7 @@ import javax.persistence.TypedQuery;
 
 import de.uni_due.s3.jack3.entities.providers.FixedListExerciseProvider;
 import de.uni_due.s3.jack3.entities.providers.FolderExerciseProvider;
-import de.uni_due.s3.jack3.entities.tenant.AbstractCourse;
-import de.uni_due.s3.jack3.entities.tenant.AbstractExercise;
-import de.uni_due.s3.jack3.entities.tenant.ContentFolder;
-import de.uni_due.s3.jack3.entities.tenant.Course;
-import de.uni_due.s3.jack3.entities.tenant.FrozenCourse;
-import de.uni_due.s3.jack3.entities.tenant.User;
-import de.uni_due.s3.jack3.entities.tenant.UserGroup;
+import de.uni_due.s3.jack3.entities.tenant.*;
 import de.uni_due.s3.jack3.services.utils.DBHelper;
 
 /**
@@ -286,7 +280,7 @@ public class CourseService extends AbstractServiceBean {
 		query.setParameter("folderList", folderList);
 		return query.getResultList();
 	}
-	
+
 	/**
 	 * Returns all courses that use at least one of the folders in a {@link FolderExerciseProvider}.
 	 *
@@ -309,4 +303,16 @@ public class CourseService extends AbstractServiceBean {
 		return DBHelper.getOneOrZeroRemovingDuplicates(query);
 	}
 
+	/**
+	 * Returns all courses that reference a given {@link de.uni_due.s3.jack3.entities.tenant.Subject}.
+	 *
+	 * @return Course list
+	 */
+	public List<Course> getCoursesReferencingSubject(Subject subject) {
+		final EntityManager em = getEntityManager();
+		final TypedQuery<Course> query = em.createNamedQuery( //
+				Course.COURSES_REFERENCING_SUBJECT, Course.class);
+		query.setParameter("subject", subject);
+		return query.getResultList();
+	}
 }

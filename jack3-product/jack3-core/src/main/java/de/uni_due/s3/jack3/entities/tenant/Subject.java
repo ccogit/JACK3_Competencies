@@ -24,6 +24,13 @@ public class Subject extends AbstractEntity implements Serializable {
 	@Type(type = "text")
 	private String name;
 
+	public Subject() {
+	}
+
+	public Subject(String name) {
+		this.name = name;
+	}
+
 	public String getName() {
 		return name;
 	}

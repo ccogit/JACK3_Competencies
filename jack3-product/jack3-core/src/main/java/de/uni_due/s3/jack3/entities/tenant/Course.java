@@ -71,6 +71,11 @@ import de.uni_due.s3.jack3.services.RevisionService;
 			+ "INNER JOIN course.contentProvider as folderProvider " //
 			+ "INNER JOIN folderProvider.folders as contentFolders " //
 			+ "WHERE KEY(contentFolders) IN (:folderList)")
+
+@NamedQuery(
+		name = Course.COURSES_REFERENCING_SUBJECT, //
+		query = "SELECT course FROM Course course " //
+				+ "WHERE course.subject=:subject")
 public class Course extends AbstractCourse implements DeepCopyable<Course> {
 
 	/**
@@ -106,6 +111,11 @@ public class Course extends AbstractCourse implements DeepCopyable<Course> {
 	 * folders
 	 */
 	public static final String COURSES_REFERENCING_FOLDER_BY_FOLDER_PROVIDER = "Course.coursesReferencingFolderByFolderProvider";
+
+	/**
+	 * Name of the query that returns all courses, which have a reference to the given subject
+	 */
+	public static final String COURSES_REFERENCING_SUBJECT = "Course.coursesReferencingSubject";
 
 	private static final long serialVersionUID = 1L;
 

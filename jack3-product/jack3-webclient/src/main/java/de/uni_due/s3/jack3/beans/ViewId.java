@@ -284,6 +284,10 @@ public class ViewId implements Serializable {
 		return new Builder("/administrator/performance");
 	}
 
+	public Builder getSubjects() {
+		return new Builder("/administrator/subjects");
+	}
+
 	public Builder getPrivacyPolicy() {
 		return new Builder("/public/privacy");
 	}

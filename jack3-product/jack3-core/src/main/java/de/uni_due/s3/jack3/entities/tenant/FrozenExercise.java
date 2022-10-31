@@ -210,6 +210,11 @@ public class FrozenExercise extends AbstractExercise implements Comparable<Froze
 	}
 
 	@Override
+	public Subject getSubject() {
+		return subject;
+	}
+
+	@Override
 	public List<VariableDeclaration> getVariableDeclarations() {
 		return Collections.unmodifiableList(variableDeclarations);
 	}
@@ -331,6 +336,11 @@ public class FrozenExercise extends AbstractExercise implements Comparable<Froze
 
 	@Override
 	public void setValid(boolean isValid) {
+		throw new UnsupportedOperationException(MUST_NOT_CHANGE_STATE_OF_FROZEN_OBJECTS);
+	}
+
+	@Override
+	public void setSubject(Subject subject) {
 		throw new UnsupportedOperationException(MUST_NOT_CHANGE_STATE_OF_FROZEN_OBJECTS);
 	}
 

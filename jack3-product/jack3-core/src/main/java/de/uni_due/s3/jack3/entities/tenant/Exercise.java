@@ -91,6 +91,11 @@ import de.uni_due.s3.jack3.services.TagService;
 	query = "SELECT DISTINCT t.name FROM Exercise e " //
 			+ "LEFT JOIN e.tags t " //
 			+ "WHERE e = :exercise")
+
+@NamedQuery(
+		name = Exercise.EXERCISES_REFERENCING_SUBJECT, //
+		query = "SELECT exercise FROM Exercise exercise " //
+				+ "WHERE exercise.subject=:subject")
 @Entity
 @XStreamAlias("Exercise")
 public class Exercise extends AbstractExercise implements DeepCopyable<Exercise> {
@@ -149,6 +154,11 @@ public class Exercise extends AbstractExercise implements DeepCopyable<Exercise>
 	public static final String EXERCISE_BY_ID = "Exercise.exerciseById";
 
 	public static final String TAGS_FOR_EXERCISE = "Exercise.tagsForExercise";
+
+	/**
+	 * Name of the query that returns all exercises which have a reference to the given subject
+	 */
+	public static final String EXERCISES_REFERENCING_SUBJECT = "Exercise.exercisesReferencingSubject";
 
 	// TODO bz: Sollte statt "String language" nicht lieber java.util.Locale verwendet werden?
 	public Exercise(String name, String language) {
@@ -266,6 +276,11 @@ public class Exercise extends AbstractExercise implements DeepCopyable<Exercise>
 		return Collections.unmodifiableSet(tags);
 	}
 
+	@Override
+	public Subject getSubject() {
+		return subject;
+	}
+
 	/*
 	 * @return unmodifiableList of variableDeclarations
 	 */
@@ -307,6 +322,11 @@ public class Exercise extends AbstractExercise implements DeepCopyable<Exercise>
 	@Override
 	public void setValid(boolean isValid) {
 		this.isValid = isValid;
+	}
+
+	@Override
+	public void setSubject(Subject subject) {
+		this.subject = subject;
 	}
 
 	@Override

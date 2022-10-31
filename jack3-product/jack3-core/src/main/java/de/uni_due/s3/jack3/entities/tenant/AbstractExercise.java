@@ -14,22 +14,7 @@ import java.util.stream.Collectors;
 
 import javax.ejb.NoSuchEntityException;
 import javax.enterprise.inject.spi.CDI;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.OrderColumn;
-import javax.persistence.Transient;
+import javax.persistence.*;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 
@@ -117,6 +102,9 @@ public abstract class AbstractExercise extends AbstractEntity implements Namable
 	// REVIEW lg - unbenutzt: "ResultFeedbackMapping" wird bisher nur im CourseOffer benutzt
 	protected Set<ResultFeedbackMapping> resultFeedbackMappings = new HashSet<>();
 
+	@ManyToOne
+	protected Subject subject;
+
 	@XStreamOmitField
 	@ElementCollection(targetClass = Integer.class, fetch = FetchType.LAZY)
 	@DeepCopyOmitField(
@@ -203,6 +191,8 @@ public abstract class AbstractExercise extends AbstractEntity implements Namable
 			.collect(Collectors.toUnmodifiableList());
 	}
 
+	public abstract Subject getSubject();
+
 	public abstract boolean isValid();
 
 	/*
@@ -223,6 +213,9 @@ public abstract class AbstractExercise extends AbstractEntity implements Namable
 	public abstract void setStartStage(Stage startStage);
 
 	public abstract void setValid(boolean isValid);
+
+	public abstract void setSubject(Subject subject);
+
 
 	/**
 	 * Returns the next available default name for a new variable.

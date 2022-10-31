@@ -19,12 +19,24 @@ public class SubjectService extends AbstractServiceBean {
 		return baseService.findAll(Subject.class);
 	}
 
-	public void persistSubject(Subject subject) {
-		baseService.persist(subject);
+	public boolean persistSubject(Subject subject) {
+		try {
+			baseService.persist(subject);
+			return true;
+		} catch (Exception e) {
+			getLogger().error("Error while trying to persist " + subject, e);
+			return false;
+		}
 	}
 
-	public Subject mergeSubject(Subject subject) {
-		return baseService.merge(subject);
+	public boolean mergeSubject(Subject subject) {
+		try {
+			baseService.persist(subject);
+			return true;
+		} catch (Exception e) {
+			getLogger().error("Error while trying to update " + subject, e);
+			return false;
+		}
 	}
 
 	public void deleteSubject(Subject subject) {

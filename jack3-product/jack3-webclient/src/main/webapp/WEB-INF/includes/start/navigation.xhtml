@@ -1,94 +1,100 @@
 <ui:composition
-  xmlns="http://www.w3.org/1999/xhtml"
-  xmlns:ui="http://java.sun.com/jsf/facelets"
-  xmlns:h="http://java.sun.com/jsf/html"
-  xmlns:f="http://java.sun.com/jsf/core"
-  xmlns:c="http://java.sun.com/jsp/jstl/core"
-  xmlns:p="http://primefaces.org/ui">
+        xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:ui="http://java.sun.com/jsf/facelets"
+        xmlns:h="http://java.sun.com/jsf/html"
+        xmlns:f="http://java.sun.com/jsf/core"
+        xmlns:c="http://java.sun.com/jsp/jstl/core"
+        xmlns:p="http://primefaces.org/ui">
 
-  <h:outputStylesheet
-    library="jack"
-    name="css/navigation.css" />
+    <h:outputStylesheet
+            library="jack"
+            name="css/navigation.css"/>
 
-  <h:form
-    id="menubar"
-    rendered="#{userSession.currentUser ne null}">
-    <p:menubar id="main-menubar"
-      autoDisplay="false"
-      styleClass="navigation-bar">
-      <p:menuitem
-        id="menubarAvailableCourses"
-        icon="fas fa-graduation-cap"
-        value="#{msg['start.courseOffers']}"
-        outcome="#{viewId.availableCourses}"
-        containerStyleClass="#{current eq 'availableCourses' ? 'current' : ''}" />
-      <p:menuitem
-        id="menubarMyParticipations"
-        icon="fas fa-bookmark"
-        value="#{msg['start.myParticipations']}"
-        outcome="#{viewId.myParticipations}"
-        containerStyleClass="#{current eq 'myParticipations' ? 'current' : ''}" />
-      <p:menuitem
-        id="menubarMyWorkspaceContent"
-        icon="fas fa-pencil-ruler"
-        value="#{msg['start.myWorkspace']}"
-        outcome="#{viewId.myWorkspace}"
-        containerStyleClass="#{current eq 'myWorkspace' ? 'current' : ''}"
-        rendered="#{userSession.currentUser.hasEditRights}" />
-      <p:submenu
-        id="menubarAdministration"
-        icon="fas fa-wrench"
-        label="#{msg['global.administration']}"
-        rendered="#{userSession.currentUser.hasAdminRights}">
-        <p:menuitem
-          id="buttonMenubarConfiguration"
-          icon="fas fa-cog"
-          value="#{msg['global.configuration']}"
-          outcome="#{viewId.tenantConfiguration}"
-          containerStyleClass="#{current eq 'admin-configuration' ? 'current' : ''}" />
-        <p:menuitem
-          id="buttonMenubarJobs"
-          icon="fas fa-sync"
-          value="#{msg['tenantadmin.jobs']}"
-          outcome="#{viewId.tenantJobs}"
-          containerStyleClass="#{current eq 'admin-jobs' ? 'current' : ''}" />
-        <p:menuitem
-          id="buttonMenubarProfileFields"
-          icon="fas fa-address-card"
-          value="#{msg['tenantadmin.profileFields']}"
-          outcome="#{viewId.tenantProfileFields}"
-          containerStyleClass="#{current eq 'admin-profileFields' ? 'current' : ''}" />
-        <p:menuitem
-          id="buttonMenubarUsers"
-          icon="fas fa-users"
-          value="#{msg['tenantadmin.userManagement']}"
-          outcome="#{viewId.tenantUserManagement}"
-          containerStyleClass="#{current eq 'admin-userManagement' ? 'current' : ''}" />
-        <p:menuitem
-          id="buttonMenubarPerformance"
-          icon="fas fa-server"
-          value="#{msg['tenantadmin.performance']}"
-          outcome="#{viewId.performance}"
-          containerStyleClass="#{current eq 'admin-performance' ? 'current' : ''}" />
-      </p:submenu>
-      <p:submenu
-        id="menubarAccount"
-        icon="fas fa-user"
-        label="#{userSession.currentUser.loginName}#{userSession.currentUser.hasAdminRights ? ' (Admin)' : ''}"
-        style="float: right;">
-        <p:menuitem
-          id="buttonMenubarMyAccount"
-          icon="fas fa-user-cog"
-          value="#{msg['global.myAccount']}"
-          outcome="#{viewId.myAccount}"
-          containerStyleClass="#{current eq 'myAccount' ? 'current' : ''}" />
-        <p:menuitem
-          id="buttonMenubarLogout"
-          icon="fas fa-external-link-alt"
-          value="#{msg['global.logout']}"
-          action="#{loginView.logout()}" />
-      </p:submenu>
-    </p:menubar>
-  </h:form>
+    <h:form
+            id="menubar"
+            rendered="#{userSession.currentUser ne null}">
+        <p:menubar id="main-menubar"
+                   autoDisplay="false"
+                   styleClass="navigation-bar">
+            <p:menuitem
+                    id="menubarAvailableCourses"
+                    icon="fas fa-graduation-cap"
+                    value="#{msg['start.courseOffers']}"
+                    outcome="#{viewId.availableCourses}"
+                    containerStyleClass="#{current eq 'availableCourses' ? 'current' : ''}"/>
+            <p:menuitem
+                    id="menubarMyParticipations"
+                    icon="fas fa-bookmark"
+                    value="#{msg['start.myParticipations']}"
+                    outcome="#{viewId.myParticipations}"
+                    containerStyleClass="#{current eq 'myParticipations' ? 'current' : ''}"/>
+            <p:menuitem
+                    id="menubarMyWorkspaceContent"
+                    icon="fas fa-pencil-ruler"
+                    value="#{msg['start.myWorkspace']}"
+                    outcome="#{viewId.myWorkspace}"
+                    containerStyleClass="#{current eq 'myWorkspace' ? 'current' : ''}"
+                    rendered="#{userSession.currentUser.hasEditRights}"/>
+            <p:submenu
+                    id="menubarAdministration"
+                    icon="fas fa-wrench"
+                    label="#{msg['global.administration']}"
+                    rendered="#{userSession.currentUser.hasAdminRights}">
+                <p:menuitem
+                        id="buttonMenubarConfiguration"
+                        icon="fas fa-cog"
+                        value="#{msg['global.configuration']}"
+                        outcome="#{viewId.tenantConfiguration}"
+                        containerStyleClass="#{current eq 'admin-configuration' ? 'current' : ''}"/>
+                <p:menuitem
+                        id="buttonMenubarJobs"
+                        icon="fas fa-sync"
+                        value="#{msg['tenantadmin.jobs']}"
+                        outcome="#{viewId.tenantJobs}"
+                        containerStyleClass="#{current eq 'admin-jobs' ? 'current' : ''}"/>
+                <p:menuitem
+                        id="buttonMenubarProfileFields"
+                        icon="fas fa-address-card"
+                        value="#{msg['tenantadmin.profileFields']}"
+                        outcome="#{viewId.tenantProfileFields}"
+                        containerStyleClass="#{current eq 'admin-profileFields' ? 'current' : ''}"/>
+                <p:menuitem
+                        id="buttonMenubarUsers"
+                        icon="fas fa-users"
+                        value="#{msg['tenantadmin.userManagement']}"
+                        outcome="#{viewId.tenantUserManagement}"
+                        containerStyleClass="#{current eq 'admin-userManagement' ? 'current' : ''}"/>
+                <p:menuitem
+                        id="buttonMenubarPerformance"
+                        icon="fas fa-server"
+                        value="#{msg['tenantadmin.performance']}"
+                        outcome="#{viewId.performance}"
+                        containerStyleClass="#{current eq 'admin-performance' ? 'current' : ''}"/>
+                <p:menuitem
+                        id="buttonMenubarSubjects"
+                        icon="fas fa-books"
+                        value="#{msg['tenantadmin.subjects']}"
+                        outcome="#{viewId.subjects}"
+                        containerStyleClass="#{current eq 'admin-subjects' ? 'current' : ''}"/>
+            </p:submenu>
+            <p:submenu
+                    id="menubarAccount"
+                    icon="fas fa-user"
+                    label="#{userSession.currentUser.loginName}#{userSession.currentUser.hasAdminRights ? ' (Admin)' : ''}"
+                    style="float: right;">
+                <p:menuitem
+                        id="buttonMenubarMyAccount"
+                        icon="fas fa-user-cog"
+                        value="#{msg['global.myAccount']}"
+                        outcome="#{viewId.myAccount}"
+                        containerStyleClass="#{current eq 'myAccount' ? 'current' : ''}"/>
+                <p:menuitem
+                        id="buttonMenubarLogout"
+                        icon="fas fa-external-link-alt"
+                        value="#{msg['global.logout']}"
+                        action="#{loginView.logout()}"/>
+            </p:submenu>
+        </p:menubar>
+    </h:form>
 
 </ui:composition>

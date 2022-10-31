@@ -14,39 +14,73 @@
       value="#{'admin-subjects'}"
       scope="request" />
 
-    <h:form id="subjects">
+    <h:form id="listForm">
       <p:dataTable
+              id="subjects"
               var="subject"
-              value="#{jobsView.jobs}"
+              value="#{subjectsView.subjects}"
               paginator="true"
               lazy="true"
               rows="20"
-              sortBy="#{job.startedAt}"
               tableStyle="white-space: nowrap; overflow: hidden; table-layout: auto;">
-<!--        <p:column-->
-<!--                headerText="Id"-->
-<!--                sortBy="#{job.id}">-->
-<!--          <h:outputText value="#{job.id}" />-->
-<!--        </p:column>-->
-<!--        <p:column-->
-<!--                headerText="Start Time">-->
-<!--          <j:outputTimestamp-->
-<!--                  value="#{job.startedAt}"-->
-<!--                  converter="fullTimestampConverter" />-->
-<!--        </p:column>-->
-<!--        <p:column-->
-<!--                headerText="End Time">-->
-<!--          <j:outputTimestamp-->
-<!--                  value="#{job.finishedAt}"-->
-<!--                  converter="fullTimestampConverter" />-->
-<!--        </p:column>-->
-<!--        <p:column headerText="Kafka Topic">-->
-<!--          <h:outputText value="#{job.kafkaTopic}" />-->
-<!--        </p:column>-->
-<!--        <p:column headerText="Backend">-->
-<!--          <h:outputText value="#{job.graderId}" />-->
-<!--        </p:column>-->
+        <p:column
+                headerText="Id">
+          <h:outputText value="#{subject.id}" />
+        </p:column>
+        <p:column
+                headerText="Name">
+          <p:inputText
+                  id="subjectName"
+                  value="#{subject.name}"
+                  style="width:calc(100% - 10px)"/>
+        </p:column>
+        <p:column
+                id="actions"
+                headerText="#{msg['global.actions']}"
+                width="100"
+                style="text-align:center;">
+          <div
+                  class="ui-inputgroup"
+                  style="justify-content: center;">
+            <p:commandButton
+                    id="updateSubject"
+                    title="#{msg['global.save']}"
+                    icon="far fa-save"
+                    action="#{subjectsView.updateSubject(subject)}"
+                    update="globalGrowl :listForm :newSubjectForm"/>
+            <p:commandButton
+                    id="deleteSubject"
+                    title="#{msg['global.delete']}"
+                    icon="fas fa-trash"
+                    action="#{subjectsView.removeSubject(subject)}"
+                    update="globalGrowl :listForm :newSubjectForm"/>
+          </div>
+        </p:column>
       </p:dataTable>
+    </h:form>
+
+    <!-- Input group for creating a new subject -->
+    <h:form id="newSubjectForm">
+      <p:panel
+              id="createNewSubject"
+              header="#{msg['tenantadmin.addNewSubject']}">
+        <h:panelGroup
+                styleClass="jack-input-group"
+                layout="block">
+          <p:inputText
+                  id="newValue"
+                  size="40"
+                  value="#{subjectsView.newSubjectName}"
+                  placeholder="#{msg['global.value']}">
+          </p:inputText>
+          <p:commandButton
+                  id="addNewSubject"
+                  icon="fas fa-plus"
+                  update="globalGrowl :listForm :newSubjectForm"
+                  action="#{subjectsView.addSubject()}"
+                  value="#{msg['global.add']}" />
+        </h:panelGroup>
+      </p:panel>
     </h:form>
 
   </ui:define>

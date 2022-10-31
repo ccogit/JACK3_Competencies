@@ -189,6 +189,11 @@ public class FrozenCourse extends AbstractCourse implements Comparable<FrozenCou
 	}
 
 	@Override
+	public Subject getSubject() {
+		return subject;
+	}
+
+	@Override
 	public void removeCourseResource(CourseResource courseResource) {
 		throw new UnsupportedOperationException(MUST_NOT_CHANGE_STATE_OF_FROZEN_OBJECTS);
 	}
@@ -231,6 +236,11 @@ public class FrozenCourse extends AbstractCourse implements Comparable<FrozenCou
 
 	@Override
 	public void setValid(boolean isValid) {
+		throw new UnsupportedOperationException(MUST_NOT_CHANGE_STATE_OF_FROZEN_OBJECTS);
+	}
+
+	@Override
+	public void setSubject(Subject subject) {
 		throw new UnsupportedOperationException(MUST_NOT_CHANGE_STATE_OF_FROZEN_OBJECTS);
 	}
 

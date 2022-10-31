@@ -15,17 +15,11 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
+import de.uni_due.s3.jack3.entities.tenant.*;
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.AuditReaderFactory;
 
 import de.uni_due.s3.jack3.entities.AbstractEntity;
-import de.uni_due.s3.jack3.entities.tenant.AbstractExercise;
-import de.uni_due.s3.jack3.entities.tenant.ContentFolder;
-import de.uni_due.s3.jack3.entities.tenant.Exercise;
-import de.uni_due.s3.jack3.entities.tenant.ExerciseResource;
-import de.uni_due.s3.jack3.entities.tenant.FrozenExercise;
-import de.uni_due.s3.jack3.entities.tenant.Tag;
-import de.uni_due.s3.jack3.entities.tenant.User;
 import de.uni_due.s3.jack3.services.utils.DBHelper;
 import de.uni_due.s3.jack3.utils.EntityReflectionHelper;
 
@@ -285,6 +279,19 @@ public class ExerciseService extends AbstractServiceBean {
 			return Collections.emptyList();
 		}
 		return list;
+	}
+
+	/**
+	 * Returns all exercises that reference a given {@link de.uni_due.s3.jack3.entities.tenant.Subject}.
+	 *
+	 * @return Exercise list
+	 */
+	public List<Exercise> getExercisesReferencingSubject(Subject subject) {
+		final EntityManager em = getEntityManager();
+		final TypedQuery<Exercise> query = em.createNamedQuery( //
+				Exercise.EXERCISES_REFERENCING_SUBJECT, Exercise.class);
+		query.setParameter("subject", subject);
+		return query.getResultList();
 	}
 
 }
