@@ -16,7 +16,7 @@
 		</f:metadata>
 		<script>
 			function processChange() {
-				// We want to enable the save button only when something has changed, to avoid saving redundant 
+				// We want to enable the save button only when something has changed, to avoid saving redundant
 				// revisions
 				PF('saveCourseButton').enable();
 				document.getElementById('courseEditMainForm:cbValidate').disabled = true;
@@ -70,10 +70,10 @@
 
 		<h:form id="courseEditMainForm">
 			<p:growl id="messages" showDetail="true" sticky="false" life="10000" />
-      
+
             <div style="display:flex">
                <p:breadCrumb id="breadCrumbMainForm"
-				model="#{courseEditView.updateMenuModel(userSession)}" 
+				model="#{courseEditView.updateMenuModel(userSession)}"
                 rendered="#{courseEditView.newestRevision}"
                 style="flex-grow: 1; margin-bottom: 2px;">
 					<f:facet name="options">
@@ -110,8 +110,8 @@
 						oncomplete="preventUnload(false);PF('globalSpinner').hide();"
 						rendered="#{courseEditView.newestRevision}">
 					</p:commandButton>
-					<!-- This script unfortunatly needs (even with jquery().ready) to be after the saveCourseButton- 
-                    definition, or Primefaces PF won't find it in the widget-array. We also can't just set 
+					<!-- This script unfortunatly needs (even with jquery().ready) to be after the saveCourseButton-
+                    definition, or Primefaces PF won't find it in the widget-array. We also can't just set
                     disabled="true" in the p:commandButton-definition, because then the button won't work anymore. -->
 					<script>
 						jQuery(document).ready(function() {
@@ -127,7 +127,7 @@
 					<p:commandButton id="testCourse" value="#{msg['courseEdit.test']}"
 						onstart="PF('globalSpinner').show(); saveAndTest();"
 						icon="fas fa-play fa-sm" rendered="#{courseEditView.newestRevision}">
-					</p:commandButton>            
+					</p:commandButton>
 					<p:remoteCommand name="saveBeforeTesting"
 						action="#{courseEditView.saveCourse()}" style="display: none;" />
 					<p:remoteCommand name="redirectToTest"
@@ -139,7 +139,7 @@
 					<p:commandButton id="resetRevision"
 						action="#{courseEditView.resetToRevision()}" value="#{msg['global.takeOver']}"
 						icon="fas fa-level-up-alt fa-sm" update="courseEditMainForm"
-						rendered="#{not courseEditView.newestRevision}" 
+						rendered="#{not courseEditView.newestRevision}"
                         disabled="#{courseEditView.readOnly}"/>
 					<p:commandButton id="jumpToCurrentRevision"
 						action="#{courseEditView.jumpToNewestRevision()}"
@@ -149,7 +149,7 @@
 					<p:commandButton id="cbCourseEditCancel" title="Cancel"
 						action="#{courseEditView.reloadCourseByRedirect()}"
 						onstart="preventUnload(false)" value="#{msg['courseEdit.cancel']}"
-                        icon="fas fa-trash-alt fa-sm" rendered="#{courseEditView.newestRevision}" 
+                        icon="fas fa-trash-alt fa-sm" rendered="#{courseEditView.newestRevision}"
                         disabled="#{courseEditView.readOnly}"/>
 				</f:facet>
 			</p:toolbar>
@@ -164,12 +164,12 @@
 				</h:outputFormat>
 				<p:outputLabel rendered="#{courseEditView.entitysAreMissingInRevision()}" styleClass="alerta">
 				<br/><br/>#{msg['courseEditView.meanwhileDeleted']}</p:outputLabel>
-				 
-				<p:outputLabel rendered="#{courseEditView.entitysAreMissingInRevision()}" 
+
+				<p:outputLabel rendered="#{courseEditView.entitysAreMissingInRevision()}"
 								value="#{courseEditView.getMissingEntitysAsString()}" escape="false" styleClass="alerta"/>
-               	
+
                	<p:outputLabel rendered="#{courseEditView.entitysAreMissingInRevision()}" styleClass="alerta">
-               	#{msg['courseEditView.stillBeGone']}</p:outputLabel> 								
+               	#{msg['courseEditView.stillBeGone']}</p:outputLabel>
 			</p:panel>
 
 			<!-- explain what a frozen version is -->
@@ -180,7 +180,7 @@
 					<f:param value="#{courseEditView.getCurrentProxiedExerciseRevisionIndex()}" />
 				</h:outputFormat>
 			</p:panel>
-			
+
 			<p:panel id="settings" header="#{msg['global.settings']}">
 
 				<p:panelGrid id="pgSettings" cellpadding="5"
@@ -275,7 +275,7 @@
 							<h:outputLabel for="titelFrozenVersion" value="#{msg['courseEdit.frozenTitle']}" />
 						</p:column>
 						<p:column>
-							<!-- We can ignore the warning here, this property is available in the 
+							<!-- We can ignore the warning here, this property is available in the
 							rendered="#{courseEditView.frozen}" case! -->
 							<p:inputText id="titelFrozenVersion"
 								value="#{courseEditView.course.frozenTitle}"
@@ -289,7 +289,6 @@
 						</p:column>
 
 					</p:row>
-
 					<p:row>
 						<p:column id="columnSettingsLanguage">
 							<h:outputLabel for="language"
@@ -304,6 +303,22 @@
 							</p:selectOneMenu>
 						</p:column>
 					</p:row>
+					<!-- Subject -->
+					<p:row>
+						<p:column id="columnSettingsSubject">
+							<h:outputLabel for="subject"
+										   value="#{msg['courseEdit.subject']}" />
+						</p:column>
+						<p:column id="columnSettingsSubjectLabel">
+							<p:selectOneMenu id="subject"
+											 disabled="#{!courseEditView.newestRevision or courseEditView.readOnly}"
+											 value="#{courseEditView.course.subject}" editable="false"
+											 onchange="processChange()">
+								<f:selectItems value="#{courseEditView.getSubjectBusiness().allSubjects}" />
+							</p:selectOneMenu>
+						</p:column>
+					</p:row>
+
                     <!-- Internal description -->
                     <p:row>
                        <p:column>
@@ -335,7 +350,7 @@
 								advancedContentFilter="false"
 								toolbar="[['Bold','Italic','Underline','-','NumberedList','BulletedList','JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock','-','Table','Link','Unlink','HorizontalRule','-','TextColor','BGColor','RemoveFormat']]"
 								customConfig="#{resource['js/ckEditorConfig.js']}"
-								disabled="#{!courseEditView.newestRevision or courseEditView.readOnly}">            
+								disabled="#{!courseEditView.newestRevision or courseEditView.readOnly}">
                                 <p:ajax event="dirty" oncomplete="processChange()" />
 							</pe:ckEditor>
                     	</p:column>
@@ -613,7 +628,7 @@
 					filteredValue="#{courseEditView.filteredResources}"
 					var="courseResourceElem"
 					emptyMessage="#{msg['courseEdit.tableEmptyMsg']}">
-          
+
                     <p:column id="columnCourseResourceElement"
                       headerText="#{msg['global.file']}" width="200"
                       sortBy="#{courseResourceElem}"
@@ -705,7 +720,7 @@
 								onchange="processChange()"
 								onkeydown="checkUserInputForActivationOfSaveButton()"
 								value="#{resultFeedbackMapping.title}" />
-							<h:outputLabel 
+							<h:outputLabel
 								for="inputFeedbackExpression"
 								value="#{msg['courseEdit.courseFeedback.condition']}: "/>
 							<p:inputText

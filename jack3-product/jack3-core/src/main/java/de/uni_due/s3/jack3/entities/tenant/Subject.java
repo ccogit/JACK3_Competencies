@@ -39,4 +39,8 @@ public class Subject extends AbstractEntity implements Serializable {
 		this.name = requireIdentifier(name, "You must provide a non-empty name.");
 	}
 
+	@Override public String toString() {
+		return name;
+	}
+
 }

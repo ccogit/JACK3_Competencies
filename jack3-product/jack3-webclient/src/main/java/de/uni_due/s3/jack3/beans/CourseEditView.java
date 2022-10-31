@@ -16,6 +16,8 @@ import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import de.uni_due.s3.jack3.business.SubjectBusiness;
+import de.uni_due.s3.jack3.entities.tenant.*;
 import org.hibernate.Hibernate;
 import org.hibernate.proxy.HibernateProxy;
 import org.primefaces.PrimeFaces;
@@ -39,46 +41,29 @@ import de.uni_due.s3.jack3.entities.enums.ECourseScoring;
 import de.uni_due.s3.jack3.entities.providers.AbstractExerciseProvider;
 import de.uni_due.s3.jack3.entities.providers.FixedListExerciseProvider;
 import de.uni_due.s3.jack3.entities.providers.FolderExerciseProvider;
-import de.uni_due.s3.jack3.entities.tenant.AbstractCourse;
-import de.uni_due.s3.jack3.entities.tenant.ContentFolder;
-import de.uni_due.s3.jack3.entities.tenant.Course;
-import de.uni_due.s3.jack3.entities.tenant.CourseEntry;
-import de.uni_due.s3.jack3.entities.tenant.CourseResource;
-import de.uni_due.s3.jack3.entities.tenant.Exercise;
-import de.uni_due.s3.jack3.entities.tenant.Folder;
-import de.uni_due.s3.jack3.entities.tenant.FrozenCourse;
-import de.uni_due.s3.jack3.entities.tenant.ResultFeedbackMapping;
 import de.uni_due.s3.jack3.enums.ECourseContentType;
 import de.uni_due.s3.jack3.exceptions.DeepCloningException;
 import de.uni_due.s3.jack3.exceptions.NoSuchJackEntityException;
 
-@ViewScoped
-@Named
-public class
-CourseEditView extends AbstractView implements Serializable {
-
+@ViewScoped @Named public class CourseEditView extends AbstractView implements Serializable {
 
 	private static final String ID_OF_GROWL = "messages";
 
 	private static final long serialVersionUID = 3803210557059695368L;
 
-	@Inject
-	private FixedAllocationView fixedAllocationView;
+	@Inject private FixedAllocationView fixedAllocationView;
 
-	@Inject
-	private ChooseFolderView chooseFolderView;
+	@Inject private ChooseFolderView chooseFolderView;
 
-	@Inject
-	private CourseBusiness courseBusiness;
+	@Inject private CourseBusiness courseBusiness;
 
-	@Inject
-	private AuthorizationBusiness authorizationBusiness;
+	@Inject private AuthorizationBusiness authorizationBusiness;
 
-	@Inject
-	private FolderBusiness folderBusiness;
+	@Inject private FolderBusiness folderBusiness;
 
-	@Inject
-	private ExerciseTreeView exerciseTreeView;
+	@Inject private ExerciseTreeView exerciseTreeView;
+
+	@Inject private SubjectBusiness subjectBusiness;
 
 	private LazyDataModel<Course> courseRevisionsLazyModel;
 
@@ -119,6 +104,8 @@ CourseEditView extends AbstractView implements Serializable {
 
 	private List<CourseEntry> courseEntrysMissingInMainDB = new ArrayList<>();
 	private List<ContentFolder> foldersMissingInMainDB = new ArrayList<>();
+
+	private List<Subject> subjectList = new ArrayList<>();
 
 	private boolean readOnly;
 	private boolean extended_read;
@@ -197,8 +184,8 @@ CourseEditView extends AbstractView implements Serializable {
 
 	public void saveFrozenRevision() {
 		if (readOnly) {
-			getLogger().warn("User " + getCurrentUser().getLoginName() + " tried to save a frozen Revision from " + course
-					+ " while not having write permission! Users should not be able to even call this function without manipulation of the UI");
+			getLogger().warn(
+					"User " + getCurrentUser().getLoginName() + " tried to save a frozen Revision from " + course + " while not having write permission! Users should not be able to even call this function without manipulation of the UI");
 			return;
 		}
 		if (!course.isFrozen()) {
@@ -239,8 +226,8 @@ CourseEditView extends AbstractView implements Serializable {
 			return;
 		}
 
-		int proxiedRevisionIdOfSelectFrozenCourse = courseBusiness
-				.getProxiedOrLastPersistedRevisionId(getSelectedFrozenCourse());
+		int proxiedRevisionIdOfSelectFrozenCourse = courseBusiness.getProxiedOrLastPersistedRevisionId(
+				getSelectedFrozenCourse());
 
 		loadFrozenCourse(proxiedRevisionIdOfSelectFrozenCourse);
 	}
@@ -260,8 +247,7 @@ CourseEditView extends AbstractView implements Serializable {
 	 * This gets called when a user clicks on the magnifing glass in the revisons overlay. We then show the old revision
 	 * directly from envers to the user while editing is disabled.
 	 *
-	 * @param revisionIndex
-	 *            Index of the revision we shall show the user
+	 * @param revisionIndex Index of the revision we shall show the user
 	 */
 	public void loadRevision(int revisionIndex) {
 		if (course.isFrozen()) {
@@ -336,8 +322,8 @@ CourseEditView extends AbstractView implements Serializable {
 			}
 		} catch (NoSuchJackEntityException e) {
 			if (isFrozen()) {
-				sendErrorResponse(400, "FrozenCourse with the realCourseId: " + courseId
-						+ " and proxiedCourseRevisionId: " + revisionId + " not found!");
+				sendErrorResponse(400,
+						"FrozenCourse with the realCourseId: " + courseId + " and proxiedCourseRevisionId: " + revisionId + " not found!");
 			} else {
 				sendErrorResponse(400, "Course with ID " + courseId + " not found!");
 			}
@@ -426,8 +412,8 @@ CourseEditView extends AbstractView implements Serializable {
 			course.setContentProvider(fep);
 			chooseFolderView.loadView(fep, course);
 		}
-		if (course.getExerciseOrder() == null
-				|| !course.getContentProvider().isExerciseOrderSupported(course.getExerciseOrder())) {
+		if (course.getExerciseOrder() == null || !course.getContentProvider()
+				.isExerciseOrderSupported(course.getExerciseOrder())) {
 			course.setExerciseOrder(ECourseExercisesOrder.ALPHABETIC_ASCENDING);
 		}
 
@@ -444,11 +430,9 @@ CourseEditView extends AbstractView implements Serializable {
 	}
 
 	public void saveCourse() {
-		if(readOnly) {
-			getLogger().warn("User " +getCurrentUser().getLoginName()+
-					" tried to save "
-					+course+
-					" while not having write permission! Users should not be able to even call this function without manipulation of the UI");
+		if (readOnly) {
+			getLogger().warn(
+					"User " + getCurrentUser().getLoginName() + " tried to save " + course + " while not having write permission! Users should not be able to even call this function without manipulation of the UI");
 			return;
 
 		}
@@ -485,6 +469,10 @@ CourseEditView extends AbstractView implements Serializable {
 		redirect(viewId.getCourseTest().withParam(Course.class, courseId));
 	}
 
+	public SubjectBusiness getSubjectBusiness(){
+		return this.subjectBusiness;
+	}
+
 	// -------------------- Course resources --------------------
 
 	public void handleFileUpload(FileUploadEvent event) {
@@ -506,12 +494,9 @@ CourseEditView extends AbstractView implements Serializable {
 	}
 
 	public StreamedContent getCourseResource(CourseResource courseResource) {
-		return DefaultStreamedContent.builder()
-				.stream(() -> new ByteArrayInputStream(courseResource.getContent()))
-				.contentType(courseResource.getMimeType())
-				.name(courseResource.getFilename())
-				.contentLength(courseResource.getSize())
-				.build();
+		return DefaultStreamedContent.builder().stream(() -> new ByteArrayInputStream(courseResource.getContent()))
+				.contentType(courseResource.getMimeType()).name(courseResource.getFilename())
+				.contentLength(courseResource.getSize()).build();
 	}
 
 	public void removeCourseResource(CourseResource courseResource) {
@@ -664,8 +649,9 @@ CourseEditView extends AbstractView implements Serializable {
 
 		// Name must not be empty
 		if ((value == null) || newValue.strip().isEmpty()) {
-			throw new ValidatorException(new FacesMessage(FacesMessage.SEVERITY_ERROR,
-					getLocalizedMessage("global.invalidName"), getLocalizedMessage("global.invalidName.empty")));
+			throw new ValidatorException(
+					new FacesMessage(FacesMessage.SEVERITY_ERROR, getLocalizedMessage("global.invalidName"),
+							getLocalizedMessage("global.invalidName.empty")));
 		}
 
 		// Name is always valid if user did not change input.
@@ -680,8 +666,9 @@ CourseEditView extends AbstractView implements Serializable {
 
 		// Name must not be empty
 		if ((value == null) || newValue.strip().isEmpty()) {
-			throw new ValidatorException(new FacesMessage(FacesMessage.SEVERITY_ERROR,
-					getLocalizedMessage("global.invalidName"), getLocalizedMessage("global.invalidName.empty")));
+			throw new ValidatorException(
+					new FacesMessage(FacesMessage.SEVERITY_ERROR, getLocalizedMessage("global.invalidName"),
+							getLocalizedMessage("global.invalidName.empty")));
 		}
 
 		if (newValue.equals(oldValue) || newValue.equals(originalCourseName)) {
@@ -698,6 +685,7 @@ CourseEditView extends AbstractView implements Serializable {
 			}
 		}
 	}
+
 	public boolean isReadOnly() {
 		return readOnly;
 	}
@@ -751,9 +739,7 @@ CourseEditView extends AbstractView implements Serializable {
 	}
 
 	public boolean isShowOrderHint() {
-		return (course.getExerciseOrder() != null && getCourse().getContentProvider() != null) &&
-				(course.getExerciseOrder() == ECourseExercisesOrder.NUMBER_OF_SUBMISSIONS ||
-						course.getExerciseOrder() == ECourseExercisesOrder.MANUAL);
+		return (course.getExerciseOrder() != null && getCourse().getContentProvider() != null) && (course.getExerciseOrder() == ECourseExercisesOrder.NUMBER_OF_SUBMISSIONS || course.getExerciseOrder() == ECourseExercisesOrder.MANUAL);
 	}
 
 	public AbstractEntity getPreviousItemInFolder() {

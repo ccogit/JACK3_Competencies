@@ -24,22 +24,18 @@ import de.uni_due.s3.jack3.multitenancy.LoggerProvider;
 import de.uni_due.s3.jack3.services.CourseService;
 import de.uni_due.s3.jack3.services.ExerciseService;
 
-@NamedQuery(
-	name = AbstractCourse.ABSTRACTCOURSES_REFERENCING_EXERCISE_BY_EXERCISE_PROVIDER, //
-	query = "SELECT abstractC FROM AbstractCourse abstractC " //
-			+ "INNER JOIN abstractC.contentProvider as contentP " //
-			+ "INNER JOIN contentP.courseEntries as courseE " //
-			+ "WHERE courseE.exercise.id=:abstractExerciseId")
-@NamedQuery(
-	name = AbstractCourse.ABSTRACTCOURSES_REFERENCING_FOLDER_BY_FOLDER_PROVIDER, //
-	query = "SELECT abstractC FROM AbstractCourse abstractC " //
-			+ "INNER JOIN abstractC.contentProvider as folderProvider " //
-			+ "INNER JOIN folderProvider.folders as contentFolders " //
-			+ "WHERE KEY(contentFolders) IN (:folderList)")
-@Audited
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
-@Entity
-public abstract class AbstractCourse extends AbstractEntity implements Namable {
+@NamedQuery(name = AbstractCourse.ABSTRACTCOURSES_REFERENCING_EXERCISE_BY_EXERCISE_PROVIDER, //
+		query = "SELECT abstractC FROM AbstractCourse abstractC " //
+				+ "INNER JOIN abstractC.contentProvider as contentP " //
+				+ "INNER JOIN contentP.courseEntries as courseE " //
+				+ "WHERE courseE.exercise.id=:abstractExerciseId")
+@NamedQuery(name = AbstractCourse.ABSTRACTCOURSES_REFERENCING_FOLDER_BY_FOLDER_PROVIDER, //
+		query = "SELECT abstractC FROM AbstractCourse abstractC " //
+				+ "INNER JOIN abstractC.contentProvider as folderProvider " //
+				+ "INNER JOIN folderProvider.folders as contentFolders " //
+				+ "WHERE KEY(contentFolders) IN (:folderList)") @Audited
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS) @Entity public abstract class AbstractCourse
+		extends AbstractEntity implements Namable {
 
 	private static final long serialVersionUID = 4190837048053004812L;
 
@@ -56,50 +52,35 @@ public abstract class AbstractCourse extends AbstractEntity implements Namable {
 
 	// Adding new fields here requires to update the constructor of FrozenCourse!
 
-	@Column
-	@Type(type = "text")
-	protected String externalDescription;
+	@Column @Type(type = "text") protected String externalDescription;
 
-	@ToString
-	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+	@ToString @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
 	protected AbstractExerciseProvider contentProvider;
 
 	/**
 	 * Order in which the exercises are presented to the user initially.
 	 */
-	@Enumerated(EnumType.STRING)
-	protected ECourseExercisesOrder exerciseOrder;
+	@Enumerated(EnumType.STRING) protected ECourseExercisesOrder exerciseOrder;
 
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
 	protected Set<CourseResource> courseResources = new HashSet<>();
 
-	@Column
-	@Type(type = "text")
-	protected String internalDescription;
+	@Column @Type(type = "text") protected String internalDescription;
 
-	@Column
-	protected boolean isValid;
+	@Column protected boolean isValid;
 
-	@Column
-	@Type(type = "text")
-	protected String language;
+	@Column @Type(type = "text") protected String language;
 
-	@ToString
-	@Column(nullable = false)
-	@Type(type = "text")
-	protected String name;
+	@ToString @Column(nullable = false) @Type(type = "text") protected String name;
 
 	@ManyToMany(cascade = CascadeType.ALL)
 	protected Set<ResultFeedbackMapping> resultFeedbackMappings = new HashSet<>();
 
-	@ManyToOne
-	protected Subject subject;
+	@ManyToOne protected Subject subject;
 
-	@Enumerated(EnumType.STRING)
-	protected ECourseScoring scoringMode;
+	@Enumerated(EnumType.STRING) protected ECourseScoring scoringMode;
 
-	@Transient
-	protected boolean isFromEnvers = false;
+	@Transient protected boolean isFromEnvers = false;
 
 	protected AbstractCourse() {
 
@@ -144,6 +125,8 @@ public abstract class AbstractCourse extends AbstractEntity implements Namable {
 
 	public abstract void setValid(boolean isValid);
 
+	public abstract void setSubject(Subject subject);
+
 	public abstract boolean isFrozen();
 
 	public abstract ECourseScoring getScoringMode();
@@ -161,8 +144,6 @@ public abstract class AbstractCourse extends AbstractEntity implements Namable {
 	public abstract void setExternalDescription(String externalDescription);
 
 	public abstract Subject getSubject();
-
-	public abstract void setSubject(Subject subject);
 
 	protected void deepCopyCourseVars(Course other, int proxiedCourseRevisionId) {
 		if (this instanceof FrozenCourse) {
@@ -197,7 +178,7 @@ public abstract class AbstractCourse extends AbstractEntity implements Namable {
 		externalDescription = courseRevisionFromEnvers.getExternalDescription();
 		internalDescription = courseRevisionFromEnvers.getInternalDescription();
 		isValid = courseRevisionFromEnvers.isValid();
-
+		subject = courseRevisionFromEnvers.getSubject();
 		name = courseRevisionFromEnvers.getName();
 
 		for (ResultFeedbackMapping resultFeedbackMapping : courseRevisionFromEnvers.getResultFeedbackMappings()) {
@@ -213,9 +194,11 @@ public abstract class AbstractCourse extends AbstractEntity implements Namable {
 		Object abstractExerciseProvider = Hibernate.unproxy(courseRevisionFromEnvers.getContentProvider());
 
 		if (!(abstractExerciseProvider instanceof FixedListExerciseProvider)) {
-			throw new DeepCloningException("Only Courses with FixedListExerciseProvider support freezing, '"
-					+ (abstractExerciseProvider == null ? "null" : abstractExerciseProvider.getClass().getSimpleName())
-					+ "' given!", EDeepCopyExceptionErrorCode.ONLY_FIXEDLIST_EXERCISEPROVIDER_ALLOWED);
+			throw new DeepCloningException("Only Courses with FixedListExerciseProvider support freezing, '" + (
+					abstractExerciseProvider == null ?
+							"null" :
+							abstractExerciseProvider.getClass().getSimpleName()) + "' given!",
+					EDeepCopyExceptionErrorCode.ONLY_FIXEDLIST_EXERCISEPROVIDER_ALLOWED);
 		}
 		FixedListExerciseProvider fixedListExerciseProvider = (FixedListExerciseProvider) abstractExerciseProvider;
 		FixedListExerciseProvider contentProviderDeepCopy = new FixedListExerciseProvider();
@@ -230,8 +213,8 @@ public abstract class AbstractCourse extends AbstractEntity implements Namable {
 	private void handleCourseEntry(FixedListExerciseProvider contentProviderDeepCopy, CourseEntry currentCourseEntry) {
 		FrozenExercise frozenExercise = currentCourseEntry.getFrozenExercise();
 		if (frozenExercise == null) {
-			throw new DeepCloningException("Frozen courses must only contain frozen Exercises, '"
-					+ currentCourseEntry.getExercise() + "' given",
+			throw new DeepCloningException(
+					"Frozen courses must only contain frozen Exercises, '" + currentCourseEntry.getExercise() + "' given",
 					EDeepCopyExceptionErrorCode.ONLY_FROZEN_EXERCISES_IN_FROZENCOURSES_ALLOWED);
 		}
 		if (frozenExercise instanceof HibernateProxy) {
@@ -246,16 +229,15 @@ public abstract class AbstractCourse extends AbstractEntity implements Namable {
 		FrozenExercise frozenMainDB = exerciseService.getFrozenExerciseWithLazyDataById(frozenExercise.getId())
 				.orElseGet(() -> {
 					LoggerProvider.get(getClass())
-					.warn("FrozenExercise has been deleted in" + " the main DB, freeze again");
+							.warn("FrozenExercise has been deleted in" + " the main DB, freeze again");
 					FrozenExercise recreatedFrozenExercise = new FrozenExercise(currentCourseEntry.getExercise(),
 							exerciseRevisionId);
 					recreatedFrozenExercise = exerciseService.mergeFrozenExercise(recreatedFrozenExercise);
 					recreatedFrozenExercise.generateSuffixWeights();
 					return exerciseService.mergeFrozenExercise(recreatedFrozenExercise);
 				});
-		Exercise correspondingExercise = exerciseService
-				.getExerciseByIdWithLazyData(frozenMainDB.getProxiedOrRegularExerciseId()).orElseThrow();
-
+		Exercise correspondingExercise = exerciseService.getExerciseByIdWithLazyData(
+				frozenMainDB.getProxiedOrRegularExerciseId()).orElseThrow();
 
 		CourseEntry courseEntry = new CourseEntry(correspondingExercise, frozenMainDB, currentCourseEntry.getPoints());
 

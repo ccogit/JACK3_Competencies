@@ -390,6 +390,7 @@ public abstract class AbstractExercise extends AbstractEntity implements Namable
 		exerciseToCopyTo.language = exerciseToCopyFrom.language;
 		exerciseToCopyTo.difficulty = exerciseToCopyFrom.difficulty;
 		exerciseToCopyTo.isValid = exerciseToCopyFrom.isValid;
+		exerciseToCopyTo.subject = exerciseToCopyFrom.subject;
 
 		// getting Tags from TagService
 		TagService tagService = CDI.current().select(TagService.class).get();
