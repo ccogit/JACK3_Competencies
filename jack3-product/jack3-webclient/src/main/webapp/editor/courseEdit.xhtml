@@ -311,9 +311,14 @@
 						</p:column>
 						<p:column id="columnSettingsSubjectLabel">
 							<p:selectOneMenu id="subject"
+											 converter="subjectConverter"
 											 disabled="#{!courseEditView.newestRevision or courseEditView.readOnly}"
 											 value="#{courseEditView.course.subject}" editable="false"
 											 onchange="processChange()">
+								<f:selectItem
+										id="selectNoSubject"
+										itemLabel="#{msg['courseEdit.noSubjectSelection']}"
+										itemValue="#{null}" />
 								<f:selectItems value="#{courseEditView.getSubjectBusiness().allSubjects}" />
 							</p:selectOneMenu>
 						</p:column>

@@ -302,6 +302,28 @@
 							</p:selectOneMenu>
 						</p:column>
 					</p:row>
+
+					<!-- Subject -->
+					<p:row>
+						<p:column id="columnSettingsSubject">
+							<h:outputLabel for="subject"
+										   value="#{msg['exerciseEdit.subject']}" />
+						</p:column>
+						<p:column id="columnSettingsSubjectLabel">
+							<p:selectOneMenu id="subject"
+											 converter="subjectConverter"
+											 disabled="#{!exerciseEditView.newestRevision or !exerciseEditView.userAllowedToEdit}"
+											 value="#{exerciseEditView.exercise.subject}" editable="false"
+											 onchange="processChange()">
+								<f:selectItem
+										id="selectNoSubject"
+										itemLabel="#{msg['exerciseEdit.noSubjectSelection']}"
+										itemValue="#{null}" />
+								<f:selectItems value="#{exerciseEditView.getSubjectBusiness().allSubjects}" />
+							</p:selectOneMenu>
+						</p:column>
+					</p:row>
+
 					<p:row>
 						<!-- Revisionslink -->
 						<p:column id="columnSettingsRevision"

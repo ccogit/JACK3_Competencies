@@ -17,8 +17,8 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 import java.util.List;
 
-@RequestScoped @Transactional(value = Transactional.TxType.REQUIRED) public class SubjectBusiness
-		extends AbstractBusiness {
+@RequestScoped @Transactional(value = Transactional.TxType.REQUIRED)
+public class SubjectBusiness extends AbstractBusiness {
 
 	@Inject private SubjectService subjectService;
 
@@ -88,7 +88,8 @@ import java.util.List;
 		if (JackStringUtils.isBlank(subject.getName())) {
 			throw new IllegalArgumentException("You must specify a non-emtpy subject name.");
 		}
-		return subjectService.mergeSubject(subject);
+		 subjectService.mergeSubject(subject);
+		return true;
 	}
 
 	public boolean subjectWithEqualNameExists(Subject subject) {
