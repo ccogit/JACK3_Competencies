@@ -306,14 +306,15 @@
 					<!-- Subject -->
 					<p:row>
 						<p:column id="columnSettingsSubject">
-							<h:outputLabel for="subject"
+							<h:outputLabel for="subjectSelect"
 										   value="#{msg['courseEdit.subject']}" />
 						</p:column>
 						<p:column id="columnSettingsSubjectLabel">
-							<p:selectOneMenu id="subject"
+							<p:selectOneMenu id="subjectSelect"
 											 converter="subjectConverter"
 											 disabled="#{!courseEditView.newestRevision or courseEditView.readOnly}"
 											 value="#{courseEditView.course.subject}" editable="false"
+											 widgetVar="subjectSelection"
 											 onchange="processChange()">
 								<f:selectItem
 										id="selectNoSubject"
@@ -465,6 +466,16 @@
 					</p:row>
 				</p:panelGrid>
 			</p:panel>
+
+			<p:panel id="referencesToCompetencies"
+					 toggleable="true"
+					 header="#{msg['global.referencesToCompetencies']}">
+				<p:panelGrid id="pgReferencesToCompetencies" cellpadding="5"
+							 styleClass="ui-panelgrid-blank" style="width:100%;">
+
+				</p:panelGrid>
+			</p:panel>
+
 
 			<p:panel id="courseExercisesPanel"
 				header="#{msg['courseEdit.courseExercises']}" toggleable="true">

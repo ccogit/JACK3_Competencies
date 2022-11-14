@@ -105,8 +105,6 @@ import de.uni_due.s3.jack3.exceptions.NoSuchJackEntityException;
 	private List<CourseEntry> courseEntrysMissingInMainDB = new ArrayList<>();
 	private List<ContentFolder> foldersMissingInMainDB = new ArrayList<>();
 
-	private List<Subject> subjectList = new ArrayList<>();
-
 	private boolean readOnly;
 	private boolean extended_read;
 

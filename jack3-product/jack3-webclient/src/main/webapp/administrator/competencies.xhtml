@@ -1,0 +1,235 @@
+<ui:composition
+        xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:ui="http://java.sun.com/jsf/facelets"
+        xmlns:h="http://java.sun.com/jsf/html"
+        xmlns:f="http://java.sun.com/jsf/core"
+        xmlns:c="http://java.sun.com/jsp/jstl/core"
+        xmlns:p="http://primefaces.org/ui"
+        xmlns:j="http://jack.s3.uni-due.de/ui-elements"
+        template="/WEB-INF/templates/template.xhtml">
+
+    <ui:define name="content">
+        <c:set
+                var="current"
+                value="#{'admin-competencies'}"
+                scope="request"/>
+
+        <!-- Filter competencies by subject and competence dimension -->
+        <h:form id="selectionForm">
+            <p:panelGrid
+                    id="selectionGrid"
+                    styleClass="ui-panelgrid-blank"
+                    style="width:auto;margin-bottom: 1rem;margin-top: 1rem">
+
+                <!-- Subject -->
+                <p:row>
+                    <p:column>
+                        <p:outputLabel
+                                id="subjectSelectionLabel"
+                                for="subjectSelection"
+                                value="#{msg['global.subject']}:"/>
+                    </p:column>
+                    <p:column>
+                        <p:selectOneMenu
+                                id="subjectSelection"
+                                converter="subjectConverter"
+                                value="#{competenciesView.selectedSubject}"
+                                style="margin-right:15px">
+                            <p:ajax event="change"
+                                    update=":listForm :selectionForm"
+                                    listener="#{competenciesView.onChange}"/>
+                            <f:selectItem
+                                    id="selectNoSubject"
+                                    itemLabel="#{msg['competencies.noSubjectSelection']}"
+                                    itemValue="#{null}"/>
+                            <f:selectItems
+                                    value="#{competenciesView.getSubjectBusiness().allSubjects}"
+                                    itemValue="#{subject}"
+                                    var="subject"/>
+                        </p:selectOneMenu>
+                    </p:column>
+                </p:row>
+
+                <!-- Competence dimension -->
+                    <p:row>
+                    <p:column>
+                        <p:outputLabel
+                                id="dimensionSelectionLabel"
+                                for="dimensionSelection"
+                                value="#{msg['global.competenceDimension']}:"/>
+                    </p:column>
+                    <p:column>
+                        <p:importEnum
+                                type="de.uni_due.s3.jack3.entities.enums.ECompetenceDimension"
+                                var="ECompetenceDimensions"/>
+                        <p:selectOneMenu
+                                id="dimensionSelection"
+                                value="#{competenciesView.selectedCompetenceDimension}"
+                                style="margin-right:15px">
+                            <p:ajax event="change"
+                                    update=":listForm :selectionForm"
+                                    listener="#{competenciesView.onChange}"/>
+                            <f:selectItem
+                                    id="selectNoDimension"
+                                    itemLabel="#{msg['competencies.noDimensionSelection']}"
+                                    itemValue="#{null}"/>
+                            <f:selectItems value="#{ECompetenceDimensions.ALL_VALUES}"/>
+                        </p:selectOneMenu>
+                    </p:column>
+                </p:row>
+            </p:panelGrid>
+        </h:form>
+
+        <!-- Display competencies and subcompetencies -->
+        <h:form id="listForm">
+            <p:panelGrid>
+
+                <!-- Competencies -->
+                <p:column style="vertical-align: top">
+
+                    <!-- List of Competencies -->
+                    <p:dataTable
+                            id="competencies"
+                            var="competence"
+                            value="#{competenciesView.competencies}"
+                            rowKey="${competence.id}"
+                            selection="${competenciesView.selectedCompetence}"
+                            selectionMode="single"
+                            paginator="true"
+                            lazy="true"
+                            rows="20"
+                            tableStyle="white-space: nowrap; overflow: hidden; table-layout: auto;">
+                        <p:column
+                                headerText="#{msg['global.competence']}">
+
+                            <p:inputText
+                                    id="competenceName"
+                                    value="#{competence.name}"
+                                    style="width:calc(100% - 10px)"/>
+                        </p:column>
+                        <p:column
+                                id="actionsCompetence"
+                                headerText="#{msg['global.actions']}"
+                                width="100"
+                                style="text-align:center;">
+                            <div
+                                    class="ui-inputgroup"
+                                    style="justify-content: center;">
+                                <p:commandButton
+                                        id="selectCompetence"
+                                        title="#{msg['global.select']}"
+                                        icon="fas fa-eye"
+                                        action="#{competenciesView.setSelectedCompetence(competence)}"
+                                        update="globalGrowl :listForm "/>
+                                <p:commandButton
+                                        id="updateCompetence"
+                                        title="#{msg['global.save']}"
+                                        icon="far fa-save"
+                                        action="#{competenciesView.updateCompetence(competence)}"
+                                        update="globalGrowl :listForm "/>
+                                <p:commandButton
+                                        id="deleteCompetence"
+                                        title="#{msg['global.delete']}"
+                                        icon="fas fa-trash"
+                                        action="#{competenciesView.removeCompetence(competence)}"
+                                        update="globalGrowl :listForm "/>
+                            </div>
+                        </p:column>
+                    </p:dataTable>
+
+                    <!-- Add new competence -->
+                    <p:panel
+                            rendered="#{competenciesView.selectedSubject!=null and competenciesView.selectedCompetenceDimension!=null}"
+                            id="createNewCompetence"
+                            style="margin-top: 1rem"
+                            header="#{msg['tenantadmin.addNewCompetence']}">
+                        <h:panelGroup
+                                styleClass="jack-input-group"
+                                layout="block">
+                            <p:inputText
+                                    id="newValueForCompetence"
+                                    size="40"
+                                    value="#{competenciesView.newCompetenceName}"
+                                    placeholder="#{msg['global.name']}">
+                            </p:inputText>
+                            <p:commandButton
+                                    id="addNewCompetence"
+                                    icon="fas fa-plus"
+                                    update="globalGrowl :listForm:competencies :listForm:createNewCompetence"
+                                    action="#{competenciesView.addCompetence()}"/>
+                        </h:panelGroup>
+                    </p:panel>
+                </p:column>
+
+                <!-- Subcompetencies -->
+                <p:column style="vertical-align: top">
+
+                    <!-- List of subcompetencies -->
+                    <p:dataTable
+                            id="subcompetencies"
+                            var="competence"
+                            value="#{competenciesView.subcompetencies}"
+                            paginator="true"
+                            lazy="true"
+                            rows="20"
+                            tableStyle="white-space: nowrap; overflow: hidden; table-layout: auto;">
+                        <p:column
+                                headerText="#{msg['global.subcompetence']}">
+                            <p:inputText
+                                    id="subcompetenceName"
+                                    value="#{competence.name}"
+                                    style="width:calc(100% - 10px)"/>
+                        </p:column>
+                        <p:column
+                                id="actionsSubcompetence"
+                                headerText="#{msg['global.actions']}"
+                                width="100"
+                                style="text-align:center;">
+                            <div
+                                    class="ui-inputgroup"
+                                    style="justify-content: center;">
+                                <p:commandButton
+                                        id="updateSubcompetence"
+                                        title="#{msg['global.save']}"
+                                        icon="far fa-save"
+                                        action="#{competenciesView.updateSubcompetence(competence)}"
+                                        update="globalGrowl :listForm:subcompetencies "/>
+                                <p:commandButton
+                                        id="deleteSubcompetence"
+                                        title="#{msg['global.delete']}"
+                                        icon="fas fa-trash"
+                                        action="#{competenciesView.removeSubcompetence(competence)}"
+                                        update="globalGrowl :listForm:subcompetencies "/>
+                            </div>
+                        </p:column>
+                    </p:dataTable>
+
+                    <!-- Add new subcompetence -->
+                    <p:panel
+                            rendered="#{competenciesView.selectedSubject!=null
+                            and competenciesView.selectedCompetenceDimension!=null
+                            and competenciesView.selectedCompetence!=null}"
+                            id="createNewSubcompetence"
+                            style="margin-top: 1rem"
+                            header="#{msg['tenantadmin.addNewSubcompetence']}">
+                        <h:panelGroup
+                                styleClass="jack-input-group"
+                                layout="block">
+                            <p:inputText
+                                    id="newValueForSubcompetence"
+                                    size="40"
+                                    value="#{competenciesView.newSubcompetenceName}"
+                                    placeholder="#{msg['global.name']}">
+                            </p:inputText>
+                            <p:commandButton
+                                    id="addNewSubcompetence"
+                                    icon="fas fa-plus"
+                                    update="globalGrowl :listForm:subcompetencies :listForm:createNewSubcompetence"
+                                    action="#{competenciesView.addSubcompetence()}"/>
+                        </h:panelGroup>
+                    </p:panel>
+                </p:column>
+            </p:panelGrid>
+        </h:form>
+    </ui:define>
+</ui:composition>

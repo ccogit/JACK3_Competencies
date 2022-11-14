@@ -41,6 +41,14 @@ import de.uni_due.s3.jack3.services.TagService;
 		+ "WHERE c.id in (:idsFolderList) " //
 		+ "ORDER BY e.name ASC")
 @NamedQuery(
+		name = Exercise.ALL_EXERCISES_FOR_CONTENTFOLDER_LIST_BY_SUBJECT,
+		query = "SELECT DISTINCT e FROM Exercise e " //
+				+ "LEFT JOIN FETCH e.folder as c " //
+				+ "LEFT JOIN FETCH e.tags " //
+				+ "WHERE c.id in (:idsFolderList) " //
+				+ "AND e.subject =:subject " //
+				+ "ORDER BY e.name ASC")
+@NamedQuery(
 		name = Exercise.ALL_EXERCISES_FOR_CONTENTFOLDER, //
 		query = "SELECT e FROM Exercise e " //
 		+ "LEFT JOIN FETCH e.folder " //
@@ -91,11 +99,15 @@ import de.uni_due.s3.jack3.services.TagService;
 	query = "SELECT DISTINCT t.name FROM Exercise e " //
 			+ "LEFT JOIN e.tags t " //
 			+ "WHERE e = :exercise")
-
 @NamedQuery(
 		name = Exercise.EXERCISES_REFERENCING_SUBJECT, //
 		query = "SELECT exercise FROM Exercise exercise " //
 				+ "WHERE exercise.subject=:subject")
+@NamedQuery(
+		name = Exercise.EXERCISES_REFERENCING_SUBCOMPETENCE, //
+		query = "SELECT e FROM Exercise e " //
+				+ "JOIN CompetenceGoal cg on cg.exercise=e.id " //
+				+ "WHERE cg.competence=:subcompetence")
 @Entity
 @XStreamAlias("Exercise")
 public class Exercise extends AbstractExercise implements DeepCopyable<Exercise> {
@@ -124,6 +136,11 @@ public class Exercise extends AbstractExercise implements DeepCopyable<Exercise>
 	 * Name of the query that returns all exercises that are children of a folder in the folder list.
 	 */
 	public static final String ALL_EXERCISES_FOR_CONTENTFOLDER_LIST = "Exercise.allExercisesForContentFolderList";
+
+	/**
+	 * Name of the query that returns all exercises that are children of a folder in the folder list by given subject.
+	 */
+	public static final String ALL_EXERCISES_FOR_CONTENTFOLDER_LIST_BY_SUBJECT = "Exercise.allExercisesForContentFolderListBySubject";
 
 	/**
 	 * Name of the query that returns all exercises that are children of the given folder.
@@ -159,6 +176,11 @@ public class Exercise extends AbstractExercise implements DeepCopyable<Exercise>
 	 * Name of the query that returns all exercises which have a reference to the given subject
 	 */
 	public static final String EXERCISES_REFERENCING_SUBJECT = "Exercise.exercisesReferencingSubject";
+
+	/**
+	 * Name of the query that returns all exercises, which have a reference to the given subcompetence
+	 */
+	public static final String EXERCISES_REFERENCING_SUBCOMPETENCE = "Exercise.exercisesReferencingSubcompetence";
 
 	// TODO bz: Sollte statt "String language" nicht lieber java.util.Locale verwendet werden?
 	public Exercise(String name, String language) {

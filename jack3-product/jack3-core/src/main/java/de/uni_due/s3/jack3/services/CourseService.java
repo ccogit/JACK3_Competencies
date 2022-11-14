@@ -315,4 +315,17 @@ public class CourseService extends AbstractServiceBean {
 		query.setParameter("subject", subject);
 		return query.getResultList();
 	}
+
+	/**
+	 * Returns all courses that reference a given {@link de.uni_due.s3.jack3.entities.tenant.Competence}.
+	 *
+	 * @return Course list
+	 */
+	public List<Course> getCoursesReferencingSubcompetence(Competence subcompetence) {
+		final EntityManager em = getEntityManager();
+		final TypedQuery<Course> query = em.createNamedQuery( //
+				Course.COURSES_REFERENCING_SUBCOMPETENCE, Course.class);
+		query.setParameter("subcompetence", subcompetence);
+		return query.getResultList();
+	}
 }

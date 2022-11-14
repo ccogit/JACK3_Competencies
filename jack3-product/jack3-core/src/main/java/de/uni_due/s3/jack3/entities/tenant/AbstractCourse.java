@@ -81,7 +81,6 @@ import de.uni_due.s3.jack3.services.ExerciseService;
 	@Enumerated(EnumType.STRING) protected ECourseScoring scoringMode;
 
 	@Transient protected boolean isFromEnvers = false;
-
 	protected AbstractCourse() {
 
 	}
@@ -109,6 +108,8 @@ import de.uni_due.s3.jack3.services.ExerciseService;
 	public abstract Set<ResultFeedbackMapping> getResultFeedbackMappings();
 
 	public abstract boolean isValid();
+
+	public abstract boolean hasSubject();
 
 	public abstract void removeCourseResource(CourseResource courseResource);
 

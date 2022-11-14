@@ -288,6 +288,10 @@ public class ViewId implements Serializable {
 		return new Builder("/administrator/subjects");
 	}
 
+	public Builder getCompetencies() {
+		return new Builder("/administrator/competencies");
+	}
+
 	public Builder getPrivacyPolicy() {
 		return new Builder("/public/privacy");
 	}

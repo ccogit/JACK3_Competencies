@@ -78,10 +78,9 @@ public class ExerciseTreeView extends AbstractView implements Serializable {
 
             final var folderRightsMap = folderBusiness.getContentFoldersWithAtLeastReadRightForUser(getCurrentUser());
             final var folders = new ArrayList<>(folderRightsMap.keySet());
-            final var exercises = exerciseBusiness.getAllExercisesForContentFolderList(folders)
-                    .stream()
-                    .filter(e -> e.getSubject().equals(courseBusiness.getCourseByCourseID(courseEditView.getCourseId()).getSubject()))
-                    .collect(Collectors.toList());
+            final var exercises = courseEditView.getCourse().hasSubject()?
+                    exerciseBusiness.getAllExercisesForContentFolderListBySubject(folders, courseEditView.getCourse().getSubject()):
+                    exerciseBusiness.getAllExercisesForContentFolderList(folders);
 
             tree.setContentFolderRightsMap(folderRightsMap);
             tree.setCurrentUser(getCurrentUser());

@@ -1,87 +1,133 @@
 <ui:composition
-  xmlns="http://www.w3.org/1999/xhtml"
-  xmlns:ui="http://java.sun.com/jsf/facelets"
-  xmlns:h="http://java.sun.com/jsf/html"
-  xmlns:f="http://java.sun.com/jsf/core"
-  xmlns:c="http://java.sun.com/jsp/jstl/core"
-  xmlns:p="http://primefaces.org/ui"
-  xmlns:j="http://jack.s3.uni-due.de/ui-elements"
-  template="/WEB-INF/templates/template.xhtml">
+        xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:ui="http://java.sun.com/jsf/facelets"
+        xmlns:h="http://java.sun.com/jsf/html"
+        xmlns:f="http://java.sun.com/jsf/core"
+        xmlns:c="http://java.sun.com/jsp/jstl/core"
+        xmlns:p="http://primefaces.org/ui"
+        xmlns:j="http://jack.s3.uni-due.de/ui-elements"
+        template="/WEB-INF/templates/template.xhtml">
 
-  <ui:define name="content">
-    <c:set
-      var="current"
-      value="#{'admin-subjects'}"
-      scope="request" />
+    <ui:define name="content">
+        <c:set
+                var="current"
+                value="#{'admin-subjects'}"
+                scope="request"/>
 
-    <h:form id="listForm">
-      <p:dataTable
-              id="subjects"
-              var="subject"
-              value="#{subjectsView.subjects}"
-              paginator="true"
-              lazy="true"
-              rows="20"
-              tableStyle="white-space: nowrap; overflow: hidden; table-layout: auto;">
-        <p:column
-                headerText="Id">
-          <h:outputText value="#{subject.id}" />
-        </p:column>
-        <p:column
-                headerText="Name">
-          <p:inputText
-                  id="subjectName"
-                  value="#{subject.name}"
-                  style="width:calc(100% - 10px)"/>
-        </p:column>
-        <p:column
-                id="actions"
-                headerText="#{msg['global.actions']}"
-                width="100"
-                style="text-align:center;">
-          <div
-                  class="ui-inputgroup"
-                  style="justify-content: center;">
-            <p:commandButton
-                    id="updateSubject"
-                    title="#{msg['global.save']}"
-                    icon="far fa-save"
-                    action="#{subjectsView.updateSubject(subject)}"
-                    update="globalGrowl :listForm :newSubjectForm"/>
-            <p:commandButton
-                    id="deleteSubject"
-                    title="#{msg['global.delete']}"
-                    icon="fas fa-trash"
-                    action="#{subjectsView.removeSubject(subject)}"
-                    update="globalGrowl :listForm :newSubjectForm"/>
-          </div>
-        </p:column>
-      </p:dataTable>
-    </h:form>
+        <h:form id="listForm">
+            <p:panelGrid>
+                <p:column>
+                    <p:dataTable
+                            id="subjects"
+                            var="subject"
+                            value="#{subjectsView.subjects}"
+                            paginator="true"
+                            lazy="true"
+                            rows="20"
+                            tableStyle="white-space: nowrap; overflow: hidden; table-layout: auto;">
+                        <p:column
+                                headerText="Id">
+                            <h:outputText value="#{subject.id}"/>
+                        </p:column>
+                        <p:column
+                                headerText="Name">
+                            <p:inputText
+                                    id="subjectName"
+                                    value="#{subject.name}"
+                                    style="width:calc(100% - 10px)"/>
+                        </p:column>
+                        <p:column
+                                id="actions"
+                                headerText="#{msg['global.actions']}"
+                                width="100"
+                                style="text-align:center;">
+                            <div
+                                    class="ui-inputgroup"
+                                    style="justify-content: center;">
+                                <p:commandButton
+                                        id="updateSubject"
+                                        title="#{msg['global.save']}"
+                                        icon="far fa-save"
+                                        action="#{subjectsView.updateSubject(subject)}"
+                                        update="globalGrowl :listForm :newSubjectForm"/>
+                                <p:commandButton
+                                        id="deleteSubject"
+                                        title="#{msg['global.delete']}"
+                                        icon="fas fa-trash"
+                                        action="#{subjectsView.removeSubject(subject)}"
+                                        update="globalGrowl :listForm :newSubjectForm"/>
+                            </div>
+                        </p:column>
+                    </p:dataTable></p:column>
+                <p:column>
+                    <p:dataTable
+                            id="subjects2"
+                            var="subject"
+                            value="#{subjectsView.subjects}"
+                            paginator="true"
+                            lazy="true"
+                            rows="20"
+                            tableStyle="white-space: nowrap; overflow: hidden; table-layout: auto;">
+                        <p:column
+                                headerText="Id">
+                            <h:outputText value="#{subject.id}"/>
+                        </p:column>
+                        <p:column
+                                headerText="Name">
+                            <p:inputText
+                                    id="subjectName2"
+                                    value="#{subject.name}"
+                                    style="width:calc(100% - 10px)"/>
+                        </p:column>
+                        <p:column
+                                id="actions2"
+                                headerText="#{msg['global.actions']}"
+                                width="100"
+                                style="text-align:center;">
+                            <div
+                                    class="ui-inputgroup"
+                                    style="justify-content: center;">
+                                <p:commandButton
+                                        id="updateSubject2"
+                                        title="#{msg['global.save']}"
+                                        icon="far fa-save"
+                                        action="#{subjectsView.updateSubject(subject)}"
+                                        update="globalGrowl :listForm :newSubjectForm"/>
+                                <p:commandButton
+                                        id="deleteSubject2"
+                                        title="#{msg['global.delete']}"
+                                        icon="fas fa-trash"
+                                        action="#{subjectsView.removeSubject(subject)}"
+                                        update="globalGrowl :listForm :newSubjectForm"/>
+                            </div>
+                        </p:column>
+                    </p:dataTable></p:column>
+            </p:panelGrid>
+        </h:form>
 
-    <!-- Input group for creating a new subject -->
-    <h:form id="newSubjectForm">
-      <p:panel
-              id="createNewSubject"
-              header="#{msg['tenantadmin.addNewSubject']}">
-        <h:panelGroup
-                styleClass="jack-input-group"
-                layout="block">
-          <p:inputText
-                  id="newValue"
-                  size="40"
-                  value="#{subjectsView.newSubjectName}"
-                  placeholder="#{msg['global.value']}">
-          </p:inputText>
-          <p:commandButton
-                  id="addNewSubject"
-                  icon="fas fa-plus"
-                  update="globalGrowl :listForm :newSubjectForm"
-                  action="#{subjectsView.addSubject()}"
-                  value="#{msg['global.add']}" />
-        </h:panelGroup>
-      </p:panel>
-    </h:form>
+        <!-- Input group for creating a new subject -->
+        <h:form id="newSubjectForm">
+            <p:panel
+                    id="createNewSubject"
+                    header="#{msg['tenantadmin.addNewSubject']}">
+                <h:panelGroup
+                        styleClass="jack-input-group"
+                        layout="block">
+                    <p:inputText
+                            id="newValue"
+                            size="40"
+                            value="#{subjectsView.newSubjectName}"
+                            placeholder="#{msg['global.name']}">
+                    </p:inputText>
+                    <p:commandButton
+                            id="addNewSubject"
+                            icon="fas fa-plus"
+                            update="globalGrowl :listForm :newSubjectForm"
+                            action="#{subjectsView.addSubject()}"
+                            value="#{msg['global.add']}"/>
+                </h:panelGroup>
+            </p:panel>
+        </h:form>
 
-  </ui:define>
+    </ui:define>
 </ui:composition>
