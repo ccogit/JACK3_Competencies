@@ -1,6 +1,7 @@
 package de.uni_due.s3.jack3.entities.tenant;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
@@ -51,6 +52,7 @@ import de.uni_due.s3.jack3.services.RevisionService;
                 + "LEFT JOIN FETCH c.contentProvider " //
                 + "LEFT JOIN FETCH c.resultFeedbackMappings " //
                 + "LEFT JOIN FETCH c.courseResources " //
+                + "LEFT JOIN FETCH c.competenceGoals " //
                 + "WHERE c.id=:id")
 @NamedQuery(
         name = Course.ALL_COURSES_FOR_CONTENT_FOLDER_LIST, //
@@ -314,8 +316,28 @@ public class Course extends AbstractCourse implements DeepCopyable<Course> {
     }
 
     @Override
+    public List<CompetenceGoal> getCompetenceGoals() {
+        return this.competenceGoals;
+    }
+
+    @Override
     public void setSubject(Subject subject) {
         this.subject = subject;
+    }
+
+    @Override
+    public void setCompetenceGoals(List<CompetenceGoal> competenceGoals) {
+        this.competenceGoals.addAll(competenceGoals);
+    }
+
+    @Override
+    public void addCompetenceGoal(CompetenceGoal competenceGoal) {
+        competenceGoals.add(competenceGoal);
+    }
+
+    @Override
+    public void removeCompetenceGoal(CompetenceGoal competenceGoal) {
+        competenceGoals.remove(competenceGoal);
     }
 
     @Override

@@ -18,6 +18,7 @@ import javax.persistence.*;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 
+import org.checkerframework.checker.units.qual.A;
 import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
 
@@ -104,6 +105,9 @@ public abstract class AbstractExercise extends AbstractEntity implements Namable
 
 	@ManyToOne
 	protected Subject subject;
+
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	protected List<CompetenceGoal> competenceGoals = new ArrayList<>();
 
 	@XStreamOmitField
 	@ElementCollection(targetClass = Integer.class, fetch = FetchType.LAZY)
@@ -192,6 +196,14 @@ public abstract class AbstractExercise extends AbstractEntity implements Namable
 	}
 
 	public abstract Subject getSubject();
+
+	public abstract List<CompetenceGoal> getCompetenceGoals();
+
+	public abstract void setCompetenceGoals(List<CompetenceGoal> competenceGoals);
+
+	public abstract void addCompetenceGoal(CompetenceGoal competenceGoal);
+
+	public abstract void removeCompetenceGoal(CompetenceGoal competenceGoal);
 
 	public abstract boolean isValid();
 

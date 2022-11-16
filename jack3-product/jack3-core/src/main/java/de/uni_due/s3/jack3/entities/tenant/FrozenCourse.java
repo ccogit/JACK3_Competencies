@@ -1,6 +1,7 @@
 package de.uni_due.s3.jack3.entities.tenant;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
@@ -199,6 +200,11 @@ public class FrozenCourse extends AbstractCourse implements Comparable<FrozenCou
     }
 
     @Override
+    public List<CompetenceGoal> getCompetenceGoals() {
+        return this.competenceGoals;
+    }
+
+    @Override
     public void removeCourseResource(CourseResource courseResource) {
         throw new UnsupportedOperationException(MUST_NOT_CHANGE_STATE_OF_FROZEN_OBJECTS);
     }
@@ -247,6 +253,21 @@ public class FrozenCourse extends AbstractCourse implements Comparable<FrozenCou
     @Override
     public void setSubject(Subject subject) {
         throw new UnsupportedOperationException(MUST_NOT_CHANGE_STATE_OF_FROZEN_OBJECTS);
+    }
+
+    @Override
+    public void setCompetenceGoals(List<CompetenceGoal> competenceGoals) {
+        this.competenceGoals.addAll(competenceGoals);
+    }
+
+    @Override
+    public void addCompetenceGoal(CompetenceGoal competenceGoal) {
+        competenceGoals.add(competenceGoal);
+    }
+
+    @Override
+    public void removeCompetenceGoal(CompetenceGoal competenceGoal) {
+        competenceGoals.remove(competenceGoal);
     }
 
     @Override

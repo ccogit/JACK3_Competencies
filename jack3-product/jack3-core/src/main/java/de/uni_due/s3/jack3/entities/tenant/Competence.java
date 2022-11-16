@@ -19,30 +19,6 @@ import java.util.Set;
 @Entity
 @Audited
 @XStreamAlias("Competence")
-//@NamedQuery( //
-//        name = Competence.ALL_PROCESS_SUBCOMPETENCIES_BY_SUBJECT, //
-//        query = "SELECT subcomp FROM Competence subcomp " //
-//                + "join Competence comp on subcomp.parentCompetence=comp.id " //
-//                + "WHERE comp.subject=:subject " //
-//                + "AND comp.competenceDimension = de.uni_due.s3.jack3.entities.enums.ECompetenceDimension.PROCESS")
-//@NamedQuery( //
-//        name = Competence.ALL_PROCESS_COMPETENCIES_BY_SUBJECT, //
-//        query = "SELECT comp FROM Competence comp " //
-//                + "WHERE comp.subject=:subject " //
-//                + "AND comp.parentCompetence is null " //
-//                + "AND comp.competenceDimension = de.uni_due.s3.jack3.entities.enums.ECompetenceDimension.PROCESS")
-//@NamedQuery( //
-//        name = Competence.ALL_CONTENT_SUBCOMPETENCIES_BY_SUBJECT, //
-//        query = "SELECT subcomp FROM Competence subcomp " //
-//                + "join Competence comp on subcomp.parentCompetence=comp.id " //
-//                + "WHERE comp.subject=:subject " //
-//                + "AND comp.competenceDimension = de.uni_due.s3.jack3.entities.enums.ECompetenceDimension.CONTENT")
-//@NamedQuery( //
-//        name = Competence.ALL_CONTENT_COMPETENCIES_BY_SUBJECT, //
-//        query = "SELECT comp FROM Competence comp " //
-//                + "WHERE comp.subject=:subject " //
-//                + "AND comp.parentCompetence is null " //
-//                + "AND comp.competenceDimension = de.uni_due.s3.jack3.entities.enums.ECompetenceDimension.CONTENT")
 @NamedQuery( //
         name = Competence.ALL_COMPETENCIES_BY_DIMENSION_AND_SUBJECT, //
         query = "SELECT comp FROM Competence comp " //
@@ -59,13 +35,15 @@ import java.util.Set;
         name = Competence.ALL_SUBCOMPETENCIES_BY_COMPETENCE, //
         query = "SELECT comp FROM Competence comp " //
                 + "WHERE comp.parentCompetence=:competence") //
+@NamedQuery( //
+        name = Competence.ALL_SUBCOMPETENCIES_BY_SUBJECT, //
+        query = "SELECT c FROM Competence c " //
+                + "WHERE c.subject=:subject " //
+                + "AND NOT c.parentCompetence is null") //
 public class Competence extends AbstractEntity {
 
     private static final long serialVersionUID = -5154989747417668114L;
-    public static final String ALL_PROCESS_COMPETENCIES_BY_SUBJECT = "Competence.allProcessCompetenciesBySubject";
-    public static final String ALL_PROCESS_SUBCOMPETENCIES_BY_SUBJECT = "Competence.allProcessSubcompetenciesBySubject";
-    public static final String ALL_CONTENT_COMPETENCIES_BY_SUBJECT = "Competence.allContentCompetenciesBySubject";
-    public static final String ALL_CONTENT_SUBCOMPETENCIES_BY_SUBJECT = "Competence.allContentSubcompetenciesBySubject";
+    public static final String ALL_SUBCOMPETENCIES_BY_SUBJECT = "Competence.allSubcompetenciesBySubject";
     public static final String ALL_SUBCOMPETENCIES_BY_COMPETENCE = "Competence.allSubcompetenciesByCompetence";
     public static final String ALL_COMPETENCIES_BY_DIMENSION_AND_SUBJECT = "Competence.allCompetenciesByDimensionAndSubject";
     public static final String ALL_SUBCOMPETENCIES_BY_DIMENSION_AND_SUBJECT = "Competence.allSubcompetenciesByDimensionAndSubject";

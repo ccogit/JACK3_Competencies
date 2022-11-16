@@ -344,6 +344,26 @@ public class FrozenExercise extends AbstractExercise implements Comparable<Froze
 		throw new UnsupportedOperationException(MUST_NOT_CHANGE_STATE_OF_FROZEN_OBJECTS);
 	}
 
+	@Override
+	public List<CompetenceGoal> getCompetenceGoals() {
+		throw new UnsupportedOperationException(MUST_NOT_CHANGE_STATE_OF_FROZEN_OBJECTS);
+	}
+
+	@Override
+	public void setCompetenceGoals(List<CompetenceGoal> competenceGoals) {
+		throw new UnsupportedOperationException(MUST_NOT_CHANGE_STATE_OF_FROZEN_OBJECTS);
+	}
+
+	@Override
+	public void addCompetenceGoal(CompetenceGoal competenceGoal) {
+		throw new UnsupportedOperationException(MUST_NOT_CHANGE_STATE_OF_FROZEN_OBJECTS);
+	}
+
+	@Override
+	public void removeCompetenceGoal(CompetenceGoal competenceGoal) {
+		throw new UnsupportedOperationException(MUST_NOT_CHANGE_STATE_OF_FROZEN_OBJECTS);
+	}
+
 	public void setStages(Set<Stage> stages) {
 		throw new UnsupportedOperationException(MUST_NOT_CHANGE_STATE_OF_FROZEN_OBJECTS);
 	}

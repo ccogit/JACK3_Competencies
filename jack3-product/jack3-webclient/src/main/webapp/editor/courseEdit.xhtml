@@ -1,860 +1,1020 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:ui="http://java.sun.com/jsf/facelets"
-	xmlns:h="http://java.sun.com/jsf/html"
-	xmlns:f="http://java.sun.com/jsf/core"
-	xmlns:p="http://primefaces.org/ui"
-	xmlns:pe="http://primefaces.org/ui/extensions"
-	xmlns:j="http://jack.s3.uni-due.de/ui-elements"
-	template="/WEB-INF/templates/template.xhtml">
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pe="http://primefaces.org/ui/extensions"
+                xmlns:j="http://jack.s3.uni-due.de/ui-elements"
+                template="/WEB-INF/templates/template.xhtml">
 
-	<ui:define name="metadata">
-		<f:metadata>
-			<f:viewParam name="course" value="#{courseEditView.courseId}" />
-            <f:viewParam name="readOnlyCourse" value="#{courseEditView.readOnly}"></f:viewParam>
-			<f:viewAction action="#{courseEditView.loadCourse}" />
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="course" value="#{courseEditView.courseId}"/>
+            <f:viewParam name="readOnlyCourse" value="#{courseEditView.readOnly}"/>
+            <f:viewAction action="#{courseEditView.loadCourse}"/>
             <f:event type="preRenderView" listener="#{courseEditView.updateBreadCrumb()}"/>
-		</f:metadata>
-		<script>
-			function processChange() {
-				// We want to enable the save button only when something has changed, to avoid saving redundant
-				// revisions
-				PF('saveCourseButton').enable();
-				document.getElementById('courseEditMainForm:cbValidate').disabled = true;
-				jQuery('#courseEditMainForm\\:cbValidate').addClass(
-						"ui-state-disabled");
-				document
-						.querySelector('#courseEditMainForm\\:testCourse > span:nth-child(2)').innerHTML = "#{msg['global.testAndSave']}";
+        </f:metadata>
+        <script>
+            function processChange() {
+                // We want to enable the save button only when something has changed, to avoid saving redundant
+                // revisions
+                PF('saveCourseButton').enable();
+                document.getElementById('courseEditMainForm:cbValidate').disabled = true;
+                jQuery('#courseEditMainForm\\:cbValidate').addClass(
+                    "ui-state-disabled");
+                document
+                    .querySelector('#courseEditMainForm\\:testCourse > span:nth-child(2)').innerHTML = "#{msg['global.testAndSave']}";
 
-				preventUnload(true);
-			}
+                preventUnload(true);
+            }
 
-			function preventUnload(state) {
-				message = "#{msg['global.preventUnloadMessage']}"
-				window.onbeforeunload = state ? function() {
-					return message;
-				} : null;
-			}
+            function preventUnload(state) {
+                message = "#{msg['global.preventUnloadMessage']}"
+                window.onbeforeunload = state ? function () {
+                    return message;
+                } : null;
+            }
 
-			function saveAndTest() {
-				preventUnload(false);
-				if (!document.getElementById('courseEditMainForm:saveCourse').disabled) {
-					saveBeforeTesting();
-				}
-				redirectToTest();
-			}
+            function saveAndTest() {
+                preventUnload(false);
+                if (!document.getElementById('courseEditMainForm:saveCourse').disabled) {
+                    saveBeforeTesting();
+                }
+                redirectToTest();
+            }
 
-			function checkUserInputForActivationOfSaveButton() {
-				var keyCode = event.keyCode;
-				// if Enter is pressed no save action
-				if (keyCode == 13) {
-					event.preventDefault();
-					return false;
-				}
+            function checkUserInputForActivationOfSaveButton() {
+                var keyCode = event.keyCode;
+                // if Enter is pressed no save action
+                if (keyCode == 13) {
+                    event.preventDefault();
+                    return false;
+                }
 
-				//printable chars have lenght of 1, Backspace or Delete should also be handeld like them
-				if (event.key.length == 1 || keyCode == 8 || keyCode == 46) {
-					processChange();
-				}
-				return true;
-			}
-		</script>
-<style>
-.alerta {
-	color: #d60000 !important;
-}
-</style>
+                //printable chars have lenght of 1, Backspace or Delete should also be handeld like them
+                if (event.key.length == 1 || keyCode == 8 || keyCode == 46) {
+                    processChange();
+                }
+                return true;
+            }
+        </script>
+        <style>
+            .alerta {
+                color: #d60000 !important;
+            }
+        </style>
 
-	</ui:define>
+    </ui:define>
 
-	<ui:define name="content">
+    <ui:define name="content">
 
-		<h:form id="courseEditMainForm">
-			<p:growl id="messages" showDetail="true" sticky="false" life="10000" />
+        <h:form id="courseEditMainForm">
+            <p:growl id="messages" showDetail="true" sticky="false" life="10000"/>
 
             <div style="display:flex">
-               <p:breadCrumb id="breadCrumbMainForm"
-				model="#{courseEditView.updateMenuModel(userSession)}"
-                rendered="#{courseEditView.newestRevision}"
-                style="flex-grow: 1; margin-bottom: 2px;">
-					<f:facet name="options">
-						<ul>
-							<li>
-								<p:link outcome="#{viewId.getEditorFor(courseEditView.previousItemInFolder)}"
-									styleClass="ui-menuitem-link ui-corner-all"
-									disabled="#{empty courseEditView.previousItemInFolder}">
-									<i class="fas fa-arrow-left"/>
-								</p:link>
-							</li>
-							<li>
-								<h:outputText value="&#x00a0;"/></li>
-							<li>
-								<p:link outcome="#{viewId.getEditorFor(courseEditView.nextItemInFolder)}"
-									styleClass="ui-menuitem-link ui-corner-all"
-									disabled="#{empty courseEditView.nextItemInFolder}">
-									<i class="fas fa-arrow-right"/>
-								</p:link>
-							</li>
-						</ul>
-					</f:facet>
-				</p:breadCrumb>
+                <p:breadCrumb id="breadCrumbMainForm"
+                              model="#{courseEditView.updateMenuModel(userSession)}"
+                              rendered="#{courseEditView.newestRevision}"
+                              style="flex-grow: 1; margin-bottom: 2px;">
+                    <f:facet name="options">
+                        <ul>
+                            <li>
+                                <p:link outcome="#{viewId.getEditorFor(courseEditView.previousItemInFolder)}"
+                                        styleClass="ui-menuitem-link ui-corner-all"
+                                        disabled="#{empty courseEditView.previousItemInFolder}">
+                                    <i class="fas fa-arrow-left"/>
+                                </p:link>
+                            </li>
+                            <li>
+                                <h:outputText value="&#x00a0;"/></li>
+                            <li>
+                                <p:link outcome="#{viewId.getEditorFor(courseEditView.nextItemInFolder)}"
+                                        styleClass="ui-menuitem-link ui-corner-all"
+                                        disabled="#{empty courseEditView.nextItemInFolder}">
+                                    <i class="fas fa-arrow-right"/>
+                                </p:link>
+                            </li>
+                        </ul>
+                    </f:facet>
+                </p:breadCrumb>
             </div>
 
-			<!-- Toolbar -->
-			<p:toolbar id="tb" styleClass="sticky-toolbar">
-				<f:facet id="facetCourseEditLeft" name="left">
-					<!-- Save Course -->
-					<p:commandButton id="saveCourse" widgetVar="saveCourseButton"
-						action="#{courseEditView.saveCourse()}"
-						update="courseEditMainForm" value="#{msg['courseEdit.save']}"
-						icon="fas fa-save fa-sm" onstart="PF('globalSpinner').show();"
-						oncomplete="preventUnload(false);PF('globalSpinner').hide();"
-						rendered="#{courseEditView.newestRevision}">
-					</p:commandButton>
-					<!-- This script unfortunatly needs (even with jquery().ready) to be after the saveCourseButton-
+            <!-- Toolbar -->
+            <p:toolbar id="tb" styleClass="sticky-toolbar">
+                <f:facet id="facetCourseEditLeft" name="left">
+                    <!-- Save Course -->
+                    <p:commandButton id="saveCourse" widgetVar="saveCourseButton"
+                                     action="#{courseEditView.saveCourse()}"
+                                     update="courseEditMainForm" value="#{msg['courseEdit.save']}"
+                                     icon="fas fa-save fa-sm" onstart="PF('globalSpinner').show();"
+                                     oncomplete="preventUnload(false);PF('globalSpinner').hide();"
+                                     rendered="#{courseEditView.newestRevision}">
+                    </p:commandButton>
+                    <!-- This script unfortunatly needs (even with jquery().ready) to be after the saveCourseButton-
                     definition, or Primefaces PF won't find it in the widget-array. We also can't just set
                     disabled="true" in the p:commandButton-definition, because then the button won't work anymore. -->
-					<script>
-						jQuery(document).ready(function() {
-							PF('saveCourseButton').disable();
-						});
-					</script>
+                    <script>
+                        jQuery(document).ready(function () {
+                            PF('saveCourseButton').disable();
+                        });
+                    </script>
 
-					<!-- Validate: Disabled, because this has no functionality yet -->
-					<p:commandButton id="cbValidate"
-						value="#{msg['courseEdit.validate']}" icon="far fa-lightbulb fa-sm"
-						rendered="#{courseEditView.newestRevision}" disabled="true" />
-					<!-- Test Course -->
-					<p:commandButton id="testCourse" value="#{msg['courseEdit.test']}"
-						onstart="PF('globalSpinner').show(); saveAndTest();"
-						icon="fas fa-play fa-sm" rendered="#{courseEditView.newestRevision}">
-					</p:commandButton>
-					<p:remoteCommand name="saveBeforeTesting"
-						action="#{courseEditView.saveCourse()}" style="display: none;" />
-					<p:remoteCommand name="redirectToTest"
-						action="#{courseEditView.redirectToTestCourse()}"
-						style="display: none;" />
-				</f:facet>
+                    <!-- Validate: Disabled, because this has no functionality yet -->
+                    <p:commandButton id="cbValidate"
+                                     value="#{msg['courseEdit.validate']}" icon="far fa-lightbulb fa-sm"
+                                     rendered="#{courseEditView.newestRevision}" disabled="true"/>
+                    <!-- Test Course -->
+                    <p:commandButton id="testCourse" value="#{msg['courseEdit.test']}"
+                                     onstart="PF('globalSpinner').show(); saveAndTest();"
+                                     icon="fas fa-play fa-sm" rendered="#{courseEditView.newestRevision}">
+                    </p:commandButton>
+                    <p:remoteCommand name="saveBeforeTesting"
+                                     action="#{courseEditView.saveCourse()}" style="display: none;"/>
+                    <p:remoteCommand name="redirectToTest"
+                                     action="#{courseEditView.redirectToTestCourse()}"
+                                     style="display: none;"/>
+                </f:facet>
 
-				<f:facet id="facetCourseEditRight" name="right">
-					<p:commandButton id="resetRevision"
-						action="#{courseEditView.resetToRevision()}" value="#{msg['global.takeOver']}"
-						icon="fas fa-level-up-alt fa-sm" update="courseEditMainForm"
-						rendered="#{not courseEditView.newestRevision}"
-                        disabled="#{courseEditView.readOnly}"/>
-					<p:commandButton id="jumpToCurrentRevision"
-						action="#{courseEditView.jumpToNewestRevision()}"
-						value="#{msg['exerciseEdit.toNewestRevision']}"
-						icon="fas fa-sign-in-alt fa-sm" update="courseEditMainForm"
-						rendered="#{!courseEditView.newestRevision}" />
-					<p:commandButton id="cbCourseEditCancel" title="Cancel"
-						action="#{courseEditView.reloadCourseByRedirect()}"
-						onstart="preventUnload(false)" value="#{msg['courseEdit.cancel']}"
-                        icon="fas fa-trash-alt fa-sm" rendered="#{courseEditView.newestRevision}"
-                        disabled="#{courseEditView.readOnly}"/>
-				</f:facet>
-			</p:toolbar>
+                <f:facet id="facetCourseEditRight" name="right">
+                    <p:commandButton id="resetRevision"
+                                     action="#{courseEditView.resetToRevision()}" value="#{msg['global.takeOver']}"
+                                     icon="fas fa-level-up-alt fa-sm" update="courseEditMainForm"
+                                     rendered="#{not courseEditView.newestRevision}"
+                                     disabled="#{courseEditView.readOnly}"/>
+                    <p:commandButton id="jumpToCurrentRevision"
+                                     action="#{courseEditView.jumpToNewestRevision()}"
+                                     value="#{msg['exerciseEdit.toNewestRevision']}"
+                                     icon="fas fa-sign-in-alt fa-sm" update="courseEditMainForm"
+                                     rendered="#{!courseEditView.newestRevision}"/>
+                    <p:commandButton id="cbCourseEditCancel" title="Cancel"
+                                     action="#{courseEditView.reloadCourseByRedirect()}"
+                                     onstart="preventUnload(false)" value="#{msg['courseEdit.cancel']}"
+                                     icon="fas fa-trash-alt fa-sm" rendered="#{courseEditView.newestRevision}"
+                                     disabled="#{courseEditView.readOnly}"/>
+                </f:facet>
+            </p:toolbar>
 
-			<!-- explain what a revision is -->
-			<p:panel
-				rendered="#{not courseEditView.newestRevision and not courseEditView.frozen}"
-				style="text-align: center; font-size: large; font-weight: normal;">
-				<h:outputFormat escape="false"
-					value="#{msg['global.revisionViewExplanationMessage']}">
-					<f:param value="#{courseEditView.getRevisionIndexForRevisionId(courseEditView.currentRevisionId)}" />
-				</h:outputFormat>
-				<p:outputLabel rendered="#{courseEditView.entitysAreMissingInRevision()}" styleClass="alerta">
-				<br/><br/>#{msg['courseEditView.meanwhileDeleted']}</p:outputLabel>
+            <!-- explain what a revision is -->
+            <p:panel
+                    rendered="#{not courseEditView.newestRevision and not courseEditView.frozen}"
+                    style="text-align: center; font-size: large; font-weight: normal;">
+                <h:outputFormat escape="false"
+                                value="#{msg['global.revisionViewExplanationMessage']}">
+                    <f:param value="#{courseEditView.getRevisionIndexForRevisionId(courseEditView.currentRevisionId)}"/>
+                </h:outputFormat>
+                <p:outputLabel rendered="#{courseEditView.entitysAreMissingInRevision()}" styleClass="alerta">
+                    <br/><br/>#{msg['courseEditView.meanwhileDeleted']}</p:outputLabel>
 
-				<p:outputLabel rendered="#{courseEditView.entitysAreMissingInRevision()}"
-								value="#{courseEditView.getMissingEntitysAsString()}" escape="false" styleClass="alerta"/>
+                <p:outputLabel rendered="#{courseEditView.entitysAreMissingInRevision()}"
+                               value="#{courseEditView.getMissingEntitysAsString()}" escape="false"
+                               styleClass="alerta"/>
 
-               	<p:outputLabel rendered="#{courseEditView.entitysAreMissingInRevision()}" styleClass="alerta">
-               	#{msg['courseEditView.stillBeGone']}</p:outputLabel>
-			</p:panel>
+                <p:outputLabel rendered="#{courseEditView.entitysAreMissingInRevision()}" styleClass="alerta">
+                    #{msg['courseEditView.stillBeGone']}</p:outputLabel>
+            </p:panel>
 
-			<!-- explain what a frozen version is -->
-			<p:panel rendered="#{courseEditView.frozen}"
-				style="text-align: center; font-size: large; font-weight: normal;">
-				<h:outputFormat escape="false"
-					value="#{msg['global.frozenViewExplanationMessage']}">
-					<f:param value="#{courseEditView.getCurrentProxiedExerciseRevisionIndex()}" />
-				</h:outputFormat>
-			</p:panel>
+            <!-- explain what a frozen version is -->
+            <p:panel rendered="#{courseEditView.frozen}"
+                     style="text-align: center; font-size: large; font-weight: normal;">
+                <h:outputFormat escape="false"
+                                value="#{msg['global.frozenViewExplanationMessage']}">
+                    <f:param value="#{courseEditView.getCurrentProxiedExerciseRevisionIndex()}"/>
+                </h:outputFormat>
+            </p:panel>
 
-			<p:panel id="settings" header="#{msg['global.settings']}">
+            <p:panel id="settings" header="#{msg['global.settings']}">
 
-				<p:panelGrid id="pgSettings" cellpadding="5"
-					styleClass="ui-panelgrid-blank" style="width:100%;">
-					<!-- Frozen versions dropdown -->
-					<p:row
-						rendered="#{not empty courseEditView.availableFrozenCourses and courseEditView.newestRevision}">
+                <p:panelGrid id="pgSettings" cellpadding="5"
+                             styleClass="ui-panelgrid-blank" style="width:100%;">
+                    <!-- Frozen versions dropdown -->
+                    <p:row
+                            rendered="#{not empty courseEditView.availableFrozenCourses and courseEditView.newestRevision}">
 
-						<p:column>
-							<h:outputLabel for="frozenRevisionsDropDown"
-								value="#{msg['exerciseEdit.frozenVersion']}:" />
-						</p:column>
+                        <p:column>
+                            <h:outputLabel for="frozenRevisionsDropDown"
+                                           value="#{msg['exerciseEdit.frozenVersion']}:"/>
+                        </p:column>
 
-						<p:column>
-							<p:selectOneMenu id="frozenRevisionsDropDown"
-								value="#{courseEditView.selectedFrozenCourse}"
-								converter="frozenCourseConverter">
+                        <p:column>
+                            <p:selectOneMenu id="frozenRevisionsDropDown"
+                                             value="#{courseEditView.selectedFrozenCourse}"
+                                             converter="frozenCourseConverter">
 
-								<p:ajax listener="#{courseEditView.loadFrozenCourse}"
-									update="@form" />
+                                <p:ajax listener="#{courseEditView.loadFrozenCourse}"
+                                        update="@form"/>
 
-								<f:selectItem itemValue="#{null}"
-									itemLabel="#{msg['global.noneSelected']} " />
-								<f:selectItems id="referencedFrozenCourse"
-									value="#{courseEditView.availableFrozenCourses}" var="revision"
-									itemLabel="#{courseEditView.getRevisionIndexForRevisionId(revision.proxiedCourseRevisionId)}: #{revision.frozenTitle} (#{revision.name})"
-									itemValue="#{revision}" />
-							</p:selectOneMenu>
-						</p:column>
-					</p:row>
-                     <p:row rendered="#{!courseEditView.newestRevision}">
-                      <p:column id="path">
-                        <h:outputLabel for="path" value="#{msg['global.path']}:" />
-                      </p:column>
-                      <p:column>
-                        <h:outputText value="#{userSession.getPathAsString(courseEditView.course)}"/>
-                      </p:column>
+                                <f:selectItem itemValue="#{null}"
+                                              itemLabel="#{msg['global.noneSelected']} "/>
+                                <f:selectItems id="referencedFrozenCourse"
+                                               value="#{courseEditView.availableFrozenCourses}" var="revision"
+                                               itemLabel="#{courseEditView.getRevisionIndexForRevisionId(revision.proxiedCourseRevisionId)}: #{revision.frozenTitle} (#{revision.name})"
+                                               itemValue="#{revision}"/>
+                            </p:selectOneMenu>
+                        </p:column>
                     </p:row>
-					<!-- Titel -->
-					<p:row>
-						<p:column>
-							<h:outputLabel for="courseName" value="#{msg['courseEdit.titel']}" />
-						</p:column>
-						<p:column>
-							<p:inplace
-								id="courseName"
-								disabled="#{!courseEditView.newestRevision or courseEditView.readOnly}"
-								editor="true"
-								widgetVar="courseNameInput"
-                                class="inplaceIcon">
-								<p:ajax
-									event="save"
-									oncomplete="processChange()"
-									update="@this"
-									onstart="document.getElementById('courseEditMainForm:courseNameInputProgress').style.display = 'inline-block'"
-									onsuccess="document.getElementById('courseEditMainForm:courseNameInputProgress').style.display = 'none'" />
-								<p:inputText
-									id="courseNameInput"
-									value="#{courseEditView.course.name}"
-									validator="#{courseEditView.validateCourseName}"
-									onkeydown="onkeydownCourseName()">
-									<f:attribute name="oldValue" value="#{courseEditView.course.name}" />
-								</p:inputText>
-								<h:outputText id="courseNameInputProgress" styleClass="fas fa-circle-notch fa-spin" style="margin-left:5px;display:none;" />
-								<p:message for="courseNameInput" />
-								<script>
-									function onkeydownCourseName() {
-										if (event.keyCode === 27) {
-											PF('courseNameInput').cancel();
-											return false;
-										} else if (event.keyCode === 13) {
-											event.preventDefault();
-											PF('courseNameInput').save();
-											return false;
-										}
-									}
-								</script>
-							</p:inplace>
-						</p:column>
-					</p:row>
+                    <p:row rendered="#{!courseEditView.newestRevision}">
+                        <p:column id="path">
+                            <h:outputLabel for="path" value="#{msg['global.path']}:"/>
+                        </p:column>
+                        <p:column>
+                            <h:outputText value="#{userSession.getPathAsString(courseEditView.course)}"/>
+                        </p:column>
+                    </p:row>
+                    <!-- Titel -->
                     <p:row>
                         <p:column>
-                            <h:outputLabel for="courseId" value="#{msg['global.id']}" />
+                            <h:outputLabel for="courseName" value="#{msg['courseEdit.titel']}"/>
                         </p:column>
                         <p:column>
-                            <h:outputText id="courseId" value="#{courseEditView.course.id}" />
+                            <p:inplace
+                                    id="courseName"
+                                    disabled="#{!courseEditView.newestRevision or courseEditView.readOnly}"
+                                    editor="true"
+                                    widgetVar="courseNameInput"
+                                    class="inplaceIcon">
+                                <p:ajax
+                                        event="save"
+                                        oncomplete="processChange()"
+                                        update="@this"
+                                        onstart="document.getElementById('courseEditMainForm:courseNameInputProgress').style.display = 'inline-block'"
+                                        onsuccess="document.getElementById('courseEditMainForm:courseNameInputProgress').style.display = 'none'"/>
+                                <p:inputText
+                                        id="courseNameInput"
+                                        value="#{courseEditView.course.name}"
+                                        validator="#{courseEditView.validateCourseName}"
+                                        onkeydown="onkeydownCourseName()">
+                                    <f:attribute name="oldValue" value="#{courseEditView.course.name}"/>
+                                </p:inputText>
+                                <h:outputText id="courseNameInputProgress" styleClass="fas fa-circle-notch fa-spin"
+                                              style="margin-left:5px;display:none;"/>
+                                <p:message for="courseNameInput"/>
+                                <script>
+                                    function onkeydownCourseName() {
+                                        if (event.keyCode === 27) {
+                                            PF('courseNameInput').cancel();
+                                            return false;
+                                        } else if (event.keyCode === 13) {
+                                            event.preventDefault();
+                                            PF('courseNameInput').save();
+                                            return false;
+                                        }
+                                    }
+                                </script>
+                            </p:inplace>
                         </p:column>
                     </p:row>
-					<!-- Titel for frozen versions -->
-					<p:row rendered="#{courseEditView.frozen}">
-						<p:column>
-							<h:outputLabel for="titelFrozenVersion" value="#{msg['courseEdit.frozenTitle']}" />
-						</p:column>
-						<p:column>
-							<!-- We can ignore the warning here, this property is available in the
-							rendered="#{courseEditView.frozen}" case! -->
-							<p:inputText id="titelFrozenVersion"
-								value="#{courseEditView.course.frozenTitle}"
-                                disabled="#{courseEditView.readOnly}"/>
+                    <p:row>
+                        <p:column>
+                            <h:outputLabel for="courseId" value="#{msg['global.id']}"/>
+                        </p:column>
+                        <p:column>
+                            <h:outputText id="courseId" value="#{courseEditView.course.id}"/>
+                        </p:column>
+                    </p:row>
+                    <!-- Titel for frozen versions -->
+                    <p:row rendered="#{courseEditView.frozen}">
+                        <p:column>
+                            <h:outputLabel for="titelFrozenVersion" value="#{msg['courseEdit.frozenTitle']}"/>
+                        </p:column>
+                        <p:column>
+                            <!-- We can ignore the warning here, this property is available in the
+                            rendered="#{courseEditView.frozen}" case! -->
+                            <p:inputText id="titelFrozenVersion"
+                                         value="#{courseEditView.course.frozenTitle}"
+                                         disabled="#{courseEditView.readOnly}"/>
 
-							<p:commandButton value="#{msg['global.save']}" id="ajax"
-								action="#{courseEditView.saveFrozenRevision}"
-								style="margin-right:20px;" styleClass="ui-priority-primary"
-								icon="far fa-save fa-sm" update="globalGrowl pgSettings"
-                                disabled="#{courseEditView.readOnly}" />
-						</p:column>
+                            <p:commandButton value="#{msg['global.save']}" id="ajax"
+                                             action="#{courseEditView.saveFrozenRevision}"
+                                             style="margin-right:20px;" styleClass="ui-priority-primary"
+                                             icon="far fa-save fa-sm" update="globalGrowl pgSettings"
+                                             disabled="#{courseEditView.readOnly}"/>
+                        </p:column>
 
-					</p:row>
-					<p:row>
-						<p:column id="columnSettingsLanguage">
-							<h:outputLabel for="language"
-								value="#{msg['courseEdit.language']}" />
-						</p:column>
-						<p:column id="columnSettingsLanguageLabel">
-							<p:selectOneMenu id="language"
-								disabled="#{!courseEditView.newestRevision or courseEditView.readOnly}"
-								value="#{courseEditView.course.language}" editable="false"
-								onchange="processChange()">
-								<f:selectItems value="#{userSession.countriesInMap}" />
-							</p:selectOneMenu>
-						</p:column>
-					</p:row>
-					<!-- Subject -->
-					<p:row>
-						<p:column id="columnSettingsSubject">
-							<h:outputLabel for="subjectSelect"
-										   value="#{msg['courseEdit.subject']}" />
-						</p:column>
-						<p:column id="columnSettingsSubjectLabel">
-							<p:selectOneMenu id="subjectSelect"
-											 converter="subjectConverter"
-											 disabled="#{!courseEditView.newestRevision or courseEditView.readOnly}"
-											 value="#{courseEditView.course.subject}" editable="false"
-											 widgetVar="subjectSelection"
-											 onchange="processChange()">
-								<f:selectItem
-										id="selectNoSubject"
-										itemLabel="#{msg['courseEdit.noSubjectSelection']}"
-										itemValue="#{null}" />
-								<f:selectItems value="#{courseEditView.getSubjectBusiness().allSubjects}" />
-							</p:selectOneMenu>
-						</p:column>
-					</p:row>
+                    </p:row>
+                    <p:row>
+                        <p:column id="columnSettingsLanguage">
+                            <h:outputLabel for="language"
+                                           value="#{msg['courseEdit.language']}"/>
+                        </p:column>
+                        <p:column id="columnSettingsLanguageLabel">
+                            <p:selectOneMenu id="language"
+                                             disabled="#{!courseEditView.newestRevision or courseEditView.readOnly}"
+                                             value="#{courseEditView.course.language}" editable="false"
+                                             onchange="processChange()">
+                                <f:selectItems value="#{userSession.countriesInMap}"/>
+                            </p:selectOneMenu>
+                        </p:column>
+                    </p:row>
+                    <!-- Subject -->
+                    <p:row>
+                        <p:column id="columnSettingsSubject">
+                            <h:outputLabel for="subjectSelect"
+                                           value="#{msg['courseEdit.subject']}"/>
+                        </p:column>
+                        <p:column id="columnSettingsSubjectLabel">
+                            <p:selectOneMenu id="subjectSelect"
+                                             converter="subjectConverter"
+                                             disabled="#{!courseEditView.newestRevision or courseEditView.readOnly}"
+                                             value="#{courseEditView.course.subject}" editable="false"
+                                             widgetVar="subjectSelection"
+                                             onchange="processChange()">
+                                <f:selectItem
+                                        id="selectNoSubject"
+                                        itemLabel="#{msg['courseEdit.noSubjectSelection']}"
+                                        itemValue="#{null}"/>
+                                <f:selectItems value="#{courseEditView.getSubjectBusiness().allSubjects}"/>
+                            </p:selectOneMenu>
+                        </p:column>
+                    </p:row>
 
                     <!-- Internal description -->
                     <p:row>
-                       <p:column>
+                        <p:column>
                             <h:outputLabel for="inputInternalDescription"
-                                value="#{msg['courseEdit.internalDescription']}" />
-                       </p:column>
-                       <p:column>
+                                           value="#{msg['courseEdit.internalDescription']}"/>
+                        </p:column>
+                        <p:column>
                             <p:inputTextarea id="inputInternalDescription" rows="5" cols="50" style="width: 100%"
-                                value="#{courseEditView.course.internalDescription}"
-                                onkeydown="processChange()"
-                                disabled="#{!courseEditView.newestRevision or courseEditView.readOnly}" />
-                       </p:column>
+                                             value="#{courseEditView.course.internalDescription}"
+                                             onkeydown="processChange()"
+                                             disabled="#{!courseEditView.newestRevision or courseEditView.readOnly}"/>
+                        </p:column>
                     </p:row>
-					<!-- External description -->
-					<p:row>
-						<p:column>
-							<h:outputLabel for="publicDescription"
-								value="#{msg['courseEdit.publicDescription']}" />
-						</p:column>
-						<p:column>
-							<pe:ckEditor
-								id="publicDescription"
-								value="#{courseEditView.course.externalDescription}"
-								readonly="#{!courseEditView.newestRevision}"
-								widgetVar="publicDescriptionWidget"
-								width="100%"
-								height="150px"
-								language="#{msg['ckEditor.language']}"
-								advancedContentFilter="false"
-								toolbar="[['Bold','Italic','Underline','-','NumberedList','BulletedList','JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock','-','Table','Link','Unlink','HorizontalRule','-','TextColor','BGColor','RemoveFormat']]"
-								customConfig="#{resource['js/ckEditorConfig.js']}"
-								disabled="#{!courseEditView.newestRevision or courseEditView.readOnly}">
-                                <p:ajax event="dirty" oncomplete="processChange()" />
-							</pe:ckEditor>
-                    	</p:column>
-					</p:row>
-					<!-- Revisions -->
-					<p:row>
-						<p:column>
-							<h:outputLabel for="revisionen"
-								value="#{msg['courseEdit.Revision_ID']}" />
-						</p:column>
-						<p:column rendered="#{courseEditView.newestRevision}">
-							<h:panelGroup id="revisionen">
-								<!-- #{courseEditView.course.revisionId} -->
-								<p:commandLink id="rev" value="#{courseEditView.revisionCount}" />
+                    <!-- External description -->
+                    <p:row>
+                        <p:column>
+                            <h:outputLabel for="publicDescription"
+                                           value="#{msg['courseEdit.publicDescription']}"/>
+                        </p:column>
+                        <p:column>
+                            <pe:ckEditor
+                                    id="publicDescription"
+                                    value="#{courseEditView.course.externalDescription}"
+                                    readonly="#{!courseEditView.newestRevision}"
+                                    widgetVar="publicDescriptionWidget"
+                                    width="100%"
+                                    height="150px"
+                                    language="#{msg['ckEditor.language']}"
+                                    advancedContentFilter="false"
+                                    toolbar="[['Bold','Italic','Underline','-','NumberedList','BulletedList','JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock','-','Table','Link','Unlink','HorizontalRule','-','TextColor','BGColor','RemoveFormat']]"
+                                    customConfig="#{resource['js/ckEditorConfig.js']}"
+                                    disabled="#{!courseEditView.newestRevision or courseEditView.readOnly}">
+                                <p:ajax event="dirty" oncomplete="processChange()"/>
+                            </pe:ckEditor>
+                        </p:column>
+                    </p:row>
+                    <!-- Revisions -->
+                    <p:row>
+                        <p:column>
+                            <h:outputLabel for="revisionen"
+                                           value="#{msg['courseEdit.Revision_ID']}"/>
+                        </p:column>
+                        <p:column rendered="#{courseEditView.newestRevision}">
+                            <h:panelGroup id="revisionen">
+                                <!-- #{courseEditView.course.revisionId} -->
+                                <p:commandLink id="rev" value="#{courseEditView.revisionCount}"/>
 
-								<!-- Overlay with lazy loaded list of revisions of this course -->
-								<p:overlayPanel
-									id="revisionPanel"
-									for="rev"
-									hideEffect="fade"
-									styleClass="nopadding-panel"
-									style="width:600px;font-size:90%;"
-									dynamic="true"
-									my="center top">
-									<p:dataTable
-										id="dtRevisionList"
-										var="courseRev"
-										value="#{courseEditView.courseRevisionsLazyModel}"
-										rows="10"
-										paginator="true"
-										rowIndexVar="rowIndex"
-										lazy="true"
-										styleClass="ui-panelgrid-blank-datatable">
-										<f:facet name="header">#{msg['global.versions']}</f:facet>
-										<p:column
-											id="headerTextCourseEditRevision"
-											width="50"
-											headerText="#{msg['global.revision']}">
-											<h:outputText value="#{rowIndex}" />
-										</p:column>
+                                <!-- Overlay with lazy loaded list of revisions of this course -->
+                                <p:overlayPanel
+                                        id="revisionPanel"
+                                        for="rev"
+                                        hideEffect="fade"
+                                        styleClass="nopadding-panel"
+                                        style="width:600px;font-size:90%;"
+                                        dynamic="true"
+                                        my="center top">
+                                    <p:dataTable
+                                            id="dtRevisionList"
+                                            var="courseRev"
+                                            value="#{courseEditView.courseRevisionsLazyModel}"
+                                            rows="10"
+                                            paginator="true"
+                                            rowIndexVar="rowIndex"
+                                            lazy="true"
+                                            styleClass="ui-panelgrid-blank-datatable">
+                                        <f:facet name="header">#{msg['global.versions']}</f:facet>
+                                        <p:column
+                                                id="headerTextCourseEditRevision"
+                                                width="50"
+                                                headerText="#{msg['global.revision']}">
+                                            <h:outputText value="#{rowIndex}"/>
+                                        </p:column>
 
-										<p:column id="headerTextLastChangedBy"
-											headerText="#{msg['global.changedBy']}">
-											<h:outputText value="#{courseRev.updatedBy}" />
-										</p:column>
+                                        <p:column id="headerTextLastChangedBy"
+                                                  headerText="#{msg['global.changedBy']}">
+                                            <h:outputText value="#{courseRev.updatedBy}"/>
+                                        </p:column>
 
-										<p:column id="headerTextTimestamp"
-											headerText="#{msg['global.alterationTime']}">
-											<j:outputTimestamp value="#{courseRev.updateTimeStamp}"
-												converter="fullTimestampConverter" />
-										</p:column>
+                                        <p:column id="headerTextTimestamp"
+                                                  headerText="#{msg['global.alterationTime']}">
+                                            <j:outputTimestamp value="#{courseRev.updateTimeStamp}"
+                                                               converter="fullTimestampConverter"/>
+                                        </p:column>
 
-										<p:column id="courseEditShowRevision"
-											style="width:32px;text-align: center">
-											<p:commandButton id="cbSearchCourseRevision"
-												icon="fas fa-search"
-												styleClass="weaker-button button-white"
-												title="#{msg['global.view']}"
-												action="#{courseEditView.loadRevision(rowIndex)}"
-												update="courseEditMainForm"
-												rendered="#{not courseEditView.isRevisionCurrentRevision(rowIndex)}" />
-											<h:panelGroup rendered="#{courseEditView.isRevisionCurrentRevision(rowIndex)}" styleClass="fa-stack fa-sm" style="color:#555555;">
-												<h:outputText styleClass="fas fa-search fa-stack-1x" />
-												<h:outputText styleClass="fas fa-ban fa-inverse fa-stack-2x fa-rotate-90" title="#{msg['global.currentVersion']}" style="color:var(--ude-red);" />
-											</h:panelGroup>
-										</p:column>
+                                        <p:column id="courseEditShowRevision"
+                                                  style="width:32px;text-align: center">
+                                            <p:commandButton id="cbSearchCourseRevision"
+                                                             icon="fas fa-search"
+                                                             styleClass="weaker-button button-white"
+                                                             title="#{msg['global.view']}"
+                                                             action="#{courseEditView.loadRevision(rowIndex)}"
+                                                             update="courseEditMainForm"
+                                                             rendered="#{not courseEditView.isRevisionCurrentRevision(rowIndex)}"/>
+                                            <h:panelGroup
+                                                    rendered="#{courseEditView.isRevisionCurrentRevision(rowIndex)}"
+                                                    styleClass="fa-stack fa-sm" style="color:#555555;">
+                                                <h:outputText styleClass="fas fa-search fa-stack-1x"/>
+                                                <h:outputText
+                                                        styleClass="fas fa-ban fa-inverse fa-stack-2x fa-rotate-90"
+                                                        title="#{msg['global.currentVersion']}"
+                                                        style="color:var(--ude-red);"/>
+                                            </h:panelGroup>
+                                        </p:column>
 
-										<p:column id="courseEditfreezeRevision"
-											style="width:32px;text-align: center">
-											<p:commandButton id="cbfreezeRevision"
-												icon="fas fa-star"
-												styleClass="weaker-button button-white"
-												title="#{msg['global.freezeRevision']}"
-												action="#{courseEditView.freezeRevision(rowIndex)}"
-												onstart="PF('globalSpinner').show()"
-												oncomplete="PF('globalSpinner').hide()"
-												update="courseEditMainForm"
-												disabled="#{courseEditView.readOnly}"
-												rendered="#{not courseEditView.revisionIsFrozen(rowIndex)}" />
-											<h:outputText styleClass="fas fa-star" title="#{msg['exerciseEdit.frozenVersion']}" style="color:var(--ude-green);" rendered="#{courseEditView.revisionIsFrozen(rowIndex)}" />
-										</p:column>
-									</p:dataTable>
+                                        <p:column id="courseEditfreezeRevision"
+                                                  style="width:32px;text-align: center">
+                                            <p:commandButton id="cbfreezeRevision"
+                                                             icon="fas fa-star"
+                                                             styleClass="weaker-button button-white"
+                                                             title="#{msg['global.freezeRevision']}"
+                                                             action="#{courseEditView.freezeRevision(rowIndex)}"
+                                                             onstart="PF('globalSpinner').show()"
+                                                             oncomplete="PF('globalSpinner').hide()"
+                                                             update="courseEditMainForm"
+                                                             disabled="#{courseEditView.readOnly}"
+                                                             rendered="#{not courseEditView.revisionIsFrozen(rowIndex)}"/>
+                                            <h:outputText styleClass="fas fa-star"
+                                                          title="#{msg['exerciseEdit.frozenVersion']}"
+                                                          style="color:var(--ude-green);"
+                                                          rendered="#{courseEditView.revisionIsFrozen(rowIndex)}"/>
+                                        </p:column>
+                                    </p:dataTable>
 
-								</p:overlayPanel>
+                                </p:overlayPanel>
 
-							</h:panelGroup>
-						</p:column>
-					</p:row>
-					<p:row>
-						<p:column>
+                            </h:panelGroup>
+                        </p:column>
+                    </p:row>
+                    <p:row>
+                        <p:column>
 
-							<p:outputLabel id="labelCourseSettingsScoring"
-								for="courseSettingsScoringSelectOne"
-								value="#{msg['courseEdit.scoring']} " />
-						</p:column>
-						<p:column>
-							<p:selectOneMenu id="courseSettingsScoringSelectOne"
-								disabled="#{!courseEditView.newestRevision or courseEditView.readOnly}"
-								value="#{courseEditView.course.scoringMode}"
-								onchange="processChange()">
-								<f:selectItems id="selectedItemScoring"
-									value="#{courseEditView.scoringModes}" var="scoring"
-									itemLabel="#{msg['enum.ECourseScoring.' += scoring]}"
-									itemValue="#{scoring}" />
-							</p:selectOneMenu>
-						</p:column>
-					</p:row>
-				</p:panelGrid>
-			</p:panel>
-
-			<p:panel id="referencesToCompetencies"
-					 toggleable="true"
-					 header="#{msg['global.referencesToCompetencies']}">
-				<p:panelGrid id="pgReferencesToCompetencies" cellpadding="5"
-							 styleClass="ui-panelgrid-blank" style="width:100%;">
-
-				</p:panelGrid>
-			</p:panel>
+                            <p:outputLabel id="labelCourseSettingsScoring"
+                                           for="courseSettingsScoringSelectOne"
+                                           value="#{msg['courseEdit.scoring']} "/>
+                        </p:column>
+                        <p:column>
+                            <p:selectOneMenu id="courseSettingsScoringSelectOne"
+                                             disabled="#{!courseEditView.newestRevision or courseEditView.readOnly}"
+                                             value="#{courseEditView.course.scoringMode}"
+                                             onchange="processChange()">
+                                <f:selectItems id="selectedItemScoring"
+                                               value="#{courseEditView.scoringModes}" var="scoring"
+                                               itemLabel="#{msg['enum.ECourseScoring.' += scoring]}"
+                                               itemValue="#{scoring}"/>
+                            </p:selectOneMenu>
+                        </p:column>
+                    </p:row>
+                </p:panelGrid>
+            </p:panel>
 
 
-			<p:panel id="courseExercisesPanel"
-				header="#{msg['courseEdit.courseExercises']}" toggleable="true">
+            <p:panel id="referencesToCompetencies"
+                     toggleable="true"
+                     header="#{msg['global.competenceGoals']}">
 
-        <!-- Legend for symbols -->
-        <p:commandButton
-          id="providerSymbolsLegendButton"
-          value="#{msg['global.legend']}"
-          type="button"
-          icon="fas fa-question-circle"
-          style="float:right;"
-          styleClass="button-white weaker-button" />
-        <p:overlayPanel
-          id="providerSymbolsLegend"
-          for="providerSymbolsLegendButton"
-          my="right bottom">
-          <p:panelGrid
-            columns="2"
-            styleClass="ui-panelgrid-blank symbol-legend-panel">
-            <h:outputText styleClass="fas fa-trash fa-sm" />
-            <h:outputText value="#{msg['courseEditProvider.symbols.meanwhileDeleted']}" />
-            <h:outputText styleClass="far fa-star fa-sm" />
-            <h:outputText value="#{msg['courseEditProvider.symbols.frozenAvailable']}" />
-            <h:outputText styleClass="fas fa-star fa-sm" />
-            <h:outputText value="#{msg['courseEditProvider.symbols.frozenSelected']}" />
-            <h:outputText styleClass="fas fa-times-circle fa-sm" />
-            <h:outputText value="#{msg['courseEditProvider.symbols.noRights']}" />
-          </p:panelGrid>
-        </p:overlayPanel>
+                <!--                <p:panelGrid-->
+                <!--                        id="pgReferencesToCompetencies"-->
+                <!--                        cellpadding="5"-->
+                <!--                        styleClass="ui-panelgrid-blank" style="width:100%;">-->
 
-        <p:panelGrid
-          id="providerSettings"
-          columns="3"
-          styleClass="ui-panelgrid-blank">
+                <!-- List of CompetenceGoals  -->
+                <!--                    <p:row>-->
+                <!--                        <p:column>-->
+                <p:dataTable
+                        id="competenceGoals"
+                        var="competenceGoal"
+                        value="#{courseEditView.competenceGoals}"
+                        paginator="true"
+                        lazy="true"
+                        rows="20"
+                        tableStyle="white-space: nowrap; overflow: hidden; table-layout: auto;">
 
-          <!-- Provider modus -->
-          <p:outputLabel
-            for="contentSelection"
-            value="#{msg['courseEdit.providerModus']}:" />
-          <p:selectOneMenu
-            id="contentSelection"
-            onchange="onChangeContentType()"
-            disabled="#{!courseEditView.newestRevision or courseEditView.readOnly}"
-            value="#{courseEditView.contentType}"
-            widgetVar="contentTypes"
-            style="width:100%;">
-            <f:selectItem
-              itemLabel="#{msg['courseEdit.contentSelection.noSelection']}"
-              itemValue="#{null}"
-              noSelectionOption="true"
-              itemDisabled="#{not empty courseEditView.contentType}" />
-            <f:selectItems
-              value="#{courseEditView.contentTypes}"
-              var="courseExercisesSelectOne"
-              itemLabel="#{msg['enum.ECourseContentType.' += courseExercisesSelectOne]}"
-              itemValue="#{courseExercisesSelectOne}" />
-            <p:ajax
-              update="@this exerciseOrderSelection contentSelectionTooltipPanel exerciseOrderSelectionTooltipPanel exerciseProviderPanel" />
-          </p:selectOneMenu>
-          <h:panelGroup id="contentSelectionTooltipPanel">
-            <j:helperTooltip
-              id="contentSelectionTooltip"
-              tooltip="#{msg['enum.ECourseContentType.' += courseEditView.contentType += '.hint']}"
-              rendered="#{not empty courseEditView.contentType}"
-              style="margin-left:1em;" />
-          </h:panelGroup>
+                    <p:column headerText="#{msg['global.subcompetence']}" style="white-space:pre-line">
+                        <h:outputText
+                                id="subcompetenceName"
+                                value="#{competenceGoal.competence.name}"
+                                style="width:calc(100% - 10px)"/>
+                        <h:outputText
+                                id="dimension"
+                                value="#{competenceGoal.competence.competenceDimension}"
+                                style="width:calc(100% - 10px); font-size: 0.5rem;color: #555555"/>
+                    </p:column>
 
-          <!-- Exercise order -->
-          <p:outputLabel
-            for="exerciseOrderSelection"
-            value="#{msg['courseEdit.exercisesSortBy']}:" />
-          <p:selectOneMenu
-            id="exerciseOrderSelection"
-            disabled="#{!courseEditView.newestRevision or courseEditView.readOnly or empty courseEditView.course.contentProvider}"
-            value="#{courseEditView.course.exerciseOrder}"
-            onchange="processChange()"
-            style="width:100%;">
-            <f:selectItems
-              value="#{courseEditView.exerciseOrder}"
-              var="order"
-              itemDisabled="#{not courseEditView.course.contentProvider.isExerciseOrderSupported(order)}"
-              itemLabel="#{msg['enum.ECourseExerciseOrder.' += order]}"
-              itemValue="#{order}" />
-            <p:ajax
-              process="@this exerciseProviderPanel"
-              update="@this exerciseProviderPanel exerciseOrderSelectionTooltipPanel" />
-          </p:selectOneMenu>
-          <h:panelGroup id="exerciseOrderSelectionTooltipPanel">
-            <j:helperTooltip
-              id="exerciseOrderSelectionTooltip"
-              tooltip="#{msg['enum.ECourseExerciseOrder.' += courseEditView.course.exerciseOrder += '.hint']}"
-              rendered="#{courseEditView.showOrderHint}"
-              style="margin-left:1em;" />
-          </h:panelGroup>
-        </p:panelGrid>
+                    <!--                                <p:column headerText="#{msg['global.competence']}" filterable="true">-->
+                    <!--                                    <h:outputText-->
+                    <!--                                            id="competenceName"-->
+                    <!--                                            value="#{competenceGoal.competence.parentCompetence.name}"-->
+                    <!--                                            style="width:calc(100% - 10px)"/>-->
+                    <!--                                </p:column>-->
 
-        <p:outputPanel id="exerciseProviderPanel">
-					<p:outputPanel id="panelFixedAllocation"
-						rendered="#{courseEditView.fixedAllocation}">
-						<ui:include src="/WEB-INF/includes/courseEdit/fixedAllocation.xhtml" />
-					</p:outputPanel>
-					<p:outputPanel id="panelChooseFolder"
-						rendered="#{courseEditView.chooseFolder}">
-						<ui:include src="/WEB-INF/includes/courseEdit/chooseFolder.xhtml" />
-					</p:outputPanel>
-				</p:outputPanel>
+<!--                    <p:column headerText="#{msg['global.dimension']}" filterable="true">-->
+<!--                        <h:outputText-->
+<!--                                id="dimension"-->
+<!--                                value="#{competenceGoal.competence.competenceDimension}"-->
+<!--                                style="width:calc(100% - 10px)"/>-->
+<!--                    </p:column>-->
 
-				<p:confirmDialog id="confirmDialog" widgetVar="confirmContentType"
-					message="#{msg['courseEdit.changeContentProviderAlert']}"
-					header="#{msg['courseEdit.changeContentProviderWarn']}"
-					severity="alert">
-					<p:commandButton id="cbConfirmYes" value="#{msg['global.yes']}"
-						update="contentSelection"
-						oncomplete="PF('confirmContentType').hide();processChange()">
-						<p:ajax listener="#{courseEditView.onContentChange}"
-							update="exerciseProviderPanel exerciseOrderSelection"
-							onstart="PF('globalSpinner').show()"
-							oncomplete="PF('globalSpinner').hide()" />
-					</p:commandButton>
-					<p:commandButton id="cbConfirmNo" value="#{msg['global.no']}"
-						type="button" onclick="resetContentType()"
-						update="exerciseProviderPanel exerciseOrderSelection" onstart="PF('globalSpinner').show()"
-						oncomplete="PF('globalSpinner').hide()" />
-				</p:confirmDialog>
+                    <p:column headerText="#{msg['global.level']}" width="55">
+                        <p:spinner
+                                id="level"
+                                value="#{competenceGoal.level}"
+                                min="1"
+                                max="5"
+                                style="width:calc(100% - 10px)"/>
+                    </p:column>
 
-				<!-- Update routines for provider panel -->
-				<p:remoteCommand name="updateExerciseProviderPanel"
-					update="exerciseProviderPanel exerciseOrderSelection"
-					actionListener="#{courseEditView.onContentChange}"
-					onstart="PF('globalSpinner').show()"
-					oncomplete="PF('globalSpinner').hide()" />
-				<script>
-					// Don't show confirm dialog if the current selection is empty
-					function onChangeContentType() {
-						if (PF('contentTypes').preShowValue.val() != '') {
-							PF('confirmContentType').show()
-						} else {
-							updateExerciseProviderPanel()
-							processChange()
-						}
-					}
+                    <p:column headerText="#{msg['global.intensity']}" width="110">
+                        <p:inputText id="intensity"
+                                     value="#{competenceGoal.intensity}"
+                                     style="width:calc(100% - 10px)"/>
+                        <p:slider for="intensity" range="min"/>
+                    </p:column>
 
-					// Reset the content type
-					function resetContentType() {
-						PF('contentTypes').selectValue(
-								PF('contentTypes').preShowValue.val())
-						PF('confirmContentType').hide()
-					}
-				</script>
-			</p:panel>
+                    <p:column
+                            id="actionsCompetenceGoal"
+                            headerText="#{msg['global.actions']}"
+                            width="100"
+                            style="text-align:center;">
+                        <div
+                                class="ui-inputgroup"
+                                style="justify-content: center;">
+                            <p:commandButton
+                                    id="updateCompetenceGoal"
+                                    title="#{msg['global.save']}"
+                                    icon="far fa-save"
+                                    action="#{courseEditView.updateCompetenceGoal(competenceGoal)}"
+                                    update="globalGrowl competenceGoals"/>
+                            <p:commandButton
+                                    id="deleteCompetenceGoal"
+                                    title="#{msg['global.delete']}"
+                                    icon="fas fa-trash"
+                                    action="#{courseEditView.removeCompetenceGoal(competenceGoal)}"
+                                    update="globalGrowl :courseEditMainForm:competenceGoals
+                                                        :courseEditMainForm:competenciesNotAllocated"/>
+                        </div>
+                    </p:column>
+                </p:dataTable>
+                <!--                        </p:column>-->
+                <!--                    </p:row>-->
+                <!--                    <p:row>-->
+                <!--                        <p:column>-->
+                <!-- Add new competenceGoal -->
+                <p:panel
+                        id="createNewCompetenceGoal"
+                        style="margin-top: 1rem"
+                        toggleable="true"
+                        collapsed="true"
+                        header="#{msg['tenantadmin.addNewCompetenceGoal']}">
+                    <!--                                <h:panelGroup-->
+                    <!--                                        styleClass="jack-input-group"-->
+                    <!--                                        layout="block">-->
+                    <p:dataTable
+                            id="competenciesNotAllocated"
+                            var="competence"
+                            value="#{courseEditView.competenciesNotAllocated}"
+                            paginator="true"
+                            lazy="true"
+                            rows="10"
+                            tableStyle="white-space: nowrap; overflow: hidden; table-layout: auto;">
 
-			<p:panel id="courseResourcePanel"
-				header="#{msg['courseEdit.courseResources']}" toggleable="true">
+                        <p:column headerText="#{msg['global.subcompetence']}">
+                            <h:outputText
+                                    id="newSubcompetenceName"
+                                    value="#{competence.name}"
+                                    style="width:calc(100% - 10px)"/>
+                        </p:column>
 
-				<p:fileUpload id="uiFileUpload" mode="advanced" auto="true"
-					disabled="#{!courseEditView.newestRevision or courseEditView.readOnly}" dragDropSupport="true"
-					multiple="true" oncomplete="processChange()"
-					listener="#{courseEditView.handleFileUpload}"
-					update="courseResources globalGrowl"
-					label="#{msg['global.upload']}" sizeLimit="10485760"
-					invalidSizeMessage="#{msg['courseEdit.fileSizeLimitExceeded']} 10MB:" />
+                        <!--                                        <p:column headerText="#{msg['global.competence']}" filterable="true">-->
+                        <!--                                            <h:outputText-->
+                        <!--                                                    id="newCompetenceName"-->
+                        <!--                                                    value="#{competence.parentCompetence.name}"-->
+                        <!--                                                    style="width:calc(100% - 10px)"/>-->
+                        <!--                                        </p:column>-->
 
-				<p:dataTable id="courseResources"
-					widgetVar="courseResources"
-					value="#{courseEditView.sortedResources}"
-					filteredValue="#{courseEditView.filteredResources}"
-					var="courseResourceElem"
-					emptyMessage="#{msg['courseEdit.tableEmptyMsg']}">
+                        <!--                                        <p:column headerText="#{msg['global.dimension']}" filterable="true">-->
+                        <!--                                            <h:outputText-->
+                        <!--                                                    id="newDimension"-->
+                        <!--                                                    value="#{competence.competenceDimension}"-->
+                        <!--                                                    style="width:calc(100% - 10px)"/>-->
+                        <!--                                        </p:column>-->
+
+                        <p:column
+                                id="newActionsCompetenceGoal"
+                                headerText="#{msg['global.actions']}"
+                                width="50"
+                                style="text-align:center;">
+                            <div
+                                    class="ui-inputgroup"
+                                    style="justify-content: center;">
+                                <p:commandButton
+                                        id="addCompetenceGoal"
+                                        title="#{msg['global.save']}"
+                                        icon="fas fa-plus"
+                                        action="#{courseEditView.addCompetenceGoal(competence)}"
+                                        update="globalGrowl :courseEditMainForm:competenceGoals
+                                                        :courseEditMainForm:competenciesNotAllocated"/>
+                            </div>
+                        </p:column>
+                    </p:dataTable>
+                    <!--                                </h:panelGroup>-->
+                </p:panel>
+                <!--                        </p:column>-->
+                <!--                    </p:row>-->
+                <!--                </p:panelGrid>-->
+            </p:panel>
+
+            <p:panel id="courseExercisesPanel"
+                     toggleable="true"
+                     header="#{msg['courseEdit.courseExercises']}">
+
+                <!-- Legend for symbols -->
+                <p:commandButton
+                        id="providerSymbolsLegendButton"
+                        value="#{msg['global.legend']}"
+                        type="button"
+                        icon="fas fa-question-circle"
+                        style="float:right;"
+                        styleClass="button-white weaker-button"/>
+                <p:overlayPanel
+                        id="providerSymbolsLegend"
+                        for="providerSymbolsLegendButton"
+                        my="right bottom">
+                    <p:panelGrid
+                            columns="2"
+                            styleClass="ui-panelgrid-blank symbol-legend-panel">
+                        <h:outputText styleClass="fas fa-trash fa-sm"/>
+                        <h:outputText value="#{msg['courseEditProvider.symbols.meanwhileDeleted']}"/>
+                        <h:outputText styleClass="far fa-star fa-sm"/>
+                        <h:outputText value="#{msg['courseEditProvider.symbols.frozenAvailable']}"/>
+                        <h:outputText styleClass="fas fa-star fa-sm"/>
+                        <h:outputText value="#{msg['courseEditProvider.symbols.frozenSelected']}"/>
+                        <h:outputText styleClass="fas fa-times-circle fa-sm"/>
+                        <h:outputText value="#{msg['courseEditProvider.symbols.noRights']}"/>
+                    </p:panelGrid>
+                </p:overlayPanel>
+
+                <p:panelGrid
+                        id="providerSettings"
+                        columns="3"
+                        styleClass="ui-panelgrid-blank">
+
+                    <!-- Provider modus -->
+                    <p:outputLabel
+                            for="contentSelection"
+                            value="#{msg['courseEdit.providerModus']}:"/>
+                    <p:selectOneMenu
+                            id="contentSelection"
+                            onchange="onChangeContentType()"
+                            disabled="#{!courseEditView.newestRevision or courseEditView.readOnly}"
+                            value="#{courseEditView.contentType}"
+                            widgetVar="contentTypes"
+                            style="width:100%;">
+                        <f:selectItem
+                                itemLabel="#{msg['courseEdit.contentSelection.noSelection']}"
+                                itemValue="#{null}"
+                                noSelectionOption="true"
+                                itemDisabled="#{not empty courseEditView.contentType}"/>
+                        <f:selectItems
+                                value="#{courseEditView.contentTypes}"
+                                var="courseExercisesSelectOne"
+                                itemLabel="#{msg['enum.ECourseContentType.' += courseExercisesSelectOne]}"
+                                itemValue="#{courseExercisesSelectOne}"/>
+                        <p:ajax
+                                update="@this exerciseOrderSelection contentSelectionTooltipPanel exerciseOrderSelectionTooltipPanel exerciseProviderPanel"/>
+                    </p:selectOneMenu>
+                    <h:panelGroup id="contentSelectionTooltipPanel">
+                        <j:helperTooltip
+                                id="contentSelectionTooltip"
+                                tooltip="#{msg['enum.ECourseContentType.' += courseEditView.contentType += '.hint']}"
+                                rendered="#{not empty courseEditView.contentType}"
+                                style="margin-left:1em;"/>
+                    </h:panelGroup>
+
+                    <!-- Exercise order -->
+                    <p:outputLabel
+                            for="exerciseOrderSelection"
+                            value="#{msg['courseEdit.exercisesSortBy']}:"/>
+                    <p:selectOneMenu
+                            id="exerciseOrderSelection"
+                            disabled="#{!courseEditView.newestRevision or courseEditView.readOnly or empty courseEditView.course.contentProvider}"
+                            value="#{courseEditView.course.exerciseOrder}"
+                            onchange="processChange()"
+                            style="width:100%;">
+                        <f:selectItems
+                                value="#{courseEditView.exerciseOrder}"
+                                var="order"
+                                itemDisabled="#{not courseEditView.course.contentProvider.isExerciseOrderSupported(order)}"
+                                itemLabel="#{msg['enum.ECourseExerciseOrder.' += order]}"
+                                itemValue="#{order}"/>
+                        <p:ajax
+                                process="@this exerciseProviderPanel"
+                                update="@this exerciseProviderPanel exerciseOrderSelectionTooltipPanel"/>
+                    </p:selectOneMenu>
+                    <h:panelGroup id="exerciseOrderSelectionTooltipPanel">
+                        <j:helperTooltip
+                                id="exerciseOrderSelectionTooltip"
+                                tooltip="#{msg['enum.ECourseExerciseOrder.' += courseEditView.course.exerciseOrder += '.hint']}"
+                                rendered="#{courseEditView.showOrderHint}"
+                                style="margin-left:1em;"/>
+                    </h:panelGroup>
+                </p:panelGrid>
+
+                <p:outputPanel id="exerciseProviderPanel">
+                    <p:outputPanel id="panelFixedAllocation"
+                                   rendered="#{courseEditView.fixedAllocation}">
+                        <ui:include src="/WEB-INF/includes/courseEdit/fixedAllocation.xhtml"/>
+                    </p:outputPanel>
+                    <p:outputPanel id="panelChooseFolder"
+                                   rendered="#{courseEditView.chooseFolder}">
+                        <ui:include src="/WEB-INF/includes/courseEdit/chooseFolder.xhtml"/>
+                    </p:outputPanel>
+                </p:outputPanel>
+
+                <p:confirmDialog id="confirmDialog" widgetVar="confirmContentType"
+                                 message="#{msg['courseEdit.changeContentProviderAlert']}"
+                                 header="#{msg['courseEdit.changeContentProviderWarn']}"
+                                 severity="alert">
+                    <p:commandButton id="cbConfirmYes" value="#{msg['global.yes']}"
+                                     update="contentSelection"
+                                     oncomplete="PF('confirmContentType').hide();processChange()">
+                        <p:ajax listener="#{courseEditView.onContentChange}"
+                                update="exerciseProviderPanel exerciseOrderSelection"
+                                onstart="PF('globalSpinner').show()"
+                                oncomplete="PF('globalSpinner').hide()"/>
+                    </p:commandButton>
+                    <p:commandButton id="cbConfirmNo" value="#{msg['global.no']}"
+                                     type="button" onclick="resetContentType()"
+                                     update="exerciseProviderPanel exerciseOrderSelection"
+                                     onstart="PF('globalSpinner').show()"
+                                     oncomplete="PF('globalSpinner').hide()"/>
+                </p:confirmDialog>
+
+                <!-- Update routines for provider panel -->
+                <p:remoteCommand name="updateExerciseProviderPanel"
+                                 update="exerciseProviderPanel exerciseOrderSelection"
+                                 actionListener="#{courseEditView.onContentChange}"
+                                 onstart="PF('globalSpinner').show()"
+                                 oncomplete="PF('globalSpinner').hide()"/>
+                <script>
+                    // Don't show confirm dialog if the current selection is empty
+                    function onChangeContentType() {
+                        if (PF('contentTypes').preShowValue.val() != '') {
+                            PF('confirmContentType').show()
+                        } else {
+                            updateExerciseProviderPanel()
+                            processChange()
+                        }
+                    }
+
+                    // Reset the content type
+                    function resetContentType() {
+                        PF('contentTypes').selectValue(
+                            PF('contentTypes').preShowValue.val())
+                        PF('confirmContentType').hide()
+                    }
+                </script>
+            </p:panel>
+
+            <p:panel id="courseResourcePanel"
+                     header="#{msg['courseEdit.courseResources']}" toggleable="true">
+
+                <p:fileUpload id="uiFileUpload" mode="advanced" auto="true"
+                              disabled="#{!courseEditView.newestRevision or courseEditView.readOnly}"
+                              dragDropSupport="true"
+                              multiple="true" oncomplete="processChange()"
+                              listener="#{courseEditView.handleFileUpload}"
+                              update="courseResources globalGrowl"
+                              label="#{msg['global.upload']}" sizeLimit="10485760"
+                              invalidSizeMessage="#{msg['courseEdit.fileSizeLimitExceeded']} 10MB:"/>
+
+                <p:dataTable id="courseResources"
+                             widgetVar="courseResources"
+                             value="#{courseEditView.sortedResources}"
+                             filteredValue="#{courseEditView.filteredResources}"
+                             var="courseResourceElem"
+                             emptyMessage="#{msg['courseEdit.tableEmptyMsg']}">
 
                     <p:column id="columnCourseResourceElement"
-                      headerText="#{msg['global.file']}" width="200"
-                      sortBy="#{courseResourceElem}"
-                      filterBy="#{courseResourceElem.filename}"
-                      filterMatchMode="contains">
-                      <p:inplace id="linkCourseResourceElement" editor="true" class="inplaceIcon">
-                        <f:facet id="facetOutputCourseResourceName" name="output">
-                          <h:outputText value="#{courseResourceElem.filename}"/>
-                        </f:facet>
-                        <f:facet id="facetInputCourseResourceName" name="input">
-                        <p:ajax event="cancel" resetValues="true" update="@this"/>
-                        <p:ajax
-                          event="save"
-                          oncomplete="processChange()"
-                          update="@this"/>
-                          <p:inputText id="inputFileName"
-                            value="#{courseResourceElem.filename}" maxlength="255"
-                            onchange="processChange()"
-                            disabled="#{!courseEditView.newestRevision}"
-                            style="width:95%"
-                            validator="#{courseEditView.validateCourseResourceName}"
-                            update="courseResources globalGrowl"
-                            onkeypress="return event.keyCode != 13">
-                            <f:attribute name="oldValue" value="#{courseResourceElem.filename}" />
-                          </p:inputText>
-                        </f:facet>
-                      </p:inplace>
+                              headerText="#{msg['global.file']}" width="200"
+                              sortBy="#{courseResourceElem}"
+                              filterBy="#{courseResourceElem.filename}"
+                              filterMatchMode="contains">
+                        <p:inplace id="linkCourseResourceElement" editor="true" class="inplaceIcon">
+                            <f:facet id="facetOutputCourseResourceName" name="output">
+                                <h:outputText value="#{courseResourceElem.filename}"/>
+                            </f:facet>
+                            <f:facet id="facetInputCourseResourceName" name="input">
+                                <p:ajax event="cancel" resetValues="true" update="@this"/>
+                                <p:ajax
+                                        event="save"
+                                        oncomplete="processChange()"
+                                        update="@this"/>
+                                <p:inputText id="inputFileName"
+                                             value="#{courseResourceElem.filename}" maxlength="255"
+                                             onchange="processChange()"
+                                             disabled="#{!courseEditView.newestRevision}"
+                                             style="width:95%"
+                                             validator="#{courseEditView.validateCourseResourceName}"
+                                             update="courseResources globalGrowl"
+                                             onkeypress="return event.keyCode != 13">
+                                    <f:attribute name="oldValue" value="#{courseResourceElem.filename}"/>
+                                </p:inputText>
+                            </f:facet>
+                        </p:inplace>
                     </p:column>
                     <p:column id="columnDescription"
-                      headerText="#{msg['global.description']}">
-                      <p:inplace id="editorDescription" editor="true" class="inplaceIcon">
-                        <f:facet id="facetOutputDescription" name="output">
-                          <h:outputText value="#{courseResourceElem.description}"
-                            rendered="#{courseResourceElem.description!=null and courseResourceElem.description!=''}" />
-                          <h:outputText value="#{msg['exerciseEdit.noFileDescription']}"
-                            style="font-style:italic;font-size:smaller"
-                            rendered="#{courseResourceElem.description==null or courseResourceElem.description==''}" />
-                        </f:facet>
-                        <f:facet id="facetInputDescription" name="input">
-                          <p:inputText id="inputFileDescription"
-                            value="#{courseResourceElem.description}" maxlength="255"
-                            onchange="processChange()"
-                            disabled="#{!courseEditView.newestRevision}"
-                            onkeypress="return event.keyCode != 13" style="width:95%"
-                            update="courseResources" />
-                        </f:facet>
-                      </p:inplace>
+                              headerText="#{msg['global.description']}">
+                        <p:inplace id="editorDescription" editor="true" class="inplaceIcon">
+                            <f:facet id="facetOutputDescription" name="output">
+                                <h:outputText value="#{courseResourceElem.description}"
+                                              rendered="#{courseResourceElem.description!=null and courseResourceElem.description!=''}"/>
+                                <h:outputText value="#{msg['exerciseEdit.noFileDescription']}"
+                                              style="font-style:italic;font-size:smaller"
+                                              rendered="#{courseResourceElem.description==null or courseResourceElem.description==''}"/>
+                            </f:facet>
+                            <f:facet id="facetInputDescription" name="input">
+                                <p:inputText id="inputFileDescription"
+                                             value="#{courseResourceElem.description}" maxlength="255"
+                                             onchange="processChange()"
+                                             disabled="#{!courseEditView.newestRevision}"
+                                             onkeypress="return event.keyCode != 13" style="width:95%"
+                                             update="courseResources"/>
+                            </f:facet>
+                        </p:inplace>
                     </p:column>
                     <p:column id="columnUploadTimestamp" style="width:200px;"
-                      sortBy="#{courseResourceElem.uploadTimestamp}"
-                      headerText="#{msg['global.uploadTimestamp']}">
-                      <j:outputTimestamp value="#{courseResourceElem.uploadTimestamp}"
-                        converter="shortTimestampConverter" />
+                              sortBy="#{courseResourceElem.uploadTimestamp}"
+                              headerText="#{msg['global.uploadTimestamp']}">
+                        <j:outputTimestamp value="#{courseResourceElem.uploadTimestamp}"
+                                           converter="shortTimestampConverter"/>
                     </p:column>
-					<p:column id="columnLastChangedBy" style="width:175px;"
-						sortBy="#{courseResourceElem.lastEditor}"
-						headerText="#{msg['global.fileUploadedByUser']}">
-						<h:outputText value="#{courseResourceElem.lastEditor.loginName}" />
-					</p:column>
-                   <p:column id="columnActions" style="width:80px;text-align:center">
-                      <p:commandButton id="cbRemoveResource"
-                        update="courseResources" icon="fa fa-trash-o"
-                        disabled="#{!courseEditView.newestRevision or courseEditView.readOnly}"
-                        actionListener="#{courseEditView.removeCourseResource(courseResourceElem)}"
-                        title="#{msg['global.remove']}" oncomplete="processChange()" />
-                      <p:commandButton id="cbDownloadResource" icon="fa fa-download"
-                        ajax="false" title="#{msg['global.download']}">
-                        <p:fileDownload
-                          value="#{courseEditView.getCourseResource(courseResourceElem)}" />
-                      </p:commandButton>
+                    <p:column id="columnLastChangedBy" style="width:175px;"
+                              sortBy="#{courseResourceElem.lastEditor}"
+                              headerText="#{msg['global.fileUploadedByUser']}">
+                        <h:outputText value="#{courseResourceElem.lastEditor.loginName}"/>
                     </p:column>
-				</p:dataTable>
-			</p:panel>
+                    <p:column id="columnActions" style="width:80px;text-align:center">
+                        <p:commandButton id="cbRemoveResource"
+                                         update="courseResources" icon="fa fa-trash-o"
+                                         disabled="#{!courseEditView.newestRevision or courseEditView.readOnly}"
+                                         actionListener="#{courseEditView.removeCourseResource(courseResourceElem)}"
+                                         title="#{msg['global.remove']}" oncomplete="processChange()"/>
+                        <p:commandButton id="cbDownloadResource" icon="fa fa-download"
+                                         ajax="false" title="#{msg['global.download']}">
+                            <p:fileDownload
+                                    value="#{courseEditView.getCourseResource(courseResourceElem)}"/>
+                        </p:commandButton>
+                    </p:column>
+                </p:dataTable>
+            </p:panel>
 
-			<p:panel id="courseFeedbackPanel"
-				header="#{msg['courseEdit.courseFeedback']}" toggleable="true">
-				<p:dataTable id="courseFeedback"
-					value="#{courseEditView.resultFeedbackMappings}"
-					var="resultFeedbackMapping"
-					emptyMessage="#{msg['courseEdit.tableEmptyMsg']}">
+            <p:panel id="courseFeedbackPanel"
+                     header="#{msg['courseEdit.courseFeedback']}" toggleable="true">
+                <p:dataTable id="courseFeedback"
+                             value="#{courseEditView.resultFeedbackMappings}"
+                             var="resultFeedbackMapping"
+                             emptyMessage="#{msg['courseEdit.tableEmptyMsg']}">
 
-					<p:column id="columnFeedbackText"
-						headerText="#{msg['courseEdit.courseFeedback.text']}">
-						<p:panelGrid id="feedbackSettingsPanel" style="margin-bottom:10px;width:100%;display:grid" columns="4" styleClass="ui-panelgrid-blank">
-							<p:outputLabel for="inputFeedbackTitle"
-								value="#{msg['courseEdit.courseFeedback.title']}: " />
-							<p:inputText id="inputFeedbackTitle"
-								disabled="#{!courseEditView.newestRevision or courseEditView.readOnly}"
-								onchange="processChange()"
-								onkeydown="checkUserInputForActivationOfSaveButton()"
-								value="#{resultFeedbackMapping.title}" />
-							<h:outputLabel
-								for="inputFeedbackExpression"
-								value="#{msg['courseEdit.courseFeedback.condition']}: "/>
-							<p:inputText
-								id="inputFeedbackExpression"
-								disabled="#{!courseEditView.newestRevision or courseEditView.readOnly}"
-								onchange="processChange()"
-								onkeydown="checkUserInputForActivationOfSaveButton()"
-								value="#{resultFeedbackMapping.expression}"
-								style="width:300px" />
-						</p:panelGrid>
-						<pe:ckEditor
-							id="inputFeedbackText"
-							value="#{resultFeedbackMapping.text}"
-							readonly="#{!courseEditView.newestRevision or courseEditView.readOnly}"
-							widgetVar="inputFeedbackTextWidget_#{resultFeedbackMapping.id}"
-							width="100%"
-							height="150px"
-							language="#{msg['ckEditor.language']}"
-							advancedContentFilter="false"
-							toolbar="[['Bold','Italic','Underline','-','NumberedList','BulletedList','JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock','-','Table','Link','Unlink','HorizontalRule','-','TextColor','BGColor','RemoveFormat']]"
-							customConfig="#{resource['js/ckEditorConfig.js']}"
-                            disabled="courseEditView.readOnly">
-							<p:ajax event="dirty" oncomplete="processChange()" />
-						</pe:ckEditor>
-					</p:column>
+                    <p:column id="columnFeedbackText"
+                              headerText="#{msg['courseEdit.courseFeedback.text']}">
+                        <p:panelGrid id="feedbackSettingsPanel" style="margin-bottom:10px;width:100%;display:grid"
+                                     columns="4" styleClass="ui-panelgrid-blank">
+                            <p:outputLabel for="inputFeedbackTitle"
+                                           value="#{msg['courseEdit.courseFeedback.title']}: "/>
+                            <p:inputText id="inputFeedbackTitle"
+                                         disabled="#{!courseEditView.newestRevision or courseEditView.readOnly}"
+                                         onchange="processChange()"
+                                         onkeydown="checkUserInputForActivationOfSaveButton()"
+                                         value="#{resultFeedbackMapping.title}"/>
+                            <h:outputLabel
+                                    for="inputFeedbackExpression"
+                                    value="#{msg['courseEdit.courseFeedback.condition']}: "/>
+                            <p:inputText
+                                    id="inputFeedbackExpression"
+                                    disabled="#{!courseEditView.newestRevision or courseEditView.readOnly}"
+                                    onchange="processChange()"
+                                    onkeydown="checkUserInputForActivationOfSaveButton()"
+                                    value="#{resultFeedbackMapping.expression}"
+                                    style="width:300px"/>
+                        </p:panelGrid>
+                        <pe:ckEditor
+                                id="inputFeedbackText"
+                                value="#{resultFeedbackMapping.text}"
+                                readonly="#{!courseEditView.newestRevision or courseEditView.readOnly}"
+                                widgetVar="inputFeedbackTextWidget_#{resultFeedbackMapping.id}"
+                                width="100%"
+                                height="150px"
+                                language="#{msg['ckEditor.language']}"
+                                advancedContentFilter="false"
+                                toolbar="[['Bold','Italic','Underline','-','NumberedList','BulletedList','JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock','-','Table','Link','Unlink','HorizontalRule','-','TextColor','BGColor','RemoveFormat']]"
+                                customConfig="#{resource['js/ckEditorConfig.js']}"
+                                disabled="courseEditView.readOnly">
+                            <p:ajax event="dirty" oncomplete="processChange()"/>
+                        </pe:ckEditor>
+                    </p:column>
 
-					<p:column id="columnFeedbackActions"
-						style="width:32px;text-align: center">
-						<p:commandButton id="cbRemoveCourseFeedback"
-							update="courseFeedback" icon="fas fa-times fa-sm"
-							disabled="#{!courseEditView.newestRevision or courseEditView.readOnly}"
-							actionListener="#{courseEditView.course.removeResultFeedbackMapping(resultFeedbackMapping)}"
-							oncomplete="processChange()"
-							title="#{msg['courseEdit.deleteFeedback']}" />
-					</p:column>
-				</p:dataTable>
-				<p:commandButton id="cbAddFeedback"
-					value="#{msg['courseEdit.addFeedback']}"
-					action="#{courseEditView.addNewResultFeedbackMapping()}"
-					disabled="#{!courseEditView.newestRevision or courseEditView.readOnly}"
-					update="courseFeedback" oncomplete="processChange()" />
-			</p:panel>
+                    <p:column id="columnFeedbackActions"
+                              style="width:32px;text-align: center">
+                        <p:commandButton id="cbRemoveCourseFeedback"
+                                         update="courseFeedback" icon="fas fa-times fa-sm"
+                                         disabled="#{!courseEditView.newestRevision or courseEditView.readOnly}"
+                                         actionListener="#{courseEditView.course.removeResultFeedbackMapping(resultFeedbackMapping)}"
+                                         oncomplete="processChange()"
+                                         title="#{msg['courseEdit.deleteFeedback']}"/>
+                    </p:column>
+                </p:dataTable>
+                <p:commandButton id="cbAddFeedback"
+                                 value="#{msg['courseEdit.addFeedback']}"
+                                 action="#{courseEditView.addNewResultFeedbackMapping()}"
+                                 disabled="#{!courseEditView.newestRevision or courseEditView.readOnly}"
+                                 update="courseFeedback" oncomplete="processChange()"/>
+            </p:panel>
 
-      <!-- statistics -->
-      <p:panel
-        id="statistics"
-        header="#{msg['statistics']}"
-        rendered="#{courseEditView.newestRevision}"
-        toggleable="true">
+            <!-- statistics -->
+            <p:panel
+                    id="statistics"
+                    header="#{msg['statistics']}"
+                    rendered="#{courseEditView.newestRevision}"
+                    toggleable="true">
 
-        <h:outputText
-          styleClass="fas fa-circle-notch fa-spin fa-lg"
-          style="margin: 10px auto;"
-          rendered="#{!courseStatisticsView.lazyDataLoaded}" />
+                <h:outputText
+                        styleClass="fas fa-circle-notch fa-spin fa-lg"
+                        style="margin: 10px auto;"
+                        rendered="#{!courseStatisticsView.lazyDataLoaded}"/>
 
-        <h:panelGrid
-          id="statisticsTable"
-          columns="2"
-          rendered="#{courseStatisticsView.lazyDataLoaded}">
-          <ui:include src="/WEB-INF/includes/course/statisticsTable.xhtml" />
-          <p:linkButton
-            id="toMoreCourseStatistics"
-            outcome="#{viewId.courseStatistics}"
-            value="#{msg['statistics.submissionOverview']}"
-            icon="fas fa-chart-bar fa-sm">
-            <f:param
-              name="course"
-              value="#{courseEditView.course.id}" />
-          </p:linkButton>
-        </h:panelGrid>
-        <h:outputFormat
-          id="testSubmissionsHint"
-          value="#{msg['statistics.testSubmissionsPresent']}"
-          rendered="#{courseStatisticsView.numberOfTestCourseRecords > 0}"
-          style="margin: 0 16px;">
-          <f:param value="#{courseStatisticsView.numberOfTestCourseRecords}" />
-        </h:outputFormat>
-      </p:panel>
+                <h:panelGrid
+                        id="statisticsTable"
+                        columns="2"
+                        rendered="#{courseStatisticsView.lazyDataLoaded}">
+                    <ui:include src="/WEB-INF/includes/course/statisticsTable.xhtml"/>
+                    <p:linkButton
+                            id="toMoreCourseStatistics"
+                            outcome="#{viewId.courseStatistics}"
+                            value="#{msg['statistics.submissionOverview']}"
+                            icon="fas fa-chart-bar fa-sm">
+                        <f:param
+                                name="course"
+                                value="#{courseEditView.course.id}"/>
+                    </p:linkButton>
+                </h:panelGrid>
+                <h:outputFormat
+                        id="testSubmissionsHint"
+                        value="#{msg['statistics.testSubmissionsPresent']}"
+                        rendered="#{courseStatisticsView.numberOfTestCourseRecords > 0}"
+                        style="margin: 0 16px;">
+                    <f:param value="#{courseStatisticsView.numberOfTestCourseRecords}"/>
+                </h:outputFormat>
+            </p:panel>
 
-      <!-- Generic confirm dialog with Yes and No button -->
-      <p:confirmDialog
-        id="globalConfirmDialog"
-        widgetVar="globalConfirmDialog"
-        closable="true"
-        resizable="false"
-        header="#{msg['global.confirm']}"
-        closeOnEscape="true"
-        global="true"
-        width="600px">
-        <p:commandButton
-          id="globalConfirmYes"
-          value="#{msg['global.yes']}"
-          type="button"
-          styleClass="ui-confirmdialog-yes"
-          icon="fas fa-check" />
-        <p:commandButton
-          id="globalConfirmNo"
-          value="#{msg['global.no']}"
-          type="button"
-          styleClass="ui-confirmdialog-no button-white"
-          icon="fas fa-times" />
-      </p:confirmDialog>
+            <!-- Generic confirm dialog with Yes and No button -->
+            <p:confirmDialog
+                    id="globalConfirmDialog"
+                    widgetVar="globalConfirmDialog"
+                    closable="true"
+                    resizable="false"
+                    header="#{msg['global.confirm']}"
+                    closeOnEscape="true"
+                    global="true"
+                    width="600px">
+                <p:commandButton
+                        id="globalConfirmYes"
+                        value="#{msg['global.yes']}"
+                        type="button"
+                        styleClass="ui-confirmdialog-yes"
+                        icon="fas fa-check"/>
+                <p:commandButton
+                        id="globalConfirmNo"
+                        value="#{msg['global.no']}"
+                        type="button"
+                        styleClass="ui-confirmdialog-no button-white"
+                        icon="fas fa-times"/>
+            </p:confirmDialog>
 
-			<p:ajaxExceptionHandler type="javax.persistence.NoResultException"
-				update="exceptionDialog" onexception="PF('exceptionDialog').show();" />
+            <p:ajaxExceptionHandler type="javax.persistence.NoResultException"
+                                    update="exceptionDialog" onexception="PF('exceptionDialog').show();"/>
 
-			<p:dialog id="exceptionDialog"
-				header="Please save before using new rescource!"
-				widgetVar="exceptionDialog" height="100px">
-				<br />
+            <p:dialog id="exceptionDialog"
+                      header="Please save before using new rescource!"
+                      widgetVar="exceptionDialog" height="100px">
+                <br/>
 
-			</p:dialog>
+            </p:dialog>
 
-			<p:remoteCommand global="false"
-				actionListener="#{courseStatisticsView.loadOnlyKeyFigures(courseEditView.course)}"
-				name="loadLazyData" id="lld" autoRun="true"
-				update="statistics" process="@this" />
-		</h:form>
-	</ui:define>
+            <p:remoteCommand global="false"
+                             actionListener="#{courseStatisticsView.loadOnlyKeyFigures(courseEditView.course)}"
+                             name="loadLazyData" id="lld" autoRun="true"
+                             update="statistics" process="@this"/>
+        </h:form>
+    </ui:define>
 
 </ui:composition>

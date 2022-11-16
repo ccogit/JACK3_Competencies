@@ -12,7 +12,7 @@ import javax.persistence.TypedQuery;
 import java.util.List;
 
 /**
- * Service for managing {@link de.uni_due.s3.jack3.entities.tenant.Competence} entities.
+ * Service for managing {@link Competence} entities.
  */
 
 @Stateless
@@ -46,7 +46,20 @@ public class CompetenceService extends AbstractServiceBean {
     }
 
     /**
-     * Returns all subcompetencies that are children of a given {@link de.uni_due.s3.jack3.entities.tenant.Competence}.
+     * Returns all subcompetencies of a given {@link Subject}.
+     *
+     * @return Subcompetencies list
+     */
+    public List<Competence> getSubcompetenciesBySubject(Subject subject) {
+        final EntityManager em = getEntityManager();
+        final TypedQuery<Competence> query = em.createNamedQuery( //
+                Competence.ALL_SUBCOMPETENCIES_BY_SUBJECT, Competence.class);
+        query.setParameter("subject", subject);
+        return query.getResultList();
+    }
+
+    /**
+     * Returns all subcompetencies that are children of a given {@link Competence}.
      *
      * @return Subcompetencies list
      */
@@ -58,22 +71,9 @@ public class CompetenceService extends AbstractServiceBean {
         return query.getResultList();
     }
 
-//    /**
-//     * Returns all content-competencies that are related to a given {@link de.uni_due.s3.jack3.entities.tenant.Subject}.
-//     *
-//     * @return Competencies list
-//     */
-//    public List<Competence> getContentCompetenciesBySubject(Subject subject) {
-//        final EntityManager em = getEntityManager();
-//        final TypedQuery<Competence> query = em.createNamedQuery( //
-//                Competence.ALL_CONTENT_COMPETENCIES_BY_SUBJECT, Competence.class);
-//        query.setParameter("subject", subject);
-//        return query.getResultList();
-//    }
-
     /**
-     * Returns all competencies that are of a given {@link de.uni_due.s3.jack3.entities.enums.ECompetenceDimension}
-     * and that are related to a given {@link de.uni_due.s3.jack3.entities.tenant.Subject}.
+     * Returns all competencies that are of a given {@link ECompetenceDimension}
+     * and that are related to a given {@link Subject}.
      *
      * @return Competencies list
      */
@@ -87,8 +87,8 @@ public class CompetenceService extends AbstractServiceBean {
     }
 
     /**
-     * Returns all subcompetencies that are of a given {@link de.uni_due.s3.jack3.entities.enums.ECompetenceDimension}
-     * and that are related to a given {@link de.uni_due.s3.jack3.entities.tenant.Subject}.
+     * Returns all subcompetencies that are of a given {@link ECompetenceDimension}
+     * and that are related to a given {@link Subject}.
      *
      * @return Competencies list
      */

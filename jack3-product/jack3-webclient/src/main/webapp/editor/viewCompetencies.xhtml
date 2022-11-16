@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+    <title>Products</title>
+    <style>
+        html {
+            font-size: 14px;
+        }
+    </style>
+</h:head>
+
+<h:body>
+    <p:dataTable
+            id="competenciesNotAllocated"
+            var="competence"
+            value="#{courseEditView.competenceGoalBusiness.getAllCompetenciesOfCourseSubjectNotAllocatedAsGoal(courseEditView.course)}"
+            paginator="true"
+            lazy="true"
+            rows="20"
+            tableStyle="white-space: nowrap; overflow: hidden; table-layout: auto;">
+
+        <p:column headerText="#{msg['global.subcompetence']}">
+            <h:outputText
+                    id="subcompetenceName"
+                    value="#{competenceGoal.competence.name}"
+                    style="width:calc(100% - 10px)"/>
+        </p:column>
+
+        <p:column headerText="#{msg['global.competence']}" filterable="true">
+            <h:outputText
+                    id="competenceName"
+                    value="#{competenceGoal.competence.parentCompetence.name}"
+                    style="width:calc(100% - 10px)"/>
+        </p:column>
+
+        <p:column headerText="#{msg['global.dimension']}" filterable="true">
+            <h:outputText
+                    id="dimension"
+                    value="#{competenceGoal.competence.competenceDimension}"
+                    style="width:calc(100% - 10px)"/>
+        </p:column>
+
+        <p:column
+                id="actionsCompetenceGoal"
+                headerText="#{msg['global.actions']}"
+                width="100"
+                style="text-align:center;">
+            <div
+                    class="ui-inputgroup"
+                    style="justify-content: center;">
+                <p:commandButton
+                        id="addCompetenceGoal"
+                        title="#{msg['global.save']}"
+                        icon="far fa-save"
+                        action="#{courseEditView.addCompetenceGoal(competenceGoal)}"
+                        update="globalGrowl :courseEditMainForm:competenceGoals"/>
+            </div>
+        </p:column>
+    </p:dataTable>
+</h:body>
+
+</html>

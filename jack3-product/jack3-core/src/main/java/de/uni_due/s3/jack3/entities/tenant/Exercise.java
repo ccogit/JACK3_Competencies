@@ -303,6 +303,11 @@ public class Exercise extends AbstractExercise implements DeepCopyable<Exercise>
 		return subject;
 	}
 
+	@Override
+	public List<CompetenceGoal> getCompetenceGoals() {
+		return this.competenceGoals;
+	}
+
 	/*
 	 * @return unmodifiableList of variableDeclarations
 	 */
@@ -349,6 +354,21 @@ public class Exercise extends AbstractExercise implements DeepCopyable<Exercise>
 	@Override
 	public void setSubject(Subject subject) {
 		this.subject = subject;
+	}
+
+	@Override
+	public void setCompetenceGoals(List<CompetenceGoal> competenceGoals) {
+		this.competenceGoals.addAll(competenceGoals);
+	}
+
+	@Override
+	public void addCompetenceGoal(CompetenceGoal competenceGoal) {
+		competenceGoals.add(competenceGoal);
+	}
+
+	@Override
+	public void removeCompetenceGoal(CompetenceGoal competenceGoal) {
+		competenceGoals.remove(competenceGoal);
 	}
 
 	@Override

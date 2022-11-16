@@ -28,9 +28,6 @@ public class CompetenceBusiness extends AbstractBusiness {
     @Inject
     private ExerciseService exerciseService;
 
-    @Inject
-    private BaseService baseService;
-
     /**
      * Returns all competencies for a given competence dimension for a given subject.
      * Returns an empty list if no competencies exist.
@@ -41,6 +38,16 @@ public class CompetenceBusiness extends AbstractBusiness {
      */
     public List<Competence> getAllCompetenciesByDimensionAndSubject(ECompetenceDimension dimension, Subject subject) {
         return competenceService.getCompetenciesByDimensionAndSubject(dimension, subject);
+    }
+
+    /**
+     * Returns all subcompetencies of a given {@link Subject}.
+     *
+     * @param subject
+     * @return
+     */
+    public List<Competence> getAllSubcompetenciesBySubject(Subject subject) {
+        return competenceService.getSubcompetenciesBySubject(subject);
     }
 
     /**

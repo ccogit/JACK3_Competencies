@@ -9,6 +9,7 @@ import de.uni_due.s3.jack3.entities.enums.ECompetenceDimension;
 import de.uni_due.s3.jack3.entities.tenant.Competence;
 import de.uni_due.s3.jack3.entities.tenant.Subject;
 import de.uni_due.s3.jack3.utils.JackStringUtils;
+import org.primefaces.PrimeFaces;
 
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
@@ -17,7 +18,9 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @ViewScoped
 @Named
